@@ -2,6 +2,8 @@ import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
 import terser from "@rollup/plugin-terser";
 import fs from "node:fs/promises";
+import serve from "rollup-plugin-serve";
+import livereload from "rollup-plugin-livereload";
 const p = JSON.parse(await fs.readFile("package.json"));
 
 const commonPlugins = [
@@ -20,6 +22,26 @@ const commonOutput = {
   preserveModules: false,
   sourcemap: true,
   banner: `/* 这是一条 banner？没错，这是一条 banner。这是 ${p.version} 版本的 ${p.name}。 */`,
+};
+
+const demo = {
+  ...commonConfig,
+  output: {
+    file: "examples/run-start/demo.js",
+    format: "iife",
+    sourcemap: true,
+  },
+  plugins: [
+    ...commonPlugins,
+    serve({
+      port: 6969,
+      contentBase: "examples/run-start",
+    }),
+    livereload({
+      port: 6969,
+      watch: "examples/run-start",
+    })
+  ]
 };
 
 const cjs = [
@@ -94,6 +116,7 @@ const umd = [
 ];
 
 const configMap = new Map([
+  ["demo", demo],
   ["cjs", cjs],
   ["esm", esm],
   ["umd", umd],
