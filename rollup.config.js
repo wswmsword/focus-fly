@@ -24,9 +24,10 @@ const commonOutput = {
   banner: `/* 这是一条 banner？没错，这是一条 banner。这是 ${p.version} 版本的 ${p.name}。 */`,
 };
 
-const demo = {
+const demo = () => ({
   ...commonConfig,
   output: {
+    name: "focusLoop",
     file: "examples/run-start/demo.js",
     format: "iife",
     sourcemap: true,
@@ -42,7 +43,7 @@ const demo = {
       watch: "examples/run-start",
     })
   ]
-};
+});
 
 const cjs = [
   {
