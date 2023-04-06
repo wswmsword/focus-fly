@@ -1,8 +1,19 @@
 {
   "name": "focus-loop",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "设置范围，循环焦点。Loop focus within expected nodes.",
+  "main": "output/focus-loop.js",
+  "module": "output/focus-loop.esm.js",
+  "sideEffects": false,
+  "files": [
+    "package.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "index.js",
+    "index.d.ts",
+    "output"
+  ],
   "types": "index.d.ts",
   "scripts": {
     "start": "npm run compile:demo -- --watch",
@@ -18,7 +29,13 @@
     "type": "git",
     "url": "git+https://github.com/wswmsword/focus-loop.git"
   },
-  "keywords": [],
+  "keywords": [
+    "focus",
+    "accessibility",
+    "keyboard",
+    "focus-loop",
+    "focus-lock"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
