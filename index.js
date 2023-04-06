@@ -12,11 +12,27 @@ const tick = function(fn) {
   setTimeout(fn, 0);
 };
 
+/** 是否是 input 可 select 的元素 */
+const isSelectableInput = function(node) {
+  return (
+    node.tagName &&
+    node.tagName.toLowerCase() === 'input' &&
+    typeof node.select === 'function'
+  );
+};
+
+/** 聚焦，如果是 input，则聚焦后选中 */
+const focus = function(e) {
+  e.focus();
+  if (isSelectableInput(e))
+    e.select();
+};
+
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
 const tryFocus = function(e) {
-  e.focus();
+  focus(e)
   const curActiveE = getActiveElement();
-  if (curActiveE !== e) tick(e.focus);
+  if (curActiveE !== e) tick(() => focus(e));
 };
 
 /** 按键是否是 esc */
@@ -40,25 +56,25 @@ const isTabBackward = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextManually = (items, activeIndex, isClamp, onEscape, isForward, isBackward) => e => {
+const focusNextManually = (subNodes, activeIndex, isClamp, onEscape, isForward, isBackward) => e => {
   if (isEscapeEvent(e)) {
     onEscape();
   }
   else if ((isForward ?? isTabForward)(e)) {
-    const itemsLen = items.length;
+    const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
     activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
     activeIndex %= itemsLen;
     e.preventDefault();
-    items[activeIndex].focus();
+    focus(subNodes[activeIndex])
   }
   else if ((isBackward ?? isTabBackward)(e)) {
-    const itemsLen = items.length;
+    const itemsLen = subNodes.length;
     const nextI = activeIndex - 1;
     activeIndex = isClamp ? Math.max(0, nextI) : nextI;
     activeIndex = (activeIndex + itemsLen) % itemsLen;
     e.preventDefault();
-    items[activeIndex].focus();
+    focus(subNodes[activeIndex]);
   }
 };
 
@@ -71,13 +87,13 @@ const focusNextKey = (head, tail, isClamp, onEscape) => e => {
   else if (isTabForward(e)) {
     if (targ === tail) {
       e.preventDefault();
-      if (!isClamp) head.focus();
+      if (!isClamp) focus(head);
     }
   }
   else if (isTabBackward(e)) {
     if (targ === head) {
       e.preventDefault();
-      if (!isClamp) tail.focus();
+      if (!isClamp) focus(tail);
     }
   }
 };
@@ -92,10 +108,10 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
   tryFocus(trigger);
 };
 
-const focusLoop = (container, items, options = {}) => {
+const focusLoop = (rootNode, subNodes, options = {}) => {
 
   const {
-    /** 指定可以聚焦的元素，聚焦 items 内的元素 */
+    /** 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
     manual,
     /** 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
@@ -137,24 +153,24 @@ const focusLoop = (container, items, options = {}) => {
 
   const onEscFocus = genEscFocus(disabledEsc, _onEscape, _trigger);
 
-  const _container = element(container);
-  const _items = items.map(item => {
+  const _rootNode = element(rootNode);
+  const _subNodes = subNodes.map(item => {
     let _item = element(item);
     if (_item == null) console.warn(`没有找到元素 ${item}。`);
     return _item;
   }).filter(item => item != null);
-  const head = _items[0];
-  const tail = _items.slice(-1)[0];
+  const head = _subNodes[0];
+  const tail = _subNodes.slice(-1)[0];
 
   if (head == null || tail == null)
     throw("至少需要包含两个可以聚焦的元素。");
 
-  /** 活动元素在 items 中的编号，打开 manual 生效 */
+  /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
 
   // 在焦点循环中触发聚焦
-  const handleFocus = _manual ? focusNextManually(_items, activeIndex, isClamp, onEscFocus, isForward, isBackward) : focusNextKey(head, tail, isClamp, onEscFocus);
-  _container.addEventListener("keydown", handleFocus);
+  const handleFocus = _manual ? focusNextManually(_subNodes, activeIndex, isClamp, onEscFocus, isForward, isBackward) : focusNextKey(head, tail, isClamp, onEscFocus);
+  _rootNode.addEventListener("keydown", handleFocus);
 
   // 触发器点击事件
   if (enterSelector && onEnter) {
@@ -180,14 +196,14 @@ const focusLoop = (container, items, options = {}) => {
     /** 进入循环，聚焦 */
     enter() {
       _trigger = _trigger || getActiveElement();
-      head.focus();
+      focus(head);
     },
     /** 退出循环，聚焦触发元素 */
     exit() {
       if (_trigger == null) {
         throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusLoop 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
       }
-      _trigger.focus();
+      focus(_trigger);
     },
     i: () => activeIndex,
   };
