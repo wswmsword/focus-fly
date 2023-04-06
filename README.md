@@ -94,7 +94,7 @@ npm run start
 | enter.on | (e: KeyboardEvent) => any | N | null | 点击触发器后的行为 |
 | exit.selector | string \| Element \| HTMLElement | N | null | 退出循环焦点的触发器，用于监听点击事件 |
 | exit.on | (e: KeyboardEvent) => any | N | null | 点击退出循环焦点的触发器后的行为 |
-| onEscape | false | ((e: KeyboardEvent) => any) | N | exit.on | 按下 `esc` 的行为，如果未设置，默认取 `exit.on` |
+| onEscape | ((e: KeyboardEvent) => any) | N | exit.on | 按下 `esc` 的行为，如果未设置，默认取 `exit.on` |
 
 <details>
 <summary>
