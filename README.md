@@ -12,14 +12,16 @@
 
 ## 使用
 
-像下面这样，元素 `#dialog` 会监听按键 `tab`，当焦点在元素 `#lastTabbableElement` 时按下 `tab`，`#firstTabbableElement` 会被聚焦，当焦点在 `#firstTabbableElement` 时按下 `shift-tab`，`#lastTabbableElement` 会被聚焦：
+添加两行代码之后，焦点就陷入了循环：
 ```javascript
 import focusLoop from "focus-loop";
 
 focusLoop("#dialog", ["#firstTabbableElement", "#lastTabbableElement"]);
 ```
 
-更多的选项请查看下面的详细介绍。
+上面的代码块表示，元素 `#dialog` 会监听按键 `tab`，当焦点在元素 `#lastTabbableElement` 时按下 `tab`，`#firstTabbableElement` 会被聚焦，当焦点在 `#firstTabbableElement` 时按下 `shift-tab`，`#lastTabbableElement` 会被聚焦。
+
+更多的选项请查看下面各参数的详细介绍。
 
 ### focusLoop(rootNode, subNodes[, options])
 
