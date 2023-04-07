@@ -182,7 +182,7 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
 
   // 跳出循环的触发器的点击事件
   if (exitSelector && onExit) {
-    const exit = querySelector(exitSelector);
+    const exit = element(exitSelector);
     exit.addEventListener("click", e => {
       onExit(e);
       if (_trigger == null) {
