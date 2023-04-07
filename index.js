@@ -139,7 +139,7 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
   } = exit;
 
   /** 取消循环则设置头和尾焦点 */
-  const isClamp = !loop;
+  const isClamp = !(loop ?? true);
 
   // 自定义前进或后退焦点函数，则设置 manual 为 true
   const _manual = !!(isForward || isBackward || manual);
