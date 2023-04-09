@@ -103,7 +103,7 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
   if (disabledEsc) return;
   if (onEscape) onEscape(e);
   if (trigger == null) {
-    throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+    console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
   }
   tryFocus(trigger);
 };
@@ -186,7 +186,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     exit.addEventListener("click", e => {
       onExit(e);
       if (_trigger == null) {
-        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+        return;
       }
       tryFocus(_trigger);
     });
@@ -201,7 +202,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     /** 退出循环，聚焦触发元素 */
     exit() {
       if (_trigger == null) {
-        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
+        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
+        return;
       }
       focus(_trigger);
     },
