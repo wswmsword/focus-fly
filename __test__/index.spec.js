@@ -26,7 +26,10 @@ function getModalDom() {
   const open = container.querySelector("#open");
   const close = container.querySelector("#close");
 
+  return { container, dialog, first, last, open, close };
+}
 
+function initBagel(container, dialog, first, last, open, close) {
   open.addEventListener('click', () => {
     first.focus();
   })
@@ -41,27 +44,28 @@ function getModalDom() {
       on() {},
     }
   });
-
-  return { container, dialog, first, last, open, close };
 }
 
 describe("focus-bagel", function() {
   test("should focus first focusable node of modal after click trigger", async () => {
-    const { open, first } = getModalDom();
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel(container, dialog, first, last, open, close)
   
     open.click();
     expect(first).toHaveFocus();
   });
 
   test("should focus back to trigger after click close button", () => {
-    const { open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel(container, dialog, first, last, open, close)
   
     close.click();
     expect(open).toHaveFocus();
   });
 
   test("should focus first focusable node of modal that is visible and sibling with trigger after press tab", async () => {
-    const { container, open, dialog, first, last } = getModalDom();
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel(container, dialog, first, last, open, close)
   
     expect(document.body).toHaveFocus();
     await user.tab(); // issue: https://github.com/testing-library/user-event/issues/1018
@@ -79,7 +83,8 @@ describe("focus-bagel", function() {
   });
 
   test("should loop focus forward", async function() {
-    const { container, open, first, close, last } = getModalDom();
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel(container, dialog, first, last, open, close)
   
     open.click();
     expect(first).toHaveFocus();
@@ -100,7 +105,8 @@ describe("focus-bagel", function() {
   });
 
   test("should loop focus backward", async function() {
-    const { container, open, dialog, first, close, last } = getModalDom();
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel(container, dialog, first, last, open, close)
     const s = { shift: true };
     open.click();
     expect(first).toHaveFocus();
@@ -121,7 +127,7 @@ describe("focus-bagel", function() {
   });
 
   test("should enter by return api", function() {
-    
+
   });
 
   test("should exit by return api", function() {
