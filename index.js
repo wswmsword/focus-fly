@@ -146,8 +146,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   const _manual = !!(isForward || isBackward || manual);
 
   /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
-  const _onEscape = onEscape || onExit;
-  const disabledEsc = onEscape === false;
+  const _onEscape = onEscape ?? onExit;
+  const disabledEsc = _onEscape === false || _onEscape == null;
 
   /** 触发打开焦点的元素 */
   let _trigger = element(trigger || enterSelector);
