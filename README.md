@@ -1,4 +1,4 @@
-# focus-loop
+# focus-bagel
 
 指定范围，循环焦点。
 
@@ -17,17 +17,17 @@
 
 添加两行代码之后，焦点就陷入了循环：
 ```javascript
-import focusLoop from "focus-loop";
-focusLoop("#dialog", ["#firstTabbableElement", "#lastTabbableElement"]);
+import focusBagel from "focus-bagel";
+focusBagel("#dialog", ["#firstTabbableElement", "#lastTabbableElement"]);
 ```
 
 上面的代码块表示，元素 `#dialog` 会监听按键 `tab`，当焦点在元素 `#lastTabbableElement` 时按下 `tab`，`#firstTabbableElement` 会被聚焦，当焦点在 `#firstTabbableElement` 时按下 `shift-tab`，`#lastTabbableElement` 会被聚焦。
 
 更多的选项请查看下面各参数的详细介绍。
 
-### focusLoop(rootNode, subNodes[, options])
+### focusBagel(rootNode, subNodes[, options])
 
-调用 `focusLoop` 函数创建循环焦点，函数可以传递 3 个参数，`rootNode` 作为根元素监听键盘事件，`subNodes` 作为子元素数组，用于检查头元素和尾元素进行循环聚焦，第三个 `options` 是可选的，用于设定若干选项。
+调用 `focusBagel` 函数创建循环焦点，函数可以传递 3 个参数，`rootNode` 作为根元素监听键盘事件，`subNodes` 作为子元素数组，用于检查头元素和尾元素进行循环聚焦，第三个 `options` 是可选的，用于设定若干选项。
 
 <details>
 <summary>
@@ -35,12 +35,12 @@ focusLoop("#dialog", ["#firstTabbableElement", "#lastTabbableElement"]);
 </summary>
 
 ```javascript
-import focusLoop from "focus-loop"; // esm 方式引入
-// const focusLoop = require("focus-loop"); // cjs 方式引入
+import focusBagel from "focus-bagel"; // esm 方式引入
+// const focusBagel = require("focus-bagel"); // cjs 方式引入
 
 /** 循环焦点的根元素，对话框 */
 const dialog = document.getElementById("root");
-focusLoop(dialog, ["#head", "#tail"], {
+focusBagel(dialog, ["#head", "#tail"], {
   enter: {
     /** 触发器的选择器字符串，例如“打开”按钮 */
     selector: "#open",
@@ -107,7 +107,7 @@ npm run start
 
 下面的代码演示了使用 `→`、`↓` 和 `ctrl-n` 完成前进焦点，使用 `←`、`↑` 和 `ctrl-p` 完成后退焦点：
 ```javascript
-import focusLoop from "focus-loop";
+import focusBagel from "focus-bagel";
 
 const dialog = document.getElementById("dialog");
 
@@ -121,7 +121,7 @@ const isBackward = e => (
   e.key === "ArrowTop" ||
   e.key === "ArrowLeft");
 
-focusLoop(dialog, ["#head", "#second", "#tail"], {
+focusBagel(dialog, ["#head", "#second", "#tail"], {
   enter: {
     selector: "#open",
     on() {
@@ -145,7 +145,7 @@ focusLoop(dialog, ["#head", "#second", "#tail"], {
 
 ### Return
 
-下面是调用 focusLoop 后返回的属性。
+下面是调用 focusBagel 后返回的属性。
 
 | Name | Type | Desc |
 |:--|:--|:--|
@@ -159,24 +159,24 @@ focusLoop(dialog, ["#head", "#second", "#tail"], {
 </summary>
 
 ```javascript
-import focusLoop from "focus-loop";
+import focusBagel from "focus-bagel";
 
 const dialog = document.getElementById("dialog");
 const openBtn = document.getElementById("#open");
 const closeBtn = document.getElementById("#close");
 
-const focusLoop = focusLoop(dialog, ["#head", "#tail"]);
+const focusBagel = focusBagel(dialog, ["#head", "#tail"]);
 
 openBtn.addEventListener("click", e => {
   dialog.classList.add("openedDialog");
   dialog.classList.remove("closedDialog");
-  focusLoop.enter(); // 聚焦 #head
+  focusBagel.enter(); // 聚焦 #head
 })
 
 closeBtn.addEventListener("click", e => {
   dialog.classList.remove("openedDialog");
   dialog.classList.add("closedDialog");
-  focusLoop.exit(); // 聚焦 #dialog
+  focusBagel.exit(); // 聚焦 #dialog
 })
 ```
 

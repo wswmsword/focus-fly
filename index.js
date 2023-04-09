@@ -103,12 +103,12 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
   if (disabledEsc) return;
   if (onEscape) onEscape(e);
   if (trigger == null) {
-    throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusLoop 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+    throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
   }
   tryFocus(trigger);
 };
 
-const focusLoop = (rootNode, subNodes, options = {}) => {
+const focusBagel = (rootNode, subNodes, options = {}) => {
 
   const {
     /** 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
@@ -119,7 +119,7 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
     isForward,
     /** 自定义后退焦点函数 */
     isBackward,
-    /** 触发器，如果使用 focusLoop.enter 则不用设置，如果使用 enter.selector 则不用设置 */
+    /** 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 enter.selector 则不用设置 */
     trigger,
     /** 触发触发器的配置 */
     enter = {},
@@ -186,7 +186,7 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
     exit.addEventListener("click", e => {
       onExit(e);
       if (_trigger == null) {
-        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusLoop 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
       }
       tryFocus(_trigger);
     });
@@ -201,7 +201,7 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
     /** 退出循环，聚焦触发元素 */
     exit() {
       if (_trigger == null) {
-        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusLoop 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
+        throw("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
       }
       focus(_trigger);
     },
@@ -209,4 +209,4 @@ const focusLoop = (rootNode, subNodes, options = {}) => {
   };
 };
 
-export default focusLoop;
+export default focusBagel;

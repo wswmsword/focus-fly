@@ -27,7 +27,7 @@ const commonOutput = {
 const demo = () => ({
   ...commonConfig,
   output: {
-    name: "focusLoop",
+    name: "focusBagel",
     file: "examples/run-start/demo.js",
     format: "iife",
     sourcemap: true,
@@ -50,7 +50,7 @@ const cjs = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-loop.js",
+      file: "output/focus-bagel.js",
       format: "cjs",
       ...commonOutput,
     },
@@ -59,7 +59,7 @@ const cjs = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-loop.min.js",
+      file: "output/focus-bagel.min.js",
       format: "cjs",
       ...commonOutput,
     },
@@ -72,7 +72,7 @@ const esm = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-loop.esm.js",
+      file: "output/focus-bagel.esm.js",
       format: "esm",
       ...commonOutput,
     },
@@ -81,7 +81,7 @@ const esm = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-loop.esm.min.js",
+      file: "output/focus-bagel.esm.min.js",
       format: "esm",
       ...commonOutput,
     },
@@ -94,10 +94,10 @@ const umd = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-loop.umd.js",
+      file: "output/focus-bagel.umd.js",
       format: "umd",
       noConflict: true,
-      name: "focus-loop",
+      name: "focus-bagel",
       ...commonOutput,
       globals: {},
     },
@@ -106,10 +106,10 @@ const umd = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-loop.umd.min.js",
+      file: "output/focus-bagel.umd.min.js",
       format: "umd",
       noConflict: true,
-      name: "focus-loop",
+      name: "focus-bagel",
       ...commonOutput,
     },
     plugins: [...commonPlugins, terser()],

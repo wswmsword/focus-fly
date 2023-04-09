@@ -53,6 +53,6 @@ interface Return {
   i(): number;
 }
 
-declare const focusLoop: (rootNode: element, subNodes: element[], options?: Options) => Return;
+declare const focusBagel: (rootNode: element, subNodes: element[], options?: Options) => Return;
 
-export default focusLoop;
+export default focusBagel;

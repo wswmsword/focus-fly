@@ -9,7 +9,7 @@ import {
 } from '@testing-library/dom';
 // adds special assertions like toHaveTextContent
 import '@testing-library/jest-dom';
-import focusLoop from '../index.js';
+import focusBagel from '../index.js';
 import userEvent from '@testing-library/user-event';
 import render from './helper/render.js';
 const user = userEvent.setup();
@@ -54,7 +54,7 @@ function getModalDom() {
     first.focus();
   })
 
-  focusLoop(dialog, [first, last], {
+  focusBagel(dialog, [first, last], {
     enter: {
       selector: open,
       on() {},
@@ -68,7 +68,7 @@ function getModalDom() {
   return { container, dialog, first, last, open, close };
 }
 
-describe("focus-loop", function() {
+describe("focus-bagel", function() {
   test("should focus first focusable node of modal after click trigger", async () => {
     const { open, first } = getModalDom();
   

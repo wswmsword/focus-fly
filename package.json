@@ -1,9 +1,9 @@
 {
-  "name": "focus-loop",
+  "name": "focus-bagel",
   "version": "1.0.0",
   "description": "设置范围，循环焦点。Loop focus within expected nodes.",
-  "main": "output/focus-loop.js",
-  "module": "output/focus-loop.esm.js",
+  "main": "output/focus-bagel.js",
+  "module": "output/focus-bagel.esm.js",
   "sideEffects": false,
   "files": [
     "package.json",
@@ -27,21 +27,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wswmsword/focus-loop.git"
+    "url": "git+https://github.com/wswmsword/focus-bagel.git"
   },
   "keywords": [
     "focus",
     "accessibility",
     "keyboard",
-    "focus-loop",
+    "focus-bagel",
     "focus-lock"
   ],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/wswmsword/focus-loop/issues"
+    "url": "https://github.com/wswmsword/focus-bagel/issues"
   },
-  "homepage": "https://github.com/wswmsword/focus-loop#readme",
+  "homepage": "https://github.com/wswmsword/focus-bagel#readme",
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",

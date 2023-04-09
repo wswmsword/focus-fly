@@ -10,7 +10,7 @@ const dialog = document.getElementById("dialog");
 // }
 
 
-const loop = focusLoop(dialog, ["#firstFocusA", "#lastFocusBtn"], {
+const loop = focusBagel(dialog, ["#firstFocusA", "#lastFocusBtn"], {
   loop: false,
   enter: {
     selector: "#open",
