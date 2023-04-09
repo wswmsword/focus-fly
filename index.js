@@ -30,9 +30,8 @@ const focus = function(e) {
 
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
 const tryFocus = function(e) {
-  focus(e)
-  const curActiveE = getActiveElement();
-  if (curActiveE !== e) tick(() => focus(e));
+  if (e == null) tick(() => e && focus(e))
+  else focus(e);
 };
 
 /** 按键是否是 esc */
@@ -106,7 +105,7 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
     console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
     return;
   }
-  tryFocus(trigger);
+  focus(trigger);
 };
 
 const focusBagel = (rootNode, subNodes, options = {}) => {
@@ -190,7 +189,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
         console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
         return;
       }
-      tryFocus(_trigger);
+      focus(_trigger)
     });
   }
 
