@@ -15,6 +15,7 @@ import render from './helper/render.js';
 const user = userEvent.setup();
 import modalHtml from './template-html/modal.js';
 import manualModalHtml from './template-html/manual-modal.js';
+import inputModalHtml from './template-html/input-modal.js';
 
 describe("focus-bagel", function() {
   test("should focus first focusable node of modal after click trigger", async () => {
@@ -263,11 +264,44 @@ describe("focus-bagel", function() {
     expect(focusA).toHaveFocus();
   });
 
-  // it("should clampe to focus nodes manually", async function() {
-  //   const s = { shift: true };
-  //   const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
-  //   initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
-  // });
+  it("should clampe to focus nodes manually", async function() {
+    const s = { shift: true };
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
+    initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    expect(document.body).toHaveFocus();
+    open.click();
+    expect(focusA).toHaveFocus();
+    await user.tab(s);
+    expect(focusA).toHaveFocus();
+    await user.tab();
+    expect(focusB).toHaveFocus();
+    await user.tab();
+    expect(focusC).toHaveFocus();
+    await user.tab();
+    expect(focusD).toHaveFocus();
+    await user.tab();
+    expect(focusE).toHaveFocus();
+    await user.tab();
+    expect(focusF).toHaveFocus();
+    await user.tab();
+    expect(focusG).toHaveFocus();
+    await user.tab();
+    expect(focusG).toHaveFocus();
+  });
+
+  it("should focus selectable node", async function() {
+    const s = { shift: true };
+    const { container, dialog, first, last, open, close } = getInputModalDom();
+    initBagel(container, dialog, first, last, open, close);
+
+    open.click();
+    expect(first).toHaveFocus();
+    await user.tab(s);
+    expect(last).toHaveFocus();
+    await user.tab();
+    expect(first).toHaveFocus(); // TODO: toHaveSelect()?
+  });
 
 });
 
@@ -287,6 +321,20 @@ function getManualModalDom() {
   const focusG = container.querySelector("#focusE");
 
   return { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG };
+}
+
+function getInputModalDom() {
+  const modal = inputModalHtml;
+
+  const { container } = render(modal);
+
+  const dialog = container.querySelector("#dialog");
+  const first = container.querySelector("#firstFocusA");
+  const last = container.querySelector("#lastFocusBtn");
+  const open = container.querySelector("#open");
+  const close = container.querySelector("#close");
+
+  return { container, dialog, first, last, open, close };
 }
 
 function getModalDom() {
