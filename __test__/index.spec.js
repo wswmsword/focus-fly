@@ -303,6 +303,28 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus(); // TODO: toHaveSelect()?
   });
 
+  it("should pass selector string instead of element object", async function() {
+    const { container, dialog, first, last, open, close } = getModalDom();
+    initBagel_14();
+  
+    open.click();
+    expect(first).toHaveFocus();
+    await user.tab();
+    expect(getByText(container, "不二家棒棒糖")).toHaveFocus();
+    await user.tab();
+    expect(getByText(container, "樱花软糖")).toHaveFocus();
+    await user.tab();
+    expect(getByText(container, "大白兔奶糖")).toHaveFocus();
+    await user.tab();
+    expect(getByText(container, "夹心巧克力")).toHaveFocus();
+    await user.tab();
+    expect(close).toHaveFocus();
+    await user.tab();
+    expect(last).toHaveFocus();
+    await user.tab();
+    expect(first).toHaveFocus();
+  });
+
 });
 
 function getManualModalDom() {
@@ -492,6 +514,20 @@ function initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, f
     },
     exit: {
       selector: focusF,
+      on() {},
+    }
+  });
+}
+
+function initBagel_14(container, dialog, first, last, open, close) {
+
+  focusBagel("#dialog", ["#firstFocusA", "#lastFocusBtn"], {
+    enter: {
+      selector: "#open",
+      on() {},
+    },
+    exit: {
+      selector: "#close",
       on() {},
     }
   });
