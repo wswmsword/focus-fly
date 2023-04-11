@@ -34,6 +34,11 @@ const tryFocus = function(e) {
   else focus(e);
 };
 
+/** 是否按下了 enter */
+const isEnterEvent = function(e) {
+  return e.key === "Enter" || e.keyCode === 13;
+};
+
 /** 按键是否是 esc */
 const isEscapeEvent = function (e) {
   return e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27;
@@ -55,11 +60,20 @@ const isTabBackward = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextManually = (subNodes, activeIndex, isClamp, onEscape, isForward, isBackward) => e => {
+const focusNextManually = (subNodes, container, activeIndex, isClamp, cover, onEscape, isForward, isBackward) => e => {
   if (isEscapeEvent(e)) {
     onEscape();
+    return;
   }
-  else if ((isForward ?? isTabForward)(e)) {
+
+  if (cover && e.target === container) {
+    if (isTabForward(e))
+      focus(subNodes.slice(-1)[0]);
+    else if (isEnterEvent(e))
+      focus(subNodes[0]);
+  }
+
+  if ((isForward ?? isTabForward)(e)) {
     const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
     activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
@@ -78,12 +92,21 @@ const focusNextManually = (subNodes, activeIndex, isClamp, onEscape, isForward, 
 };
 
 /** 按下 tab，自动聚焦下个元素 */
-const focusNextKey = (head, tail, isClamp, onEscape) => e => {
+const focusNextKey = (head, tail, container, isClamp, cover, onEscape) => e => {
   const targ = e.target;
   if (isEscapeEvent(e)) {
     onEscape();
+    return;
   }
-  else if (isTabForward(e)) {
+
+  if (cover && targ === container) {
+    if (isTabForward(e))
+      focus(tail);
+    else if (isEnterEvent(e))
+      focus(head);
+  }
+
+  if (isTabForward(e)) {
     if (targ === tail) {
       e.preventDefault();
       if (!isClamp) focus(head);
@@ -94,6 +117,14 @@ const focusNextKey = (head, tail, isClamp, onEscape) => e => {
       e.preventDefault();
       if (!isClamp) focus(tail);
     }
+  }
+};
+
+/** 在遮罩的后一个元素按下 shift-tab */
+const handleCoverShiftTab = container => e => {
+  if (isTabBackward(e)) {
+    e.preventDefault(container);
+    focus()
   }
 };
 
@@ -127,6 +158,11 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     exit = {},
     /** 按下 esc 的行为，如果未设置，则取 exit.on */
     onEscape,
+    /** 聚焦子元素前是否先聚焦根元素，在根元素按下 enter 则进入子元素
+     * TODO: cover 配置选项，例如是否锁 tab（默认不锁）
+     */
+    cover = false,
+    /** TODO: 子元素锁 tab */
   } = options;
 
   const {
@@ -137,6 +173,9 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     selector: exitSelector,
     on: onExit,
   } = exit;
+  const {
+    shiftTabNode: coverShiftTab
+  } = Object.prototype.toString.call(cover) === "[object Object]" ? cover : {};
 
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
@@ -169,8 +208,11 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   let activeIndex = 0;
 
   // 在焦点循环中触发聚焦
-  const handleFocus = _manual ? focusNextManually(_subNodes, activeIndex, isClamp, onEscFocus, isForward, isBackward) : focusNextKey(head, tail, isClamp, onEscFocus);
+  const handleFocus = _manual ? focusNextManually(_subNodes, rootNode, activeIndex, isClamp, cover, onEscFocus, isForward, isBackward) : focusNextKey(head, tail, rootNode, isClamp, cover, onEscFocus);
   _rootNode.addEventListener("keydown", handleFocus);
+
+  if (coverShiftTab)
+    coverShiftTab.addEventListener("keydown", handleCoverShiftTab(rootNode));
 
   // 触发器点击事件
   if (enterSelector && onEnter) {
