@@ -165,6 +165,27 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
   return focus(trigger);
 };
 
+/** 添加焦点需要的事件监听器 */
+const addEventListeners = function(rootNode, handleFocus, exitSelector, onExit, trigger, coverShiftTab) {
+  rootNode.addEventListener("keydown", handleFocus);
+
+  // 跳出循环的触发器的点击事件
+  if (exitSelector && onExit) {
+    const exit = element(exitSelector);
+    exit.addEventListener("click", e => {
+      onExit(e);
+      if (trigger == null) {
+        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+        return;
+      }
+      focus(trigger)
+    });
+  }
+
+  if (coverShiftTab)
+    coverShiftTab.addEventListener("keydown", handleCoverShiftTab(rootNode));
+};
+
 const focusBagel = (rootNode, subNodes, options = {}) => {
 
   const {
@@ -188,6 +209,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
      * TODO: cover 配置选项，例如是否锁 tab（默认不锁）
      */
     cover = false,
+    /** 延迟挂载非触发器元素的事件，可以是一个 promise，可以是一个接收所有事件监听器作为入参的普通函数 */
+    delayListeners,
     /** TODO: 子元素锁 tab */
   } = options;
 
@@ -201,6 +224,9 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     on: onExit,
     key: exitKey,
   } = exit;
+
+  const promiseDelay = Object.prototype.toString.call(delayListeners) === "[object Promise]";
+  const commonDelay = Object.prototype.toString.call(delayListeners) === "[object Function]";
 
   /** 封面选项是否为对象 */
   const isObjCover = Object.prototype.toString.call(cover) === "[object Object]";
@@ -240,35 +266,32 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
 
+  // 触发器点击事件
+  if (enterSelector && onEnter) {
+    _trigger.addEventListener("click", async e => {
+      onEnter(e);
+      if (promiseDelay) {
+        await delayListeners;
+        addEventListeners();
+        tryFocus(head)
+      }
+      else if (commonDelay) {
+        delayListeners(() => {
+          addEventListeners();
+          tryFocus(head)
+        });
+      }
+      else tryFocus(head);
+    })
+  }
+
   // 在焦点循环中触发聚焦
   const handleFocus = _manual ?
     focusNextManually(_subNodes, _rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey) :
     focusNextKey(head, tail, _rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey);
-  _rootNode.addEventListener("keydown", handleFocus);
 
-  if (coverShiftTab)
-    coverShiftTab.addEventListener("keydown", handleCoverShiftTab(_rootNode));
-
-  // 触发器点击事件
-  if (enterSelector && onEnter) {
-    _trigger.addEventListener("click", e => {
-      onEnter(e);
-      tryFocus(head);
-    })
-  }
-
-  // 跳出循环的触发器的点击事件
-  if (exitSelector && onExit) {
-    const exit = element(exitSelector);
-    exit.addEventListener("click", e => {
-      onExit(e);
-      if (_trigger == null) {
-        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
-        return;
-      }
-      focus(_trigger)
-    });
-  }
+  // 添加除 trigger 以外其它和焦点相关的事件监听器
+  addEventListeners(_rootNode, handleFocus, exitSelector, onExit, _trigger, coverShiftTab);
 
   return {
     /** 进入循环，聚焦 */
