@@ -59,35 +59,40 @@ const isTabBackward = function(e) {
   return isTabEvent(e) && e.shiftKey;
 };
 
-/** 手动聚焦下一个元素 */
-const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, enterKey, exitKey) => e => {
-
+/** 和封面相关的聚焦行为 */
+const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, tail) {
   if (enabledCover) { // 已经打开封面选项
-    if (e.target === container) { // 当前聚焦封面
+    if (target === container) { // 当前聚焦封面
       if (enterKey && enterKey(e)) { // 进入封面内部
-        focus(subNodes[0]);
-        return;
+        focus(head);
+        return true;
       }
       else if (exitKey && exitKey(e)) { // 退出封面，聚焦触发器
         onEscape();
-        return;
+        return true;
       }
-      else if (isTabForward(e)) {
-        focus(subNodes.slice(-1)[0]); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
-        return;
+      else if (isTabForward(e)) { // 在封面按下 tab
+        focus(tail); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
+        return true;
       }
-      else if (isEnterEvent(e)) {
-        focus(subNodes[0]);
-        return;
+      else if (isEnterEvent(e)) { // 在封面按下 enter
+        focus(head);
+        return true;
       }
     } else { // 当前聚焦封面内部
       if (exitKey && exitKey(e)) { // 退出封面内部，进入封面
         focus(container);
-        return;
+        return true;
       }
     }
   }
+};
 
+/** 手动聚焦下一个元素 */
+const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, enterKey, exitKey) => e => {
+
+  const focusedCover = focusCover(enabledCover, e.target, container, enterKey, exitKey, onEscape, subNodes[0], subNodes.slice(-1)[0]);
+  if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) {
     onEscape();
@@ -100,7 +105,7 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
     activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
     activeIndex %= itemsLen;
     e.preventDefault();
-    focus(subNodes[activeIndex])
+    focus(subNodes[activeIndex]);
   }
   else if ((isBackward ?? isTabBackward)(e)) {
     const itemsLen = subNodes.length;
@@ -116,32 +121,8 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
 const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, enterKey, exitKey) => e => {
   const targ = e.target;
 
-
-  if (enabledCover) { // 已经打开封面选项
-    if (targ === container) { // 当前聚焦封面
-      if (enterKey && enterKey(e)) { // 进入封面内部
-        focus(head);
-        return;
-      }
-      else if (exitKey && exitKey(e)) { // 退出封面，聚焦触发器
-        onEscape();
-        return;
-      }
-      else if (isTabForward(e)) {
-        focus(tail); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
-        return;
-      }
-      else if (isEnterEvent(e)) {
-        focus(head);
-        return;
-      }
-    } else { // 当前聚焦封面内部
-      if (exitKey && exitKey(e)) { // 退出封面内部，进入封面
-        focus(container);
-        return;
-      }
-    }
-  }
+  const focusedCover = focusCover(enabledCover, targ, container, enterKey, exitKey, onEscape, head, tail);
+  if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) { // 聚焦触发器
     onEscape();
