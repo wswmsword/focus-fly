@@ -26,6 +26,7 @@ const focus = function(e) {
   e.focus();
   if (isSelectableInput(e))
     e.select();
+  return true;
 };
 
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
@@ -61,31 +62,33 @@ const isTabBackward = function(e) {
 
 /** 和封面相关的聚焦行为 */
 const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, tail) {
-  if (enabledCover) { // 已经打开封面选项
-    if (target === container) { // 当前聚焦封面
-      if (enterKey && enterKey(e)) { // 进入封面内部
-        focus(head);
-        return true;
-      }
-      else if (exitKey && exitKey(e)) { // 退出封面，聚焦触发器
-        onEscape();
-        return true;
-      }
-      else if (isTabForward(e)) { // 在封面按下 tab
-        focus(tail); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
-        return true;
-      }
-      else if (isEnterEvent(e)) { // 在封面按下 enter
-        focus(head);
-        return true;
-      }
-    } else { // 当前聚焦封面内部
-      if (exitKey && exitKey(e)) { // 退出封面内部，进入封面
-        focus(container);
-        return true;
-      }
+  if (!enabledCover) return false; // 尚未打开封面选项
+  const isInnerCover = target !== container;
+  if (isInnerCover) { // 当前聚焦封面内部
+    if (exitKey && exitKey(e)) { // 退出封面内部，进入封面
+      return focus(container);
+    }
+    else if (isTabForward(e)) {
+      return focus(head);
+    }
+    else if (isTabBackward(e)) {
+      return focus(container);
+    }
+  } else { // 当前聚焦封面
+    if (enterKey && enterKey(e)) { // 进入封面内部
+      return focus(head);
+    }
+    else if (exitKey && exitKey(e)) { // 退出封面，聚焦触发器
+      return onEscape();
+    }
+    else if (isTabForward(e)) { // 在封面按下 tab
+      return focus(tail); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
+    }
+    else if (isEnterEvent(e)) { // 在封面按下 enter
+      return focus(head);
     }
   }
+  return false;
 };
 
 /** 手动聚焦下一个元素 */
@@ -159,7 +162,7 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
     console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
     return;
   }
-  focus(trigger);
+  return focus(trigger);
 };
 
 const focusBagel = (rootNode, subNodes, options = {}) => {
