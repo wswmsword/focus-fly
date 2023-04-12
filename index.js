@@ -149,8 +149,8 @@ const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, en
 /** 在遮罩的后一个元素按下 shift-tab */
 const handleCoverShiftTab = container => e => {
   if (isTabBackward(e)) {
-    e.preventDefault(container);
-    focus()
+    e.preventDefault();
+    focus(container);
   }
 };
 
