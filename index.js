@@ -64,7 +64,7 @@ const isTabBackward = function(e) {
 };
 
 /** 和封面相关的聚焦行为 */
-const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, tail) {
+const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, coverNextSibling) {
   if (!enabledCover) return false; // 尚未打开封面选项
   /** 当前事件是否在封面内部 */
   const isInnerCover = target !== container;
@@ -86,7 +86,8 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
       return onEscape();
     }
     else if (isTabForward(e)) { // 在封面按下 tab
-      return focus(tail); // 聚焦 tail 后一个元素（未调用 e.preventDefault()）
+      e.preventDefault();
+      return focus(coverNextSibling); // 聚焦封面之后一个元素
     }
     else if (isEnterEvent(e)) { // 在封面按下 enter
       return focus(head);
@@ -96,9 +97,9 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, enterKey, exitKey) => e => {
+const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, enterKey, exitKey, coverNextSibling) => e => {
 
-  const focusedCover = focusCover(enabledCover, e.target, container, enterKey, exitKey, onEscape, subNodes[0], subNodes.slice(-1)[0]);
+  const focusedCover = focusCover(enabledCover, e.target, container, enterKey, exitKey, onEscape, subNodes[0], coverNextSibling);
   if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) {
@@ -125,10 +126,10 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
 };
 
 /** 按下 tab，自动聚焦下个元素 */
-const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, enterKey, exitKey) => e => {
+const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, enterKey, exitKey, coverNextSibling) => e => {
   const targ = e.target;
 
-  const focusedCover = focusCover(enabledCover, targ, container, enterKey, exitKey, onEscape, head, tail);
+  const focusedCover = focusCover(enabledCover, targ, container, enterKey, exitKey, onEscape, head, coverNextSibling);
   if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) { // 聚焦触发器
@@ -170,7 +171,7 @@ const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, handleFocus, exitSelector, onExit, trigger, coverShiftTab) {
+const addEventListeners = function(rootNode, handleFocus, exitSelector, onExit, trigger, coverNextSibling) {
   rootNode.addEventListener("keydown", handleFocus);
 
   // 跳出循环的触发器的点击事件
@@ -186,8 +187,8 @@ const addEventListeners = function(rootNode, handleFocus, exitSelector, onExit, 
     });
   }
 
-  if (coverShiftTab)
-    coverShiftTab.addEventListener("keydown", handleCoverShiftTab(rootNode));
+  if (coverNextSibling)
+    coverNextSibling.addEventListener("keydown", handleCoverShiftTab(rootNode));
 };
 
 const focusBagel = (rootNode, subNodes, options = {}) => {
@@ -232,7 +233,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   /** 封面选项是否为对象 */
   const isObjCover = objToStr(cover) === "[object Object]";
   const {
-    shiftTabNode: coverShiftTab
+    nextSibling: coverNextSibling
   } = isObjCover ? cover : {};
 
   const promiseDelay = objToStr(delayListeners) === "[object Promise]";
@@ -296,11 +297,11 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
 
   // 在焦点循环中触发聚焦
   const handleFocus = _manual ?
-    focusNextManually(_subNodes, _rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey) :
-    focusNextKey(head, tail, _rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey);
+    focusNextManually(_subNodes, _rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey, coverNextSibling) :
+    focusNextKey(head, tail, _rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey, coverNextSibling);
 
   // 添加除 trigger 以外其它和焦点相关的事件监听器
-  addEventListeners(_rootNode, handleFocus, exitSelector, onExit, _trigger, coverShiftTab);
+  addEventListeners(_rootNode, handleFocus, exitSelector, onExit, _trigger, coverNextSibling);
 
   return {
     /** 进入循环，聚焦 */
