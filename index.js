@@ -1,3 +1,6 @@
+/** Object.prototype.toString.call 快捷方式 */
+const objToStr = obj => Object.prototype.toString.call(obj);
+
 /** document.activeElement 的快捷方式 */
 const getActiveElement = () => document.activeElement;
 
@@ -63,6 +66,7 @@ const isTabBackward = function(e) {
 /** 和封面相关的聚焦行为 */
 const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, tail) {
   if (!enabledCover) return false; // 尚未打开封面选项
+  /** 当前事件是否在封面内部 */
   const isInnerCover = target !== container;
   if (isInnerCover) { // 当前聚焦封面内部
     if (exitKey && exitKey(e)) { // 退出封面内部，进入封面
@@ -225,16 +229,17 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     key: exitKey,
   } = exit;
 
-  const promiseDelay = Object.prototype.toString.call(delayListeners) === "[object Promise]";
-  const commonDelay = Object.prototype.toString.call(delayListeners) === "[object Function]";
-
   /** 封面选项是否为对象 */
-  const isObjCover = Object.prototype.toString.call(cover) === "[object Object]";
-  /** 是否打开封面选项 */
-  const enabledCover = isObjCover || cover === true;
+  const isObjCover = objToStr(cover) === "[object Object]";
   const {
     shiftTabNode: coverShiftTab
   } = isObjCover ? cover : {};
+
+  const promiseDelay = objToStr(delayListeners) === "[object Promise]";
+  const commonDelay = objToStr(delayListeners) === "[object Function]";
+
+  /** 是否已经打开封面选项 */
+  const enabledCover = isObjCover || cover === true;
 
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
