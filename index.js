@@ -159,17 +159,6 @@ const handleCoverShiftTab = container => e => {
   }
 };
 
-/** 生成按下 esc 的行为 */
-const genEscFocus = (disabledEsc, onEscape, trigger) => e => {
-  if (disabledEsc) return;
-  if (onEscape) onEscape(e);
-  if (trigger == null) {
-    console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
-    return;
-  }
-  return focus(trigger);
-};
-
 /** 添加焦点需要的事件监听器 */
 const addEventListeners = function(rootNode, handleFocus, exitSelector, onExit, trigger, coverNextSibling) {
   rootNode.addEventListener("keydown", handleFocus);
@@ -279,8 +268,6 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   /** 触发打开焦点的元素 */
   let _trigger = element(trigger || enterSelector);
 
-  const onEscFocus = genEscFocus(disabledEsc, _onEscape, _trigger);
-
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
 
@@ -334,16 +321,23 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   function loadEventListeners(rootNode, subNodes, head, tail) {
 
     // 在焦点循环中触发聚焦
-    const handleFocus = initFocusHandler(subNodes, rootNode, head, tail);
+    const handleFocus = _manual ?
+      focusNextManually(subNodes, rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey, coverNextSibling) :
+      focusNextKey(head, tail, rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey, coverNextSibling);
 
     // 添加除 trigger 以外其它和焦点相关的事件监听器
     addEventListeners(rootNode, handleFocus, exitSelector, onExit, _trigger, coverNextSibling);
   }
 
-  function initFocusHandler(subNodes, rootNode, head, tail) {
-    return _manual ?
-      focusNextManually(subNodes, rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey, coverNextSibling) :
-      focusNextKey(head, tail, rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey, coverNextSibling);
+  /** 按下 esc 的行为 */
+  function onEscFocus(e) {
+    if (disabledEsc) return;
+    if (onEscape) onEscape(e);
+    if (trigger == null) {
+      console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
+      return;
+    }
+    return focus(trigger);
   }
 };
 
