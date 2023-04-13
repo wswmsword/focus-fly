@@ -269,19 +269,23 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   // 触发器点击事件
   if (enterSelector && onEnter) {
     _trigger.addEventListener("click", async e => {
+      const focusNext = function() {
+        if (enabledCover) tryFocus(_rootNode); // 如果打开封面，首先聚焦封面
+        else tryFocus(head); // 如果未打开封面，聚焦内部聚焦列表
+      };
       onEnter(e);
       if (promiseDelay) {
         await delayListeners;
         addEventListeners();
-        tryFocus(head)
+        focusNext();
       }
       else if (commonDelay) {
         delayListeners(() => {
           addEventListeners();
-          tryFocus(head)
+          focusNext();
         });
       }
-      else tryFocus(head);
+      else focusNext();
     })
   }
 
