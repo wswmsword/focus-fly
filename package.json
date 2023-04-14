@@ -1,7 +1,7 @@
 {
   "name": "focus-bagel",
   "version": "1.0.0",
-  "description": "设置范围，循环焦点。Loop focus within expected nodes.",
+  "description": "🍩 焦点管理。Focus management.",
   "main": "output/focus-bagel.js",
   "module": "output/focus-bagel.esm.js",
   "sideEffects": false,
