@@ -224,7 +224,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
      * TODO: cover 配置选项，例如是否锁 tab（默认不锁）
      */
     cover = false,
-    /** 延迟挂载非触发器元素的事件，可以是一个 promise，可以是一个接收所有事件监听器作为入参的普通函数 */
+    /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收一个函数（所有事件监听器）作为入参的普通函数 */
     delayToFocus,
     /** TODO: 子元素锁 tab */
   } = options;
@@ -246,8 +246,10 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     nextSibling: coverNextSibling
   } = isObjCover ? cover : {};
 
-  const promiseDelay = objToStr(delayToFocus) === "[object Promise]";
-  const commonDelay = objToStr(delayToFocus) === "[object Function]";
+  const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
+  const delayRes = isFunctionDelay && delayToFocus(() => {});
+  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
+  const commonDelay = isFunctionDelay && objToStr(delayToFocus) === "[object Function]" && !promiseDelay;
   const isDelay = promiseDelay || commonDelay;
 
   const { rootNode: _rootNode, subNodes: _subNodes, head, tail } = isDelay ? {} : getNodes(rootNode, subNodes);
@@ -283,7 +285,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
       if (isDelay) {
         const { rootNode: _rootNode, subNodes: _subNodes, head, tail } = getNodes(rootNode, subNodes);
         if (promiseDelay) {
-          await delayToFocus;
+          await delayToFocus(() => {});
           loadEventListeners(_rootNode, _subNodes, head, tail);
           focusNext(_rootNode, head);
         }
