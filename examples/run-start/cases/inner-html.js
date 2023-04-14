@@ -1,5 +1,5 @@
 const dialogHtml = `
-<div id="dialog_2" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog"
+<div id="dialog_2" aria-modal="true" aria-labelledby="modal-title" class="dialog centre" role="dialog"
 tabindex="0">
 <h3 id="modal-title_2">吃一颗糖</h3>
 <ul>
@@ -23,17 +23,11 @@ const bagel_2 = focusBagel("#dialog_2", ["#firstFocusA_2", "#lastFocusBtn_2"], {
     selector: "#open_2",
     on() {
       placeHolder.innerHTML = dialogHtml;
-      const dialog = document.getElementById("dialog_2");
-      dialog.classList.add("openedDialog");
-      dialog.classList.remove("closedDialog");
     },
   },
   exit: {
     selector: "#close_2",
     on() {
-      const dialog = document.getElementById("dialog_2");
-      dialog.classList.remove("openedDialog");
-      dialog.classList.add("closedDialog");
       placeHolder.innerHTML = '';
     },
   },
