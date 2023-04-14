@@ -8,11 +8,14 @@
     <meta name="description" content="A demo of focus-bagel">
   </head>
   <body>
+    <h1>一些例子</h1>
+    <hr />
+    <h2>默认弹窗（无动画，无需 innerHtml，无需 display）</h2>
     <button id="open">打开一包糖</button>
     <button id="walk">走两步</button>
     <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="centre closedDialog" role="dialog"
       tabindex="0">
-      <h2 id="modal-title">吃一颗糖</h2>
+      <h3 id="modal-title">吃一颗糖</h3>
       <ul>
         <li><a id="firstFocusA" href="#">椰蓉酥心糖</a></li>
         <li><a href="#">不二家棒棒糖</a></li>
@@ -25,7 +28,13 @@
         <button id="lastFocusBtn">OK</button>
       </div>
     </div>
+    <hr />
+    <h2>触发后需要 innerHtml 的弹窗</h2>
+    <button id="open_2">打开一包糖</button>
+    <button id="walk_2">走两步</button>
+    <div id="place_holder"></div>
   </body>
   <script src="demo.js"></script>
   <script src="index.js"></script>
+  <script src="cases/inner-html.js"></script>
 </html>
