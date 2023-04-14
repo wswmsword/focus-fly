@@ -24,3 +24,13 @@ a:focus, button:focus, .dialog:focus {
   border-radius: 2px;
   outline-offset: 3px;
 }
+
+.transition-in {
+  opacity: 1;
+  transition: opacity .3s;
+}
+
+.transition-out {
+  opacity: 0;
+  transition: opacity .3s;
+}
