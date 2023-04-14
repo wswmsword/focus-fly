@@ -13,7 +13,7 @@
     <h2>默认弹窗（无动画，无需 innerHtml，无需 display）</h2>
     <button id="open">打开一包糖</button>
     <button id="walk">走两步</button>
-    <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="centre closedDialog" role="dialog"
+    <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog"
       tabindex="0">
       <h3 id="modal-title">吃一颗糖</h3>
       <ul>
@@ -33,8 +33,33 @@
     <button id="open_2">打开一包糖</button>
     <button id="walk_2">走两步</button>
     <div id="place_holder"></div>
+    <hr />
+    <h2>触发后需要 display: block 的弹窗</h2>
+    <button id="open_3">打开一包糖</button>
+    <button id="walk_3">走两步</button>
+    <div id="dialog_3"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      class="dialog centre"
+      style="display: none"
+      role="dialog"
+      tabindex="0">
+      <h3 id="modal-title_3">吃一颗糖</h3>
+      <ul>
+        <li><a id="firstFocusA_3" href="#">椰蓉酥心糖</a></li>
+        <li><a href="#">不二家棒棒糖</a></li>
+        <li><a href="#">樱花软糖</a></li>
+        <li><a href="#">大白兔奶糖</a></li>
+        <li><a href="#">夹心巧克力</a></li>
+      </ul>
+      <div class="ctrls">
+        <button id="close_3">Close</button>
+        <button id="lastFocusBtn_3">OK</button>
+      </div>
+    </div>
   </body>
   <script src="demo.js"></script>
   <script src="index.js"></script>
   <script src="cases/inner-html.js"></script>
+  <script src="cases/display.js"></script>
 </html>

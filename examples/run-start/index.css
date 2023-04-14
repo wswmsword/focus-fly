@@ -1,4 +1,4 @@
-#dialog, #dialog_2 {
+.dialog {
   width: 360px;
   height: 240px;
   border: 1px solid black;
@@ -11,6 +11,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  background-color: white;
 }
 .openedDialog {
   display: block;
@@ -18,7 +19,7 @@
 .closedDialog {
   display: none;
 }
-a:focus, button:focus, #dialog:focus {
+a:focus, button:focus, .dialog:focus {
   outline: 2px dashed seagreen;
   border-radius: 2px;
   outline-offset: 3px;

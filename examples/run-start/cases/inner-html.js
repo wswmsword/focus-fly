@@ -1,5 +1,5 @@
 const dialogHtml = `
-<div id="dialog_2" aria-modal="true" aria-labelledby="modal-title" class="centre closedDialog" role="dialog"
+<div id="dialog_2" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog"
 tabindex="0">
 <h3 id="modal-title_2">吃一颗糖</h3>
 <ul>
