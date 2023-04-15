@@ -73,7 +73,8 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
       return focus(container);
     }
     else if (isTabForward(e)) {
-      return focus(head);
+      e.preventDefault();
+      return focus(coverNextSibling); // 聚焦封面之后一个元素
     }
     else if (isTabBackward(e)) {
       return focus(container);
