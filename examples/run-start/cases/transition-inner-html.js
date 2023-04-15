@@ -50,8 +50,8 @@ const bagel_5 = focusBagel("#dialog_5", ["#firstFocusA_5", "#lastFocusBtn_5"], {
       });
     },
   },
-  delayToFocus(fn) { // 传入函数
-    setTimeout(fn, 1111);
-  },
+  // delayToFocus(fn) { // 传入函数
+  //   setTimeout(fn, 1111);
+  // },
   // delayToFocus: () => new Promise(resolve => setTimeout(resolve, 1111)), // 或者传入 promise
 });

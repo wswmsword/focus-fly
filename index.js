@@ -185,14 +185,14 @@ const getNodes = function(rootNode, subNodes) {
   const _rootNode = element(rootNode);
   const _subNodes = subNodes.map(item => {
     let _item = element(item);
-    if (_item == null) console.warn(`没有找到元素 ${item}。`);
+    // if (_item == null) console.warn(`没有找到元素 ${item}。`);
     return _item;
   }).filter(item => item != null);
   const head = _subNodes[0];
   const tail = _subNodes.slice(-1)[0];
 
-  if (head == null || tail == null)
-    throw("至少需要包含两个可以聚焦的元素。");
+  // if (head == null || tail == null)
+  //   throw("至少需要包含两个可以聚焦的元素。");
   return {
     rootNode: _rootNode,
     subNodes: _subNodes,
@@ -246,13 +246,14 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     nextSibling: coverNextSibling
   } = isObjCover ? cover : {};
 
+  const { rootNode: _rootNode, subNodes: _subNodes, head, tail } = getNodes(rootNode, subNodes);
+
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
-  const commonDelay = isFunctionDelay && objToStr(delayToFocus) === "[object Function]" && !promiseDelay;
-  const isDelay = promiseDelay || commonDelay;
-
-  const { rootNode: _rootNode, subNodes: _subNodes, head, tail } = isDelay ? {} : getNodes(rootNode, subNodes);
+  const callbackDelay = isFunctionDelay && !promiseDelay;
+  const commonDelay = (_rootNode == null || head == null || tail == null) && !promiseDelay && !callbackDelay;
+  const isDelay = promiseDelay || callbackDelay || commonDelay;
 
   /** 是否已经打开封面选项 */
   const enabledCover = isObjCover || cover === true;
@@ -283,17 +284,20 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
       onEnter(e);
 
       if (isDelay) {
-        const { rootNode: _rootNode, subNodes: _subNodes, head, tail } = getNodes(rootNode, subNodes);
         if (promiseDelay) {
           await delayToFocus(() => {});
-          loadEventListeners(_rootNode, _subNodes, head, tail);
-          focusNext(_rootNode, head);
+          const { rootNode: _, head } = loadEventListeners(rootNode, subNodes);
+          focusNext(_, head);
+        }
+        else if (callbackDelay) {
+          delayToFocus(() => {
+            const { rootNode: _, head } = loadEventListeners(rootNode, subNodes);
+            focusNext(_, head);
+          });
         }
         else if (commonDelay) {
-          delayToFocus(() => {
-            loadEventListeners(_rootNode, _subNodes, head, tail);
-            focusNext(_rootNode, head);
-          });
+          const { rootNode: _, head } = loadEventListeners(rootNode, subNodes);
+          focusNext(_, head);
         }
       }
       else focusNext(_rootNode, head);
@@ -301,7 +305,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   }
 
   // 不用延迟聚焦
-  if (!isDelay) loadEventListeners(_rootNode, _subNodes, head, tail);
+  if (!isDelay) loadEventListeners(_rootNode, _subNodes);
 
   return {
     /** 进入循环，聚焦 */
@@ -320,7 +324,14 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     i: () => activeIndex,
   };
 
-  function loadEventListeners(rootNode, subNodes, head, tail) {
+  function loadEventListeners(originRootNode, originSubNodes) {
+
+    const { rootNode, subNodes, head, tail } = getNodes(originRootNode, originSubNodes);
+
+    if (rootNode == null)
+      throw new Error(`没有找到元素 ${originRootNode}，您可以尝试 delayToFocus 选项，等待元素 ${originRootNode} 渲染完毕后进行聚焦。`);
+    if (head == null || tail == null)
+      throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
 
     // 在焦点循环中触发聚焦
     const handleFocus = _manual ?
@@ -329,6 +340,13 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
 
     // 添加除 trigger 以外其它和焦点相关的事件监听器
     addEventListeners(rootNode, handleFocus, exitSelector, onExit, _trigger, coverNextSibling);
+
+    return {
+      rootNode,
+      subNodes,
+      head,
+      tail,
+    };
   }
 
   /** 按下 esc 的行为 */

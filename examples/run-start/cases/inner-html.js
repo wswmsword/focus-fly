@@ -31,7 +31,7 @@ const bagel_2 = focusBagel("#dialog_2", ["#firstFocusA_2", "#lastFocusBtn_2"], {
       placeHolder.innerHTML = '';
     },
   },
-  delayToFocus: () => new Promise(resolve => setTimeout(resolve, 1111)), // 传入 promise
+  // delayToFocus: () => new Promise(resolve => setTimeout(resolve, 1111)), // 传入 promise
   // delayToFocus(fn) { // 或者传入函数
   //   setTimeout(fn, 1111);
   // },
