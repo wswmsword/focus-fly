@@ -160,8 +160,7 @@ const handleCoverShiftTab = container => e => {
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, handleFocus, exitNode, exitHandler, coverNextSibling) {
-  const coverShiftTabHandler = handleCoverShiftTab(rootNode);
+const addEventListeners = function(rootNode, handleFocus, exitNode, exitHandler, coverNextSibling, coverShiftTabHandler) {
 
   // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", handleFocus);
@@ -349,7 +348,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(rootNode, handleFocus, exitNode, exitHandler, coverNextSibling);
+      addedListeners = addEventListeners(rootNode, handleFocus, exitNode, exitHandler, coverNextSibling, coverShiftTabHandler);
 
     return {
       rootNode,
