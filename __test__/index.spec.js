@@ -377,11 +377,11 @@ function initBagel(container, dialog, first, last, open, close) {
 
   focusBagel(dialog, [first, last], {
     enter: {
-      selector: open,
+      node: open,
       on() {},
     },
     exit: {
-      selector: close,
+      node: close,
       on() {},
     }
   });
@@ -429,7 +429,7 @@ function initBagel_5(container, dialog, first, last, open, close) {
 function initBagel_6(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     exit: {
-      selector: close,
+      node: close,
       on: () => {}
     }
   });
@@ -452,11 +452,11 @@ function initBagel_8(container, dialog, first, last, open, close) {
 function initBagel_9(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     enter: {
-      selector: open,
+      node: open,
       on: () => {}
     },
     exit: {
-      selector: close,
+      node: close,
       on: () => {}
     },
     onEscape() {},
@@ -466,11 +466,11 @@ function initBagel_9(container, dialog, first, last, open, close) {
 function initBagel_10(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     enter: {
-      selector: open,
+      node: open,
       on: () => {}
     },
     exit: {
-      selector: close,
+      node: close,
       on: () => {}
     },
     onEscape: false,
@@ -483,7 +483,7 @@ function initBagel_11(container, dialog, first, last, open, close) {
   });
   const bagel = focusBagel(dialog, [first, last], {
     exit: {
-      selector: close,
+      node: close,
       on: () => {}
     },
     onEscape() {},
@@ -494,11 +494,11 @@ function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, f
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     manual: true,
     enter: {
-      selector: open,
+      node: open,
       on() {},
     },
     exit: {
-      selector: focusF,
+      node: focusF,
       on() {},
     }
   });
@@ -509,11 +509,11 @@ function initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, f
     manual: true,
     loop: false,
     enter: {
-      selector: open,
+      node: open,
       on() {},
     },
     exit: {
-      selector: focusF,
+      node: focusF,
       on() {},
     }
   });
@@ -523,11 +523,11 @@ function initBagel_14(container, dialog, first, last, open, close) {
 
   focusBagel("#dialog", ["#firstFocusA", "#lastFocusBtn"], {
     enter: {
-      selector: "#open",
+      node: "#open",
       on() {},
     },
     exit: {
-      selector: "#close",
+      node: "#close",
       on() {},
     }
   });
