@@ -1,28 +1,4 @@
-/** Object.prototype.toString.call 快捷方式 */
-const objToStr = obj => Object.prototype.toString.call(obj);
-
-/** document.activeElement 的快捷方式 */
-const getActiveElement = () => document.activeElement;
-
-/** document.querySelector 的快捷方式 */
-const querySelector = str => document.querySelector(str);
-
-/** 通过字符串查找节点，或者直接返回节点 */
-const element = e => typeof e === "string" ? querySelector(e) : e;
-
-/** 滴答 */
-const tick = function(fn) {
-  setTimeout(fn, 0);
-};
-
-/** 是否是 input 可 select 的元素 */
-const isSelectableInput = function(node) {
-  return (
-    node.tagName &&
-    node.tagName.toLowerCase() === 'input' &&
-    typeof node.select === 'function'
-  );
-};
+import { objToStr, isObj, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward } from "./utils";
 
 /** 聚焦，如果是 input，则聚焦后选中 */
 const focus = function(e) {
@@ -36,31 +12,6 @@ const focus = function(e) {
 const tryFocus = function(e) {
   if (e == null) tick(() => e && focus(e))
   else focus(e);
-};
-
-/** 是否按下了 enter */
-const isEnterEvent = function(e) {
-  return e.key === "Enter" || e.keyCode === 13;
-};
-
-/** 按键是否是 esc */
-const isEscapeEvent = function (e) {
-  return e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27;
-};
-
-/** 按键是否是 tab */
-const isTabEvent = function(e) {
-  return e.key === 'Tab' || e.keyCode === 9;
-};
-
-/** 是否是向前的 tab */
-const isTabForward = function(e) {
-  return isTabEvent(e) && !e.shiftKey;
-};
-
-/** 是否是向后的 tab */
-const isTabBackward = function(e) {
-  return isTabEvent(e) && e.shiftKey;
 };
 
 /** 和封面相关的聚焦行为 */
@@ -244,8 +195,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     key: exitKey,
   } = exit;
 
-  const isObjForward = objToStr(forward) === "[object Object]";
-  const isObjBackward = objToStr(backward) === "[object Object]";
+  const isObjForward = isObj(forward);
+  const isObjBackward = isObj(backward);
 
   const {
     key: isForward,
@@ -258,7 +209,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   } = isObjBackward ? backward : { key: backward };
 
   /** 封面选项是否为对象 */
-  const isObjCover = objToStr(cover) === "[object Object]";
+  const isObjCover = isObj(cover);
   const {
     nextSibling: coverNextSibling
   } = isObjCover ? cover : {};
