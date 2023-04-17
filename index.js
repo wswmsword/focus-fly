@@ -64,7 +64,8 @@ const isTabBackward = function(e) {
 };
 
 /** 和封面相关的聚焦行为 */
-const focusCover = function(enabledCover, target, container, enterKey, exitKey, onEscape, head, coverNextSibling) {
+const focusCover = function(enabledCover, e, container, enterKey, exitKey, onEscape, head, coverNextSibling) {
+  const target = e.target;
   if (!enabledCover) return false; // 尚未打开封面选项
   /** 当前事件是否在封面内部 */
   const isInnerCover = target !== container;
@@ -84,7 +85,7 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
       return focus(head);
     }
     else if (exitKey && exitKey(e)) { // 退出封面，聚焦触发器
-      return onEscape();
+      return onEscape(e);
     }
     else if (isTabForward(e)) { // 在封面按下 tab
       e.preventDefault();
@@ -100,7 +101,7 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
 /** 手动聚焦下一个元素 */
 const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, onForward, onBackward, enterKey, exitKey, coverNextSibling) => e => {
 
-  const focusedCover = focusCover(enabledCover, e.target, container, enterKey, exitKey, onEscape, subNodes[0], coverNextSibling);
+  const focusedCover = focusCover(enabledCover, e, container, enterKey, exitKey, onEscape, subNodes[0], coverNextSibling);
   if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) {
@@ -132,7 +133,7 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
 const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, onForward, onBackward, enterKey, exitKey, coverNextSibling) => e => {
   const targ = e.target;
 
-  const focusedCover = focusCover(enabledCover, targ, container, enterKey, exitKey, onEscape, head, coverNextSibling);
+  const focusedCover = focusCover(enabledCover, e, container, enterKey, exitKey, onEscape, head, coverNextSibling);
   if (focusedCover) return;
 
   if ((exitKey ?? isEscapeEvent)(e)) { // 聚焦触发器
@@ -233,12 +234,12 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   } = options;
 
   const {
-    selector: enterSelector,
+    node: enterStringOrElement,
     on: onEnter,
     key: enterKey,
   } = enter;
   const {
-    selector: exitSelector,
+    node: exitStringOrElement,
     on: onExit,
     key: exitKey,
   } = exit;
@@ -285,7 +286,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   const disabledEsc = _onEscape === false || _onEscape == null;
 
   /** 触发打开焦点的元素 */
-  let _trigger = element(trigger || enterSelector);
+  let _trigger = element(trigger || enterStringOrElement);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
@@ -293,13 +294,13 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   let addedListeners = false;
 
   // 触发器点击事件
-  if (enterSelector && onEnter) {
+  if (_trigger) {
     _trigger.addEventListener("click", async e => {
       const focusNext = function(rootNode, head) {
         if (enabledCover) tryFocus(rootNode); // 如果打开封面，首先聚焦封面
         else tryFocus(head); // 如果未打开封面，聚焦内部聚焦列表
       };
-      onEnter(e);
+      onEnter && onEnter(e);
 
       if (isDelay) {
         if (promiseDelay) {
@@ -348,14 +349,14 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
 
   function loadEventListeners(originRootNode, originSubNodes) {
 
-    const { rootNode, subNodes, head, tail, exitNode } = getNodes(originRootNode, originSubNodes, exitSelector);
+    const { rootNode, subNodes, head, tail, exitNode } = getNodes(originRootNode, originSubNodes, exitStringOrElement);
 
     if (rootNode == null)
       throw new Error(`没有找到元素 ${originRootNode}，您可以尝试 delayToFocus 选项，等待元素 ${originRootNode} 渲染完毕后进行聚焦。`);
     if (head == null || tail == null)
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
-    if (exitSelector && exitNode == null)
-      console.warn(`没有找到元素 ${exitSelector}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
+    if (exitStringOrElement && exitNode == null)
+      console.warn(`没有找到元素 ${exitStringOrElement}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
 
     // 在焦点循环中触发聚焦
     const handleFocus = _manual ?
