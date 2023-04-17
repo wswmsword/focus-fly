@@ -98,7 +98,7 @@ const focusCover = function(enabledCover, target, container, enterKey, exitKey, 
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, enterKey, exitKey, coverNextSibling) => e => {
+const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCover, onEscape, isForward, isBackward, onForward, onBackward, enterKey, exitKey, coverNextSibling) => e => {
 
   const focusedCover = focusCover(enabledCover, e.target, container, enterKey, exitKey, onEscape, subNodes[0], coverNextSibling);
   if (focusedCover) return;
@@ -109,6 +109,7 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
   }
 
   if ((isForward ?? isTabForward)(e)) {
+    onForward && onForward(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
     activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
@@ -117,6 +118,7 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
     focus(subNodes[activeIndex]);
   }
   else if ((isBackward ?? isTabBackward)(e)) {
+    onBackward && onBackward(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex - 1;
     activeIndex = isClamp ? Math.max(0, nextI) : nextI;
@@ -127,7 +129,7 @@ const focusNextManually = (subNodes, container, activeIndex, isClamp, enabledCov
 };
 
 /** 按下 tab，自动聚焦下个元素 */
-const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, enterKey, exitKey, coverNextSibling) => e => {
+const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, onForward, onBackward, enterKey, exitKey, coverNextSibling) => e => {
   const targ = e.target;
 
   const focusedCover = focusCover(enabledCover, targ, container, enterKey, exitKey, onEscape, head, coverNextSibling);
@@ -139,12 +141,14 @@ const focusNextKey = (head, tail, container, isClamp, enabledCover, onEscape, en
   }
 
   if (isTabForward(e)) {
+    onForward && onForward(e);
     if (targ === tail) {
       e.preventDefault();
       if (!isClamp) focus(head);
     }
   }
   else if (isTabBackward(e)) {
+    onBackward && onBackward(e);
     if (targ === head) {
       e.preventDefault();
       if (!isClamp) focus(tail);
@@ -206,9 +210,9 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     /** move: 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
     /** move: 自定义前进焦点函数 */
-    isForward,
+    forward,
     /** move: 自定义后退焦点函数 */
-    isBackward,
+    backward,
     /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 enter.selector 则不用设置 */
     trigger,
     /** focus: 触发触发器的配置 */
@@ -238,6 +242,19 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     on: onExit,
     key: exitKey,
   } = exit;
+
+  const isObjForward = objToStr(forward) === "[object Object]";
+  const isObjBackward = objToStr(backward) === "[object Object]";
+
+  const {
+    key: isForward,
+    on: onForward,
+  } = isObjForward ? forward : { key: forward };
+
+  const {
+    key: isBackward,
+    on: onBackward,
+  } = isObjBackward ? backward : { key: backward };
 
   /** 封面选项是否为对象 */
   const isObjCover = objToStr(cover) === "[object Object]";
@@ -342,8 +359,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
 
     // 在焦点循环中触发聚焦
     const handleFocus = _manual ?
-      focusNextManually(subNodes, rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, enterKey, exitKey, coverNextSibling) :
-      focusNextKey(head, tail, rootNode, isClamp, enabledCover, onEscFocus, enterKey, exitKey, coverNextSibling);
+      focusNextManually(subNodes, rootNode, activeIndex, isClamp, enabledCover, onEscFocus, isForward, isBackward, onForward, onBackward, enterKey, exitKey, coverNextSibling) :
+      focusNextKey(head, tail, rootNode, isClamp, enabledCover, onEscFocus, onForward, onBackward, enterKey, exitKey, coverNextSibling);
 
     const coverShiftTabHandler = handleCoverShiftTab(rootNode);
 
