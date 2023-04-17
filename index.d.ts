@@ -113,10 +113,10 @@ interface Options {
   loop?: boolean;
 
   /** 自定义*前进*焦点函数，设置后，`manual` 将默认为 true */
-  forward?: isForward | subNodesForward;
+  forward?: isKey | subNodesForward;
 
   /** 自定义*后退*焦点函数，设置后，`manual` 将默认为 true */
-  backward?: isBackward | subNodesBackward;
+  backward?: isKey | subNodesBackward;
 
   /** 聚焦 subNodes 的后一个元素 */
   headPrev?: subNodesHeadPrev;
