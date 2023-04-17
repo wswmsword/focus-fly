@@ -27,8 +27,14 @@ type subNodesHeadPrev = {
   /** 自定义聚焦该元素的组合键 */
   key?: isKey;
 
+  /** 从 node 返回到 subNodes 的组合键 */
+  keyBack?: isKey;
+
   /** 聚焦时的行为 */
   on?: handleKeydown;
+
+  /** 返回聚焦时的行为 */
+  onBack?: handleKeydown;
 };
 
 type subNodesTailNext = {
@@ -38,8 +44,14 @@ type subNodesTailNext = {
   /** 自定义聚焦该元素的组合键 */
   key?: isKey;
 
+  /** 从 node 返回到 subNodes 的组合键 */
+  keyBack?: isKey;
+
   /** 聚焦时的行为 */
   on?: handleKeydown;
+
+  /** 返回时的行为 */
+  onBack?: handleKeydown;
 };
 
 type enterSubNodes = {
@@ -75,8 +87,14 @@ type cover = {
   /** 自定义聚焦封面后面元素的组合键 */
   nextKey?: isKey;
 
+  /** 从后面元素返回到封面的组合键 */
+  nextKeyBack?: isKey;
+
   /** 聚焦后面可 tab 元素的行为 */
   onNext?: handleKeydown;
+
+  /** 返回的行为 */
+  onNextBack?: handleKeydown;
 
   /** 封面的前一个可 tab 的元素 */
   prev?: element;
@@ -84,8 +102,14 @@ type cover = {
   /** 自定义聚焦封面前面元素的组合键 */
   prevKey?: isKey;
 
+  /** 聚焦前面元素之后返回到封面的组合键 */
+  prevKeyBack?: isKey;
+
   /** 聚焦前面可 tab 元素的行为 */
   onPrev?: handleKeydown;
+
+  /** 返回的行为 */
+  onPrevBack?: handleKeydown;
 
   /** 自定义进入 subNodes 的组合键 */
   enterKey?: isKey;
