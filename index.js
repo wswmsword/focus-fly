@@ -413,7 +413,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     function removeListeners() {
       if (removeListenersEachExit) {
         _rootNode.removeEventListener("keydown", subNodesHandler);
-        _exitNode.removeEventListener("click", exitHandler);
+        _exitNode?.removeEventListener("click", exitHandler);
         _coverNode?.removeEventListener("keydown", coverHandler);
         _coverNext?.removeEventListener("keydown", coverNextHandler);
         _coverPrev?.removeEventListener("keydown", coverPrevHandler);
