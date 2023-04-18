@@ -239,7 +239,10 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     /** 进入循环，聚焦 */
     enter() {
       _trigger = _trigger || getActiveElement();
-      focus(head);
+      const head = element(subNodes[0]);
+      if (head == null)
+        console.warn(`没有找到元素 ${subNodes[0]}，如果元素需要等待渲染，您需要延迟调用 enter 等待渲染完毕。`);
+      else focus(head);
     },
     /** 退出循环，聚焦触发元素 */
     exit() {
