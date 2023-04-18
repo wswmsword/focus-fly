@@ -10,7 +10,7 @@ const focus = function(e) {
 
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
 const tryFocus = function(e) {
-  if (e == null) tick(() => e && focus(e))
+  if (e == null) tick(() => e && focus(e));
   else focus(e);
 };
 
@@ -187,7 +187,13 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
 
-  const { rootNode: _rootNode, subNodes: _subNodes, head, tail, coverNode: _coverNode, exitNode: _exitNode, coverNext, coverPrev } = getNodes(rootNode, subNodes, exitStringOrElement, coverNode, coverNextNode, coverPrevNode);
+  const {
+    rootNode: _rootNode,
+    subNodes: _subNodes, head, tail,
+    coverNode: _coverNode,
+    exitNode: _exitNode,
+    coverNext, coverPrev,
+  } = getNodes(rootNode, subNodes, exitStringOrElement, coverNode, coverNextNode, coverPrevNode);
 
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
@@ -226,7 +232,8 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   }
 
   // 不用延迟聚焦
-  if (!isDelay) loadEventListeners(_rootNode, _subNodes, _coverNode);
+  if (!isDelay)
+    loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
 
   return {
     /** 进入循环，聚焦 */
@@ -246,72 +253,72 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   };
 
   async function enterTriggerHandler(e) {
-    const focusCoverOrHead = function(cover, head) {
-      if (enabledCover) tryFocus(cover); // 如果打开封面，首先聚焦封面
-      else tryFocus(head); // 如果未打开封面，聚焦内部聚焦列表
-    };
     onEnter && onEnter(e);
 
     if (isDelay) {
       if (promiseDelay) {
         await delayToFocus(() => {});
-        const { head, coverNode: _ } = loadEventListeners(rootNode, subNodes, coverNode);
-        focusCoverOrHead(_, head);
+        findNodesToLoadListenersAndFocus();
       }
-      else if (callbackDelay) {
-        delayToFocus(() => {
-          const { coverNode: _, head } = loadEventListeners(rootNode, subNodes, coverNode);
-          focusCoverOrHead(_, head);
-        });
-      }
-      else if (commonDelay) {
-        const { coverNode: _, head } = loadEventListeners(rootNode, subNodes, coverNode);
-        focusCoverOrHead(_, head);
-      }
+      else if (callbackDelay) delayToFocus(findNodesToLoadListenersAndFocus);
+      else if (commonDelay) findNodesToLoadListenersAndFocus();
     }
     else if (removeListenersEachExit) {
-      loadEventListeners(_rootNode, _subNodes, _coverNode)
+      loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
       focusCoverOrHead(_rootNode, head);
     }
     else focusCoverOrHead(_rootNode, head);
   }
 
-  function loadEventListeners(originRootNode, originSubNodes, originCoverNode) {
+  /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
+  function findNodesToLoadListenersAndFocus() {
+    const {
+      rootNode: _rootNode,
+      subNodes: _subNodes, head, tail,
+      coverNode: _coverNode,
+      exitNode: _exitNode,
+      coverNext, coverPrev,
+    } = getNodes(_rootNode, _subNodes, exitStringOrElement, _coverNode, coverNext, coverPrev);
 
-    const { rootNode, subNodes, head, tail, exitNode, coverNode, coverNext, coverPrev } = getNodes(originRootNode, originSubNodes, exitStringOrElement, originCoverNode, coverNextNode, coverPrevNode);
+    loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
+    focusCoverOrHead(_coverNode, head);
+  }
 
-    if (rootNode == null)
-      throw new Error(`没有找到元素 ${originRootNode}，您可以尝试 delayToFocus 选项，等待元素 ${originRootNode} 渲染完毕后进行聚焦。`);
-    if (head == null || tail == null)
+  function focusCoverOrHead(cover, head) {
+    if (enabledCover) tryFocus(cover); // 如果打开封面，首先聚焦封面
+    else tryFocus(head); // 如果未打开封面，聚焦内部聚焦列表
+  }
+
+  function loadEventListeners(_rootNode, _subNodes, _head, _tail, _exitNode, _coverNode, _coverNext, _coverPrev) {
+
+    // const { rootNode, subNodes, head, tail, exitNode, coverNode, coverNext, coverPrev } = getNodes(originRootNode, originSubNodes, exitStringOrElement, originCoverNode, coverNextNode, coverPrevNode);
+
+    if (_rootNode == null)
+      throw new Error(`没有找到元素 ${rootNode}，您可以尝试 delayToFocus 选项，等待元素 ${rootNode} 渲染完毕后进行聚焦。`);
+    if (_head == null || _tail == null)
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
-    if (exitStringOrElement && exitNode == null)
+    if (exitStringOrElement && _exitNode == null)
       console.warn(`没有找到元素 ${exitStringOrElement}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
 
     // 在焦点循环中触发聚焦
     const subNodesHandler = _manual ?
-      focusSubNodesManually(subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, exitKey) :
-      focusSubNodes(head, tail, isClamp, exitSubNodesHandler, onForward, onBackward, exitKey);
+      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, exitKey) :
+      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, exitKey);
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(rootNode, subNodesHandler, exitNode, exitHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler);
-
-    return {
-      rootNode,
-      head,
-      coverNode,
-    };
+      addedListeners = addEventListeners(_rootNode, subNodesHandler, _exitNode, exitHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler);
 
     /** 封面后一个元素的事件响应 */
     function coverNextHandler(e) {
       if (coverNextKeyBack?.(e)) {
         onCoverNextBack?.(e);
-        focus(coverNode);
+        focus(_coverNode);
       }
       else if (isTabBackward(e)) {
         onCoverNextBack?.(e);
         e.preventDefault();
-        focus(coverNode);
+        focus(_coverNode);
       }
     }
 
@@ -319,12 +326,12 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     function coverPrevHandler(e) {
       if (coverPrevKeyBack?.(e)) {
         onCoverPrevBack?.(e);
-        focus(coverNode);
+        focus(_coverNode);
       }
       else if (isTabForward(e)) {
         onCoverPrevBack?.(e);
         e.preventDefault();
-        focus(coverNode);
+        focus(_coverNode);
       }
     }
 
@@ -332,40 +339,36 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     function coverHandler(e) {
       if (coverNextKey?.(e)) {
         onCoverNext?.(e);
-        const nextNode = element(coverNextNode);
-        if (nextNode == null)
+        if (_coverNext == null)
           console.warn("当前没有指定聚焦元素，请指定 cover.next。");
-        else focus(nextNode);
+        else focus(_coverNext);
       }
       else if (isTabForward(e)) {
         onCoverNext?.(e);
-        const nextNode = element(coverNextNode);
-        if (nextNode == null) focus(tail);
+        if (_coverNext == null) focus(_tail);
         else {
           e.preventDefault();
-          focus(nextNode);
+          focus(_coverNext);
         }
       }
       else if (coverPrevKey?.(e)) {
         onCoverPrev?.(e);
-        const prevNode = element(coverPrevNode);
-        if (prevNode == null)
+        if (_coverPrev == null)
           console.warn("当前没有指定聚焦元素，请指定 cover.prev。");
-        else focus(prevNode);
+        else focus(_coverPrev);
       }
       else if (isTabBackward(e)) {
         onCoverPrev?.(e);
-        const prevNode = element(coverPrevNode);
-        if (prevNode == null)
-          focus(coverNode);
+        if (_coverPrev == null)
+          focus(_coverNode);
         else {
           e.preventDefault();
-          focus(prevNode);
+          focus(_coverPrev);
         }
       }
       else if((coverEnterKey && isEnterEvent)(e)) {
         onEnterCover?.(e);
-        focus(head);
+        focus(_head);
       }
       else if ((coverExitKey && isEscapeEvent)(e)) {
         exitCoverHandler(e);
@@ -388,7 +391,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
       if (disabledEsc) return;
       if (enabledCover) {
         _onEscape?.(e);
-        return focus(coverNode);
+        return focus(_coverNode);
       } else {
         removeListeners();
         _onEscape?.(e);
@@ -403,13 +406,14 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
       return _trigger && focus(_trigger);
     }
 
+    /** 移除监听事件 */
     function removeListeners() {
       if (removeListenersEachExit) {
-        rootNode.removeEventListener("keydown", subNodesHandler);
-        exitNode.removeEventListener("click", exitHandler);
-        coverNode?.removeEventListener("keydown", coverHandler);
-        coverNext?.removeEventListener("keydown", coverNextHandler);
-        coverPrev?.removeEventListener("keydown", coverPrevHandler);
+        _rootNode.removeEventListener("keydown", subNodesHandler);
+        _exitNode.removeEventListener("click", exitHandler);
+        _coverNode?.removeEventListener("keydown", coverHandler);
+        _coverNext?.removeEventListener("keydown", coverNextHandler);
+        _coverPrev?.removeEventListener("keydown", coverPrevHandler);
       }
     }
   }
