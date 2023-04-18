@@ -8,7 +8,7 @@ let exitTransition = false;
 
 const bagel_4 = focusBagel(dialog4, [first4, last4], {
   enter: {
-    selector: open4,
+    node: open4,
     on() {
       exitTransition = false;
       dialog4.classList.add("openedDialog");
@@ -20,7 +20,7 @@ const bagel_4 = focusBagel(dialog4, [first4, last4], {
     },
   },
   exit: {
-    selector: close4,
+    node: close4,
     on() {
       exitTransition = true;
       dialog4.classList.remove("transition-in");

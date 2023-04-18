@@ -20,13 +20,13 @@ const placeHolder = document.getElementById("place_holder");
 
 const bagel_2 = focusBagel("#dialog_2", ["#firstFocusA_2", "#lastFocusBtn_2"], {
   enter: {
-    selector: "#open_2",
+    node: "#open_2",
     on() {
       placeHolder.innerHTML = dialogHtml;
     },
   },
   exit: {
-    selector: "#close_2",
+    node: "#close_2",
     on() {
       placeHolder.innerHTML = '';
     },

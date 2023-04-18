@@ -27,7 +27,7 @@ let exitTransition5 = false;
 
 const bagel_5 = focusBagel("#dialog_5", ["#firstFocusA_5", "#lastFocusBtn_5"], {
   enter: {
-    selector: "#open_5",
+    node: "#open_5",
     on() {
       exitTransition5 = false;
       placeHolder.innerHTML = dialogHtml5;
@@ -39,7 +39,7 @@ const bagel_5 = focusBagel("#dialog_5", ["#firstFocusA_5", "#lastFocusBtn_5"], {
     },
   },
   exit: {
-    selector: "#close_5",
+    node: "#close_5",
     on() {
       exitTransition5 = false;
       const dialog = document.getElementById("dialog_5");

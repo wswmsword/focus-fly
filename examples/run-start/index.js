@@ -13,14 +13,14 @@ const dialog = document.getElementById("dialog");
 const bagel = focusBagel(dialog, ["#firstFocusA", "#lastFocusBtn"], {
   loop: false,
   enter: {
-    selector: "#open",
+    node: "#open",
     on() {
       dialog.classList.add("openedDialog");
       dialog.classList.remove("closedDialog");
     },
   },
   exit: {
-    selector: "#close",
+    node: "#close",
     on() {
       dialog.classList.remove("openedDialog");
       dialog.classList.add("closedDialog");

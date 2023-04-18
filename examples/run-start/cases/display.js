@@ -6,13 +6,13 @@ const close3 = document.getElementById("close_3");
 
 const bagel_3 = focusBagel(dialog3, [first3, last3], {
   enter: {
-    selector: open3,
+    node: open3,
     on() {
       dialog3.style.display = "block";
     },
   },
   exit: {
-    selector: close3,
+    node: close3,
     on() {
       dialog3.style.display = "none";
     },
