@@ -9,7 +9,7 @@ const focus = function(e) {
 };
 
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
-const tryFocus = function(e) {
+const tickFocus = function(e) {
   if (e == null) tick(() => e && focus(e));
   else focus(e);
 };
@@ -131,47 +131,47 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     exit = {},
     /** blur: 按下 esc 的行为，如果未设置，则取 exit.on */
     onEscape,
-    /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素
-     * TODO: cover 配置选项，例如是否锁 tab（默认不锁）
-     */
+    /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素 */
     cover = false,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
     delayToFocus,
     /** 每次触发 exit 是否移除事件 */
     removeListenersEachExit = true,
-    /** TODO: 子元素锁 tab */
   } = options;
 
   const {
-    node: enterStringOrElement,
+    node: enterNode,
     on: onEnter,
     key: enterKey,
   } = enter;
   const {
-    node: exitStringOrElement,
+    node: exitNode,
     on: onExit,
     key: exitKey,
   } = exit;
 
-  const isObjForward = isObj(forward);
-  const isObjBackward = isObj(backward);
-
   const {
     key: isForward,
     on: onForward,
-  } = isObjForward ? forward : { key: forward };
+  } = isObj(forward) ? forward : { key: forward };
 
   const {
     key: isBackward,
     on: onBackward,
-  } = isObjBackward ? backward : { key: backward };
+  } = isObj(backward) ? backward : { key: backward };
 
   const {
+    /** 封面节点 */
     node: coverNode,
+    /** 封面节点的后一个元素 */
     next: coverNextNode,
+    /** 移动至后面元素的自定义组合键 */
     nextKey: coverNextKey,
+    /** 从后面节点回到封面节点的组合键 */
     nextKeyBack: coverNextKeyBack,
+    /** 移动至后面节点的行为 */
     onNext: onCoverNext,
+    /** 从后面回到封面的行为 */
     onNextBack: onCoverNextBack,
     prev: coverPrevNode,
     prevKey: coverPrevKey,
@@ -193,7 +193,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     coverNode: _coverNode,
     exitNode: _exitNode,
     coverNext, coverPrev,
-  } = getNodes(rootNode, subNodes, exitStringOrElement, coverNode, coverNextNode, coverPrevNode);
+  } = getNodes(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode);
 
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
@@ -216,7 +216,7 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
   const disabledEsc = _onEscape === false || _onEscape == null;
 
   /** 触发打开焦点的元素 */
-  let _trigger = element(trigger || enterStringOrElement);
+  let _trigger = element(trigger || enterNode);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
@@ -246,11 +246,9 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     },
     /** 退出循环，聚焦触发元素 */
     exit() {
-      if (_trigger == null) {
+      if (_trigger == null)
         console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
-        return;
-      }
-      focus(_trigger);
+      else focus(_trigger);
     },
     i: () => activeIndex,
   };
@@ -281,27 +279,26 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
       coverNode: _coverNode,
       exitNode: _exitNode,
       coverNext, coverPrev,
-    } = getNodes(_rootNode, _subNodes, exitStringOrElement, _coverNode, coverNext, coverPrev);
+    } = getNodes(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode);
 
     loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
     focusCoverOrHead(_coverNode, head);
   }
 
   function focusCoverOrHead(cover, head) {
-    if (enabledCover) tryFocus(cover); // 如果打开封面，首先聚焦封面
-    else tryFocus(head); // 如果未打开封面，聚焦内部聚焦列表
+    if (enabledCover) tickFocus(cover); // 如果打开封面，首先聚焦封面
+    else tickFocus(head); // 如果未打开封面，聚焦内部聚焦列表
   }
 
+  /** 生成事件行为，添加事件监听器 */
   function loadEventListeners(_rootNode, _subNodes, _head, _tail, _exitNode, _coverNode, _coverNext, _coverPrev) {
-
-    // const { rootNode, subNodes, head, tail, exitNode, coverNode, coverNext, coverPrev } = getNodes(originRootNode, originSubNodes, exitStringOrElement, originCoverNode, coverNextNode, coverPrevNode);
 
     if (_rootNode == null)
       throw new Error(`没有找到元素 ${rootNode}，您可以尝试 delayToFocus 选项，等待元素 ${rootNode} 渲染完毕后进行聚焦。`);
     if (_head == null || _tail == null)
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
-    if (exitStringOrElement && _exitNode == null)
-      console.warn(`没有找到元素 ${exitStringOrElement}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
+    if (exitNode && _exitNode == null)
+      console.warn(`没有找到元素 ${exitNode}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
 
     // 在焦点循环中触发聚焦
     const subNodesHandler = _manual ?
