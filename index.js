@@ -184,17 +184,20 @@ const focusBagel = (rootNode, subNodes, options = {}) => {
     onExit: onExitCover,
   } = isObj(cover) ? cover : { node: !!cover ? rootNode : null };
 
-  const { rootNode: _rootNode, subNodes: _subNodes, head, tail, coverNode: _coverNode } = getNodes(rootNode, subNodes);
+  /** 是否已经打开封面选项 */
+  const enabledCover = !!coverNode;
+
+  const { rootNode: _rootNode, subNodes: _subNodes, head, tail, coverNode: _coverNode, exitNode: _exitNode, coverNext, coverPrev } = getNodes(rootNode, subNodes, exitStringOrElement, coverNode, coverNextNode, coverPrevNode);
 
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = (_rootNode == null || head == null || tail == null) && !promiseDelay && !callbackDelay;
+  const commonDelay = (
+    (_rootNode == null || head == null || tail == null) ||
+    (enabledCover && (_coverNode == null || coverNext == null || coverPrev == null))) &&
+    !promiseDelay && !callbackDelay;
   const isDelay = promiseDelay || callbackDelay || commonDelay;
-
-  /** 是否已经打开封面选项 */
-  const enabledCover = !!coverNode;
 
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
