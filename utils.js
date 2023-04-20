@@ -51,3 +51,19 @@ export const isTabForward = function(e) {
 export const isTabBackward = function(e) {
   return isTabEvent(e) && e.shiftKey;
 };
+
+/** 找到两个元素的最小公共祖先元素 */
+export const findLowestCommonAncestorNode = function(x, y) {
+  if (x == null || y == null) return null;
+  if (x.contains(y)) return x;
+  if (y.contains(x)) return y;
+
+  const range = new Range();
+  range.setStartBefore(x);
+  range.setEndAfter(y);
+  if (range.collapsed) {
+     range.setStartBefore(y);
+     range.setEndAfter(x);
+  }
+  return range.commonAncestorContainer;
+};

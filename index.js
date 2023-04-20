@@ -1,4 +1,4 @@
-import { objToStr, isObj, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward } from "./utils";
+import { objToStr, isObj, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode } from "./utils";
 
 /** 聚焦，如果是 input，则聚焦后选中 */
 const focus = function(e) {
@@ -91,10 +91,10 @@ const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHand
 
 /** 获取关键节点 */
 const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode) {
-  const _rootNode = element(rootNode);
   const _subNodes = subNodes.map(item => element(item)).filter(item => item != null);
   const head = _subNodes[0];
   const tail = _subNodes.slice(-1)[0];
+  const _rootNode = element(rootNode) ?? findLowestCommonAncestorNode(head, tail);
   const _exitNode = element(exitNode);
   const _coverNode = element(coverNode);
   const _coverNextNode = element(coverNextNode);
@@ -112,8 +112,11 @@ const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode
   };
 };
 
-const focusBagel = (rootNode, subNodes, options = {}) => {
-
+const focusBagel = (...props) => {
+  const offset = 0 - (props[0] instanceof Array);
+  const rootNode = props[0 + offset];
+  const subNodes = props[1 + offset];
+  const options  = props[2 + offset] ?? {}; 
   const {
     /** move: 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
     manual,
