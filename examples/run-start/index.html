@@ -9,6 +9,7 @@
   </head>
   <body>
     <h1>一些例子</h1>
+
     <hr />
     <h2>默认弹窗（无动画，无需 innerHtml，无需 display）</h2>
     <button id="open">打开一包糖</button>
@@ -33,6 +34,7 @@
     <button id="open_2">打开一包糖</button>
     <button id="walk_2">走两步</button>
     <div id="place_holder"></div>
+
     <hr />
     <h2>触发后需要 display: block 的弹窗</h2>
     <button id="open_3">打开一包糖</button>
@@ -57,6 +59,7 @@
         <button id="lastFocusBtn_3">OK</button>
       </div>
     </div>
+
     <hr />
     <h2>动画弹窗</h2>
     <button id="open_4">打开一包糖</button>
@@ -80,11 +83,23 @@
         <button id="lastFocusBtn_4">OK</button>
       </div>
     </div>
+
     <hr />
     <h2>触发后需要 innerHtml 的动画弹窗</h2>
     <button id="open_5">打开一包糖</button>
     <button id="walk_5">走两步</button>
     <div id="place_holder_5"></div>
+
+    <hr />
+    <h2>进入一个带有封面的列表</h2>
+    <h3>查看一些糖</h3>
+    <ul tabindex="0">
+      <li><a id="firstFocusA_6" href="#">椰蓉酥心糖</a></li>
+      <li><a href="#">不二家棒棒糖</a></li>
+      <li><a href="#">樱花软糖</a></li>
+      <li><a href="#">大白兔奶糖</a></li>
+      <li><a id="lastFocusBtn_6" href="#">夹心巧克力</a></li>
+    </ul>
   </body>
   <script src="demo.js"></script>
   <script src="index.js"></script>
@@ -92,4 +107,5 @@
   <script src="cases/display.js"></script>
   <script src="cases/transition.js"></script>
   <script src="cases/transition-inner-html.js"></script>
+  <script src="cases/cover.js"></script>
 </html>
