@@ -1,5 +1,5 @@
 import { objToStr, isObj, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode } from "./utils";
-
+let isDemo = false;
 /** 聚焦，如果是 input，则聚焦后选中 */
 const focus = function(e) {
   e.focus();
@@ -69,14 +69,14 @@ const focusSubNodes = (head, tail, isClamp, onEscape, onForward, onBackward, exi
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler) {
+const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler, tail, tailHandler, clickRootHandler) {
 
   // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", subNodesHandler);
 
   // 跳出循环的触发器的点击事件
   exitNode?.addEventListener("click", exitHandler);
-
+ 
   /** 封面的事件 */
   coverNode?.addEventListener("keydown", coverHandler);
 
@@ -85,6 +85,15 @@ const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHand
 
   /** 封面前一个元素的键盘事件 */
   coverPrev?.addEventListener("keydown", coverPrevHandler);
+
+  if (coverNext == null && coverNode) {
+
+    /** 尾部元素聚焦后的事件，用于返回封面 */
+    tail?.addEventListener("focus", tailHandler);
+
+    /** subNodes 点击事件，用于配合 tail focus */
+    rootNode.addEventListener("click", clickRootHandler);
+  }
 
   return true;
 };
@@ -112,7 +121,7 @@ const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode
   };
 };
 
-const focusBagel = (...props) => {
+const focusBagel = (...props) => 
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
   const subNodes = props[1 + offset];
@@ -140,8 +149,10 @@ const focusBagel = (...props) => {
     delayToFocus,
     /** 每次触发 exit 是否移除事件 */
     removeListenersEachExit = true,
+    /** 用于内部调试 */
+    demo = false,
   } = options;
-
+  isDemo = demo;
   const {
     node: enterNode,
     on: onEnter,
@@ -229,6 +240,9 @@ const focusBagel = (...props) => {
   /** 是否已添加监听事件 */
   let addedListeners = false;
 
+  /** 是否通过 cover 进入的 subNodes */
+  let trappedFromCover = false;
+
   // 触发器点击事件
   if (_trigger) {
     _trigger.addEventListener("click", enterTriggerHandler);
@@ -313,7 +327,27 @@ const focusBagel = (...props) => {
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(_rootNode, subNodesHandler, _exitNode, exitHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler);
+      addedListeners = addEventListeners(_rootNode, subNodesHandler, _exitNode, exitHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler, _tail, tailHandler, clickRootHandler);
+
+    /** 点击 rootNode 的事件，click 事件响应的顺序在 focus 之后 */
+    function clickRootHandler(e) {
+      const targ = e.target;
+      if (getActiveElement() !== _coverNode)
+        trappedFromCover = true;
+
+      if (targ === _tail) { // 如果触发了 tail，首先响应 tail 的 focus 事件，封面被聚焦，这里将焦点重新设置到 tail
+        focus(_tail);
+        trappedFromCover = true;
+      }
+    }
+
+    /** subNodes 最后一个元素的聚焦事件 */
+    function tailHandler(e) {
+      const prevFocus = e.relatedTarget; // 理想情况只在 tail 后面一个元素 shift-tab 时触发，可是还存在点击触发的情况，所以需要在点击时调整
+      if (prevFocus !== _coverNode && !trappedFromCover) { // subNodes 里聚焦元素同样会聚焦到 tail，这里做区分，如果是从非 subNodes 的范围聚焦这个 tail，就重新聚焦到封面
+        focus(_coverNode);
+      }
+    }
 
     /** 封面后一个元素的事件响应 */
     function coverNextHandler(e) {
@@ -373,6 +407,7 @@ const focusBagel = (...props) => {
         }
       }
       else if((coverEnterKey ?? isEnterEvent)(e)) {
+        trappedFromCover = true;
         onEnterCover?.(e);
         focus(_head);
       }
@@ -396,6 +431,7 @@ const focusBagel = (...props) => {
     function exitSubNodesHandler(e) {
       if (disabledEsc) return;
       if (enabledCover) {
+        trappedFromCover = false;
         _onEscape?.(e);
         return focus(_coverNode);
       } else {
@@ -420,9 +456,11 @@ const focusBagel = (...props) => {
         _coverNode?.removeEventListener("keydown", coverHandler);
         _coverNext?.removeEventListener("keydown", coverNextHandler);
         _coverPrev?.removeEventListener("keydown", coverPrevHandler);
+        _tail?.removeEventListener("focus", tailHandler);
+        _rootNode.removeEventListener("click", clickRootHandler);
       }
     }
   }
-};
+;
 
 export default focusBagel;
