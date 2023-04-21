@@ -15,8 +15,9 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForward, isBackward, onForward, onBackward, exitKey) => e => {
-
+const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForward, isBackward, onForward, onBackward, exitKey, coverNode) => e => {
+  if (e.target === coverNode) return;
+  else e.stopImmediatePropagation(); // 防止封面响应键盘事件
   e.stopImmediatePropagation(); // 防止封面响应键盘事件
 
   if ((isForward ?? isTabForward)(e)) {
@@ -43,11 +44,10 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForwa
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onEscape, onForward, onBackward, exitKey) => e => {
-
-  e.stopImmediatePropagation(); // 防止封面响应键盘事件
-
+const focusSubNodes = (head, tail, isClamp, onEscape, onForward, onBackward, exitKey, coverNode) => e => {
   const targ = e.target;
+  if (targ === coverNode) return;
+  else e.stopImmediatePropagation(); // 防止封面响应键盘事件
 
   if (isTabForward(e)) {
     onForward && onForward(e);
@@ -96,7 +96,7 @@ const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode
   const tail = _subNodes.slice(-1)[0];
   const _rootNode = element(rootNode) ?? findLowestCommonAncestorNode(head, tail);
   const _exitNode = element(exitNode);
-  const _coverNode = element(coverNode);
+  const _coverNode = coverNode === true ? _rootNode : element(coverNode);
   const _coverNextNode = element(coverNextNode);
   const _coverPrevNode = element(coverPrevNode);
 
@@ -116,7 +116,7 @@ const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
   const subNodes = props[1 + offset];
-  const options  = props[2 + offset] ?? {}; 
+  const options  = props[2 + offset] ?? {};
   const {
     /** move: 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
     manual,
@@ -185,7 +185,7 @@ const focusBagel = (...props) => {
     onEnter: onEnterCover,
     exitKey: coverExitKey,
     onExit: onExitCover,
-  } = isObj(cover) ? cover : { node: !!cover ? rootNode : null };
+  } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
 
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
@@ -203,8 +203,8 @@ const focusBagel = (...props) => {
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
   const commonDelay = (
-    (_rootNode == null || head == null || tail == null) ||
-    (enabledCover && (_coverNode == null || coverNext == null || coverPrev == null))) &&
+    (head == null || tail == null) ||
+    (enabledCover && _coverNode == null)) &&
     !promiseDelay && !callbackDelay;
   const isDelay = promiseDelay || callbackDelay || commonDelay;
 
@@ -217,6 +217,8 @@ const focusBagel = (...props) => {
   /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
   const _onEscape = onEscape ?? onExit;
   const disabledEsc = _onEscape === false || _onEscape == null;
+  /** 按下 esc 是否只聚焦 */
+  // const onlyEscapeFocus = _onEscape === true;
 
   /** 触发打开焦点的元素 */
   let _trigger = element(trigger || enterNode);
@@ -224,6 +226,7 @@ const focusBagel = (...props) => {
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
 
+  /** 是否已添加监听事件 */
   let addedListeners = false;
 
   // 触发器点击事件
@@ -305,8 +308,8 @@ const focusBagel = (...props) => {
 
     // 在焦点循环中触发聚焦
     const subNodesHandler = _manual ?
-      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, exitKey) :
-      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, exitKey);
+      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, exitKey, _coverNode) :
+      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, exitKey, _coverNode);
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
@@ -369,11 +372,11 @@ const focusBagel = (...props) => {
           focus(_coverPrev);
         }
       }
-      else if((coverEnterKey && isEnterEvent)(e)) {
+      else if((coverEnterKey ?? isEnterEvent)(e)) {
         onEnterCover?.(e);
         focus(_head);
       }
-      else if ((coverExitKey && isEscapeEvent)(e)) {
+      else if ((coverExitKey ?? isEscapeEvent)(e)) {
         exitCoverHandler(e);
       }
     }
