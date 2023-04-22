@@ -48,7 +48,7 @@ import focusBagel from "focus-bagel"; // esm 方式引入
 const dialog = document.getElementById("dialog");
 focusBagel(dialog, ["#head", "#tail"], {
   enter: {
-    /** 触发器的选择器字符串，例如“打开”按钮 */
+    /** 入口的选择器字符串，例如“打开”按钮 */
     selector: "#open",
     /** 点击 #open 后的行为 */
     on() {
@@ -57,7 +57,7 @@ focusBagel(dialog, ["#head", "#tail"], {
     },
   },
   exit: {
-    /** 退出循环焦点的触发器，例如“返回”按钮 */
+    /** 退出列表的出口元素，例如“返回”按钮 */
     selector: "#close",
     /** 点击 #close 后的行为 */
     on() {
@@ -81,7 +81,7 @@ npm run start
 
 **rootNode**，`string | Element | HTMLElement`，可以是一个 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是一个 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 `tab` 来控制循环焦点。如果需要监听 `esc`，希望按下 `esc` 后聚焦触发元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.enter`，`options.exit` 和 `options.onEscape` 被用来执行按下 `esc` 后的行为，`trigger` 和 `options.enter` 用来聚焦触发器（触发元素）。
+`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 `tab` 来控制焦点聚焦。如果需要监听 `esc`，希望按下 `esc` 后聚焦*入口*元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.enter`，`options.exit` 和 `options.onEscape` 被用来执行按下 `esc` 后的行为，`trigger` 和 `options.enter` 用来聚焦*入口*（元素）。
 
 如果不提供这个参数，focus-bagel 会取得 `subNodes` 的最小公共祖先作为 `rootNode`。
 
@@ -94,6 +94,8 @@ npm run start
 设置 `options.manual` 为 true 后，`subNodes` 必须手动指定，这时按下 `tab` 后，聚焦规则将不是浏览器的默认行为，而是以 `subNodes` 中元素的顺序进行聚焦。当设置 `options.forward` 或 `options.backward` 后，`options.manual` 默认为 true。
 
 ### options
+
+下面的选项，除了选项 `trigger`、`enter`、`exit` 和 `cover`，其它选项都和*列表*相关。
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
@@ -124,6 +126,8 @@ npm run start
 | on | handleKeydown | N | null | 后退时被执行，后退时的行为 |
 
 ### options.enter
+
+这些选项和*入口*相关，描述了如何通过*入口*进入*封面*或*列表*。
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
@@ -176,13 +180,17 @@ focusBagel(dialog, ["#head", "#second", "#tail"], {
 
 ### options.exit
 
+这些选项和*出口*相关，描述了焦点如何从列表回到*封面*或*入口*。
+
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| node | element | N | null | *入口*元素，将用于监听点击事件，用于退出*列表*时聚焦使用 |
-| key | iskey | N | null | 自定义进入*列表*组合键 |
-| on | handleKeydown | N | null | 进入时被调用，进入*列表*前的行为 |
+| node | element | N | null | *出口*元素，将用于监听点击事件，用于退出*列表*时聚焦使用 |
+| key | iskey | N | null | 自定义退出*列表*组合键 |
+| on | handleKeydown | N | null | 退出时被调用，退出*列表*前的行为，如果有*封面*就退出至封面，如果没有就退出至*入口*，设置该选项后，按键按下 `esc` 同样生效 |
 
 ### options.cover
+
+这些选项和*封面*有关。
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
@@ -204,12 +212,12 @@ focusBagel(dialog, ["#head", "#second", "#tail"], {
 
 ### Return
 
-下面是调用 focusBagel 后返回的属性。
+下面是调用函数 focusBagel 后返回的属性。
 
 | Name | Type | Desc |
 |:--|:--|:--|
-| enter | () => void | 聚焦 `subNodes` 的头元素，如果自己管理触发器的点击监听器，可以使用该方法 |
-| exit | () => void | 聚焦触发元素，例如 `trigger`，如果自己管理退出触发器的点击监听器，可以使用该方法 |
+| enter | () => void | 聚焦 `subNodes` 的头元素，如果自己管理*入口*元素的点击监听器，可以使用该方法 |
+| exit | () => void | 聚焦*入口*元素，例如 `trigger`，如果自己管理退出*入口*元素的点击监听器，可以使用该方法 |
 | i | () => number | 获取当前焦点的编号 |
 
 <details>
