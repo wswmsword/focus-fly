@@ -121,7 +121,7 @@ const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode
   };
 };
 
-const focusBagel = (...props) => 
+const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
   const subNodes = props[1 + offset];
@@ -461,6 +461,6 @@ const focusBagel = (...props) =>
       }
     }
   }
-;
+};
 
 export default focusBagel;
