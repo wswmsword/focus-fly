@@ -20,40 +20,6 @@ type subNodesBackward = {
   on?: handleKeydown;
 };
 
-type subNodesHeadPrev = {
-/** subNodes 的前一个可 tab 的元素 */
-  node?: element;
-
-  /** 自定义聚焦该元素的组合键 */
-  key?: isKey;
-
-  /** 从 node 返回到 subNodes 的组合键 */
-  keyBack?: isKey;
-
-  /** 聚焦时的行为 */
-  on?: handleKeydown;
-
-  /** 返回聚焦时的行为 */
-  onBack?: handleKeydown;
-};
-
-type subNodesTailNext = {
-  /** subNodes 的后一个可 tab 的元素 */
-  node?: element;
-
-  /** 自定义聚焦该元素的组合键 */
-  key?: isKey;
-
-  /** 从 node 返回到 subNodes 的组合键 */
-  keyBack?: isKey;
-
-  /** 聚焦时的行为 */
-  on?: handleKeydown;
-
-  /** 返回时的行为 */
-  onBack?: handleKeydown;
-};
-
 type enterSubNodes = {
   /** 触发器，将用于监听点击事件，用于退出焦点循环时聚焦使用 */
   node?: element;
@@ -141,12 +107,6 @@ interface Options {
 
   /** 自定义*后退*焦点函数，设置后，`manual` 将默认为 true */
   backward?: isKey | subNodesBackward;
-
-  /** 聚焦 subNodes 的后一个元素 */
-  headPrev?: subNodesHeadPrev;
-
-  /** 聚焦 subNodes 的前一个元素 */
-  tailNext?: subNodesTailNext;
 
   /** 触发器，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` */
   trigger?: element;
