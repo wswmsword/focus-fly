@@ -49,7 +49,7 @@ const dialog = document.getElementById("dialog");
 focusBagel(dialog, ["#head", "#tail"], {
   enter: {
     /** 入口的选择器字符串，例如“打开”按钮 */
-    selector: "#open",
+    node: "#open",
     /** 点击 #open 后的行为 */
     on() {
       dialog.classList.add("opened");
@@ -58,7 +58,7 @@ focusBagel(dialog, ["#head", "#tail"], {
   },
   exit: {
     /** 退出列表的出口元素，例如“返回”按钮 */
-    selector: "#close",
+    node: "#close",
     /** 点击 #close 后的行为 */
     on() {
       dialog.classList.add("closed");
@@ -103,11 +103,11 @@ npm run start
 | loop | boolean | N | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
 | forward | isKey \| subNodesForward | N | null | 自定义*前进*焦点函数，设置后，`manual` 将默认为 true |
 | backward | isKey \| subNodesForward | N | null | 自定义*后退*焦点函数，设置后，`manual` 将默认为 true |
-| trigger | element | N | null | *入口*元素，用于退出*列表*时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` |
-| enter | enterSubNodes | N | null | *入口*相关配置，进入*列表* |
-| exit | exitSubNodes | N | null | *出口*相关配置，退出*列表* |
+| trigger | element | N | null | *入口*元素，用于退出*列表*时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.node` 后，不用设置 `trigger` |
+| enter | enterSubNodes | N | {} | *入口*相关配置，进入*列表* |
+| exit | exitSubNodes | N | {} | *出口*相关配置，退出*列表* |
 | onEscape | false \| handleKeydown | N | null | 按下 `esc` 的行为，如果未设置，默认取 `options.exit.on` |
-| cover | cover | N | null | *封面*相关配置 |
+| cover | cover | N | false | *封面*相关配置 |
 | delayToFocus | promiseDelay \| callbackDelay | N | null | 延迟聚焦，执行完 `options.enter.on` 后，等待执行 delayToFocus 完成后聚焦 |
 | removeListenersEachExit | boolean | N | true | 每次退出*列表*后是否移除所有监听事件 |
 
@@ -158,14 +158,14 @@ const isBackward = e => (
 
 focusBagel(dialog, ["#head", "#second", "#tail"], {
   enter: {
-    selector: "#open",
+    node: "#open",
     on() {
       dialog.classList.add("openedDialog");
       dialog.classList.remove("closedDialog");
     },
   },
   exit: {
-    selector: "#close",
+    node: "#close",
     on() {
       dialog.classList.remove("openedDialog");
       dialog.classList.add("closedDialog");
@@ -190,25 +190,25 @@ focusBagel(dialog, ["#head", "#second", "#tail"], {
 
 ### options.cover
 
-这些选项和*封面*有关。
+这些选项和*封面*有关，每个选项都是可选且默认值为空。
 
-| Name | Type | isRequired | Default | Desc |
+| Name | Type | Desc |
 |:--|:--|:--|:--|:--|
-| node | element | N | null | *封面*元素，如果不指定，默认将取 `rootNode` |
-| next | element | N | null | 封面的后一个可 tab 的元素 |
-| nextKey | element | N | null | 自定义聚焦封面后面元素的组合键 |
-| nextKeyBack | element | N | null | 从后面元素返回到封面的组合键 |
-| onNext | element | N | null | 聚焦后面可 tab 元素的行为 |
-| onNextBack | element | N | null | 返回的行为 |
-| prev | element | N | null | 封面的前一个可 tab 的元素 |
-| prevKey | element | N | null | 自定义聚焦封面前面元素的组合键 |
-| prevKeyBack | element | N | null | 聚焦前面元素之后返回到封面的组合键 |
-| onPrev | element | N | null | 聚焦前面可 tab 元素的行为 |
-| onPrevBack | element | N | null | 返回的行为 |
-| enterKey | element | N | null | 自定义进入 subNodes 的组合键 |
-| onEnter | element | N | null | 进入 subNodes 时的行为 |
-| exitKey | element | N | null | 自定义退出封面的组合键 |
-| onExit | element | N | null | 退出封面时的行为 |
+| node | element | *封面*元素，如果不指定，默认将取 `rootNode` |
+| next | element | 封面的后一个可 tab 的元素 |
+| nextKey | element | 自定义聚焦封面后面元素的组合键 |
+| nextKeyBack | element | 从后面元素返回到封面的组合键 |
+| onNext | element | 聚焦后面可 tab 元素的行为 |
+| onNextBack | element | 返回的行为 |
+| prev | element | 封面的前一个可 tab 的元素 |
+| prevKey | element | 自定义聚焦封面前面元素的组合键 |
+| prevKeyBack | element | 聚焦前面元素之后返回到封面的组合键 |
+| onPrev | element | 聚焦前面可 tab 元素的行为 |
+| onPrevBack | element | 返回的行为 |
+| enterKey | element | 自定义进入 subNodes 的组合键 |
+| onEnter | element | 进入 subNodes 时的行为 |
+| exitKey | element | 自定义退出封面的组合键 |
+| onExit | element | 退出封面时的行为 |
 
 ### Return
 
@@ -272,3 +272,5 @@ npm run test
 
 相关链接：
 - [https://www.toptal.com/developers/keycode](https://www.toptal.com/developers/keycode)
+- [Developing a Keyboard Interface](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)
+- [Keyboard Accessibility](https://webaim.org/techniques/keyboard/)
