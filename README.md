@@ -193,7 +193,7 @@ focusBagel(dialog, ["#head", "#second", "#tail"], {
 这些选项和*封面*有关，每个选项都是可选且默认值为空。
 
 | Name | Type | Desc |
-|:--|:--|:--|:--|:--|
+|:--|:--|:--|
 | node | element | *封面*元素，如果不指定，默认将取 `rootNode` |
 | next | element | 封面的后一个可 tab 的元素 |
 | nextKey | element | 自定义聚焦封面后面元素的组合键 |
