@@ -2,17 +2,19 @@
 
 focus-no-jutsu，聚焦之术，属于 B 级幻术。
 
-网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入到这些情景里之后，我们希望焦点被施加一个幻术，或者在情景里陷入循环，或者被卡在首尾元素之间的秘密空间，直到我们按下按键 <kbd>Esc</kbd> 或者按钮“返回”解开幻术。
+网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入到这些情景里之后，我们希望焦点被施加一个幻术，或者在情景里陷入循环，或者被卡在首尾元素之间的秘密空间，直到我们按下按键 <kbd>Esc</kbd> 或者点击按钮“返回”解开幻术。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述如何进入焦点，进入后如何移动焦点，以及如何退出焦点。
 
 <details>
 <summary>查看一个常规聚焦流程。</summary>
+
 一个常规流程是这样的，开始焦点在*入口*，焦点通过*入口*到达*列表*，在*列表*中焦点可以自由移动，前进或者后退聚焦*列表*的每一个单项，*列表*中有一个特殊项是*出口*，通过*出口*，焦点会从*列表*回到*入口*。也有一些情况，在从*入口*到*列表*之前首先到达*封面*，从*出口*回到*入口*前首先回到*封面*。还有一些情况不用指定*入口*和*出口*，*封面*独自担当这两个角色。
 </details>
 
 <details>
 <summary>在开发无障碍组件的时候需要控制焦点。</summary>
+
 例如开发一个模态对话框，对话框的背景应该对所有用户隐藏，对于鼠标用户，鼠标不能访问背景元素，对于键盘用户，键盘不能访问背景元素，对于使用辅助设备的用户，辅助设备也不能访问背景元素。这个仓库可以控制键盘焦点在对话框中循环，避免聚焦到背景元素上。
 </details>
 
@@ -84,7 +86,7 @@ npm run start
 
 **rootNode**，`string | Element | HTMLElement`，可以是一个 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是一个 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 <kbd>tab</kdb> 来控制焦点聚焦。如果需要监听 <kbd>Esc</kbd>，希望按下 <kbd>Esc</kbd> 后聚焦*入口*元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.enter`，`options.exit` 和 `options.onEscape` 被用来执行按下 <kbd>Esc</kbd> 后的行为，`trigger` 和 `options.enter` 用来聚焦*入口*（元素）。
+`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 <kbd>tab</kbd> 来控制焦点聚焦。如果需要监听 <kbd>Esc</kbd>，希望按下 <kbd>Esc</kbd> 后聚焦*入口*元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.enter`，`options.exit` 和 `options.onEscape` 被用来执行按下 <kbd>Esc</kbd> 后的行为，`trigger` 和 `options.enter` 用来聚焦*入口*（元素）。
 
 如果不提供这个参数，focus-no-jutsu 会取得 `subNodes` 的最小公共祖先作为 `rootNode`。
 
