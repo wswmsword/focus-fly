@@ -41,53 +41,36 @@ type exitSubNodes = {
 
   /** 点击退出循环焦点的触发器后的行为 */
   on?: handleKeydown;
+
+  /** 退出至哪个元素？ */
+  target?: element;
 };
 
+type exitCover = {
+
+  /** 自定义退出封面的组合键 */
+  key?: isKey;
+
+  /** 退出封面时的行为 */
+  on?: handleKeydown;
+
+  /** 退出到哪个元素？ */
+  target?: element;
+}
+
 type cover = {
+
   /** 封面元素 */
   node?: element;
 
-  /** 封面的后一个可 tab 的元素 */
-  next?: element;
-
-  /** 自定义聚焦封面后面元素的组合键 */
-  nextKey?: isKey;
-
-  /** 从后面元素返回到封面的组合键 */
-  nextKeyBack?: isKey;
-
-  /** 聚焦后面可 tab 元素的行为 */
-  onNext?: handleKeydown;
-
-  /** 返回的行为 */
-  onNextBack?: handleKeydown;
-
-  /** 封面的前一个可 tab 的元素 */
-  prev?: element;
-
-  /** 自定义聚焦封面前面元素的组合键 */
-  prevKey?: isKey;
-
-  /** 聚焦前面元素之后返回到封面的组合键 */
-  prevKeyBack?: isKey;
-
-  /** 聚焦前面可 tab 元素的行为 */
-  onPrev?: handleKeydown;
-
-  /** 返回的行为 */
-  onPrevBack?: handleKeydown;
+  /** 退出封面 */
+  exit?: exitCover | exitCover[];
 
   /** 自定义进入 subNodes 的组合键 */
   enterKey?: isKey;
 
   /** 进入 subNodes 时的行为 */
   onEnter?: handleKeydown;
-
-  /** 自定义退出封面的组合键 */
-  exitKey?: isKey;
-
-  /** 退出封面时的行为 */
-  onExit?: handleKeydown;
 };
 
 type promiseDelay = () => Promise<unknown>;
@@ -112,10 +95,10 @@ interface Options {
   trigger?: element;
 
   /** 进入 subNodes */
-  enter?: enterSubNodes;
+  enter?: enterSubNodes | enterSubNodes[];
 
   /** 退出 subNodes */
-  exit?: exitSubNodes;
+  exit?: exitSubNodes | exitSubNodes[];
 
   /** 按下 `esc` 的行为，如果未设置，默认取 `exit.on` */
   onEscape?: false | handleKeydown;
