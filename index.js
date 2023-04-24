@@ -20,7 +20,11 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForwa
   else e.stopImmediatePropagation(); // 防止封面响应键盘事件
   e.stopImmediatePropagation(); // 防止封面响应键盘事件
 
-  if ((isForward ?? isTabForward)(e)) {
+  if ((exitKey ?? isEscapeEvent)(e)) {
+    e.preventDefault(); // 阻止 tab 的默认行为
+    onEscape();
+  }
+  else if ((isForward ?? isTabForward)(e)) {
     onForward && onForward(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
@@ -37,9 +41,6 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForwa
     activeIndex = (activeIndex + itemsLen) % itemsLen;
     e.preventDefault();
     focus(subNodes[activeIndex]);
-  }
-  else if ((exitKey ?? isEscapeEvent)(e)) {
-    onEscape();
   }
 };
 
