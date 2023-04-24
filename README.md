@@ -196,19 +196,19 @@ focusBagel(dialog, ["#head", "#second", "#tail"], {
 |:--|:--|:--|
 | node | element | *封面*元素，如果不指定，默认将取 `rootNode` |
 | next | element | 封面的后一个可 tab 的元素 |
-| nextKey | element | 自定义聚焦封面后面元素的组合键 |
-| nextKeyBack | element | 从后面元素返回到封面的组合键 |
-| onNext | element | 聚焦后面可 tab 元素的行为 |
-| onNextBack | element | 返回的行为 |
+| nextKey | isKey | 自定义聚焦封面后面元素的组合键 |
+| nextKeyBack | isKey | 从后面元素返回到封面的组合键 |
+| onNext | handleKeydown | 聚焦后面可 tab 元素的行为 |
+| onNextBack | handleKeydown | 返回的行为 |
 | prev | element | 封面的前一个可 tab 的元素 |
-| prevKey | element | 自定义聚焦封面前面元素的组合键 |
-| prevKeyBack | element | 聚焦前面元素之后返回到封面的组合键 |
-| onPrev | element | 聚焦前面可 tab 元素的行为 |
-| onPrevBack | element | 返回的行为 |
-| enterKey | element | 自定义进入 subNodes 的组合键 |
-| onEnter | element | 进入 subNodes 时的行为 |
-| exitKey | element | 自定义退出封面的组合键 |
-| onExit | element | 退出封面时的行为 |
+| prevKey | isKey | 自定义聚焦封面前面元素的组合键 |
+| prevKeyBack | isKey | 聚焦前面元素之后返回到封面的组合键 |
+| onPrev | handleKeydown | 聚焦前面可 tab 元素的行为 |
+| onPrevBack | handleKeydown | 返回的行为 |
+| enterKey | isKey | 自定义进入 subNodes 的组合键 |
+| onEnter | handleKeydown | 进入 subNodes 时的行为 |
+| exitKey | isKey | 自定义退出封面的组合键 |
+| onExit | handleKeydown | 退出封面时的行为 |
 
 ### Return
 
