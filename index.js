@@ -15,16 +15,15 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForward, isBackward, onForward, onBackward, exitKey, coverNode) => e => {
+const focusSubNodesManually = (subNodes, activeIndex, isClamp, handleEsc, isForward, isBackward, onForward, onBackward, coverNode) => e => {
   if (e.target === coverNode) return;
   else e.stopImmediatePropagation(); // 防止封面响应键盘事件
   e.stopImmediatePropagation(); // 防止封面响应键盘事件
+  
+  const handledEsc = handleEsc(e);
+  if (handledEsc) return;
 
-  if ((exitKey ?? isEscapeEvent)(e)) {
-    e.preventDefault(); // 阻止 tab 的默认行为
-    onEscape();
-  }
-  else if ((isForward ?? isTabForward)(e)) {
+  if ((isForward ?? isTabForward)(e)) {
     onForward && onForward(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
@@ -45,10 +44,13 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, onEscape, isForwa
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onEscape, onForward, onBackward, exitKey, coverNode) => e => {
+const focusSubNodes = (head, tail, isClamp, handleEsc, onForward, onBackward, coverNode) => e => {
   const targ = e.target;
   if (targ === coverNode) return;
   else e.stopImmediatePropagation(); // 防止封面响应键盘事件
+
+  const handledEsc = handleEsc(e);
+  if (handledEsc) return;
 
   if (isTabForward(e)) {
     onForward && onForward(e);
@@ -64,19 +66,16 @@ const focusSubNodes = (head, tail, isClamp, onEscape, onForward, onBackward, exi
       if (!isClamp) focus(tail);
     }
   }
-  else if ((exitKey ?? isEscapeEvent)(e)) {
-    onEscape();
-  }
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler, tail, tailHandler, clickRootHandler) {
+const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler, tail, tailHandler, clickRootTailHandler, clickRootExitHandler) {
 
   // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", subNodesHandler);
 
-  // 跳出循环的触发器的点击事件
-  exitNode?.addEventListener("click", exitHandler);
+  /** 点击退出列表 */
+  rootNode.addEventListener("click", clickRootExitHandler);
  
   /** 封面的事件 */
   coverNode?.addEventListener("keydown", coverHandler);
@@ -93,19 +92,18 @@ const addEventListeners = function(rootNode, subNodesHandler, exitNode, exitHand
     tail?.addEventListener("focus", tailHandler);
 
     /** subNodes 点击事件，用于配合 tail focus */
-    rootNode.addEventListener("click", clickRootHandler);
+    rootNode.addEventListener("click", clickRootTailHandler);
   }
 
   return true;
 };
 
 /** 获取关键节点 */
-const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode) {
+const getNodes = function(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode) {
   const _subNodes = subNodes.map(item => element(item)).filter(item => item != null);
   const head = _subNodes[0];
   const tail = _subNodes.slice(-1)[0];
   const _rootNode = element(rootNode) ?? findLowestCommonAncestorNode(head, tail);
-  const _exitNode = element(exitNode);
   const _coverNode = coverNode === true ? _rootNode : element(coverNode);
   const _coverNextNode = element(coverNextNode);
   const _coverPrevNode = element(coverPrevNode);
@@ -115,7 +113,6 @@ const getNodes = function(rootNode, subNodes, exitNode, coverNode, coverNextNode
     subNodes: _subNodes,
     head,
     tail,
-    exitNode: _exitNode,
     coverNode: _coverNode,
     coverNext: _coverNextNode,
     coverPrev: _coverPrevNode
@@ -159,11 +156,28 @@ const focusBagel = (...props) => {
     on: onEnter,
     key: enterKey,
   } = enter;
-  const {
-    node: exitNode,
-    on: onExit,
-    key: exitKey,
-  } = exit;
+
+  /** 是否已经打开封面选项 */
+  const enabledCover = !!coverNode;
+
+  /** 入口，触发打开焦点的元素 */
+  let _trigger = element(trigger || enterNode);
+  // 无 node 则监听 rootNode keydown
+  // 有 node 则监听 rootNode click，同时监听 rootNode keydown
+  // 有 target 则聚焦 target，无但有封面，则聚焦封面，无封面则聚焦入口
+  const escapeExit = objToStr(onEscape) === "[object Function]" ? {
+    node: null,
+    key: isEscapeEvent,
+    on: onEscape,
+    target: enabledCover ? coverNode : _trigger,
+  } : null;
+  const tempExits = [escapeExit].concat(exit).filter(o => o != null);
+  const setEscapeExit = tempExits.some(e => e.node == null); // 是否设置了直接按下 esc 的退出
+  const exits = setEscapeExit ? tempExits : [{
+    ...tempExits[0],
+    key: tempExits[0].key ?? isEscapeEvent,
+    node: null,
+  }].concat(tempExits);
 
   const {
     key: isForward,
@@ -199,16 +213,12 @@ const focusBagel = (...props) => {
     onExit: onExitCover,
   } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
 
-  /** 是否已经打开封面选项 */
-  const enabledCover = !!coverNode;
-
   const {
     rootNode: _rootNode,
     subNodes: _subNodes, head, tail,
     coverNode: _coverNode,
-    exitNode: _exitNode,
     coverNext, coverPrev,
-  } = getNodes(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode);
+  } = getNodes(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode);
 
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
@@ -227,13 +237,10 @@ const focusBagel = (...props) => {
   const _manual = !!(isForward || isBackward || manual);
 
   /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
-  const _onEscape = onEscape ?? onExit;
+  const _onEscape = onEscape ?? exits[0].on;
   const disabledEsc = _onEscape === false || _onEscape == null;
   /** 按下 esc 是否只聚焦 */
   // const onlyEscapeFocus = _onEscape === true;
-
-  /** 触发打开焦点的元素 */
-  let _trigger = element(trigger || enterNode);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
@@ -254,7 +261,7 @@ const focusBagel = (...props) => {
 
   // 不用延迟聚焦
   if (!isDelay)
-    loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
+    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
 
   return {
     /** 进入循环，聚焦 */
@@ -285,8 +292,8 @@ const focusBagel = (...props) => {
       else if (callbackDelay) delayToFocus(findNodesToLoadListenersAndFocus);
       else if (commonDelay) findNodesToLoadListenersAndFocus();
     }
-    else if (removeListenersEachExit) {
-      loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
+    else if (removeListenersEachExit && !addedListeners) {
+      loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
       focusCoverOrHead(_rootNode, head);
     }
     else focusCoverOrHead(_rootNode, head);
@@ -298,11 +305,10 @@ const focusBagel = (...props) => {
       rootNode: _rootNode,
       subNodes: _subNodes, head, tail,
       coverNode: _coverNode,
-      exitNode: _exitNode,
       coverNext, coverPrev,
-    } = getNodes(rootNode, subNodes, exitNode, coverNode, coverNextNode, coverPrevNode);
+    } = getNodes(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode);
 
-    loadEventListeners(_rootNode, _subNodes, head, tail, _exitNode, _coverNode, coverNext, coverPrev);
+    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
     focusCoverOrHead(_coverNode, head);
   }
 
@@ -312,26 +318,53 @@ const focusBagel = (...props) => {
   }
 
   /** 生成事件行为，添加事件监听器 */
-  function loadEventListeners(_rootNode, _subNodes, _head, _tail, _exitNode, _coverNode, _coverNext, _coverPrev) {
+  function loadEventListeners(_rootNode, _subNodes, _head, _tail, _coverNode, _coverNext, _coverPrev) {
 
     if (_rootNode == null)
       throw new Error(`没有找到元素 ${rootNode}，您可以尝试 delayToFocus 选项，等待元素 ${rootNode} 渲染完毕后进行聚焦。`);
     if (_head == null || _tail == null)
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
-    if (exitNode && _exitNode == null)
-      console.warn(`没有找到元素 ${exitNode}，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。`);
 
     // 在焦点循环中触发聚焦
     const subNodesHandler = _manual ?
-      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, exitKey, _coverNode) :
-      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, exitKey, _coverNode);
+      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, _coverNode) :
+      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, _coverNode);
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(_rootNode, subNodesHandler, _exitNode, exitHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler, _tail, tailHandler, clickRootHandler);
+      addedListeners = addEventListeners(_rootNode, subNodesHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler, _tail, tailHandler, clickRootTailHandler, clickRootExitHandler);
+
+    function clickRootExitHandler(e) {
+      for (const exit of exits) {
+        const affectedNode = element(exit.node);
+        const focusTarget = element(exit.target);
+        const on = exit.on;
+
+        if (affectedNode == null) continue;
+        if (affectedNode != null && e.target !== affectedNode) continue;
+        if (focusTarget) {
+          enabledCover && (trappedFromCover = false); // 标记离开列表
+          removeListeners();
+          (on ?? _onEscape)?.(e);
+          return focusTarget && focus(focusTarget);
+        } else {
+          if (enabledCover) {
+            trappedFromCover = false;
+            (on ?? _onEscape)?.(e);
+            return focus(_coverNode);
+          } else {
+            removeListeners();
+            (on ?? _onEscape)?.(e);
+            return _trigger && focus(_trigger);
+          }
+        }
+      }
+
+      return false;
+    }
 
     /** 点击 rootNode 的事件，click 事件响应的顺序在 focus 之后 */
-    function clickRootHandler(e) {
+    function clickRootTailHandler(e) {
       const targ = e.target;
       if (getActiveElement() !== _coverNode)
         trappedFromCover = true;
@@ -417,29 +450,43 @@ const focusBagel = (...props) => {
       }
     }
 
-    /** 点击退出触发器按钮的行为 */
-    function exitHandler(e) {
-      removeListeners();
-      onExit?.(e);
-      if (_trigger == null) {
-        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter，如果您使用了选项 enter，您也可以设置 enter.selector 而不指定选项 trigger 或者调用函数 enter。");
-        return;
-      }
-      focus(_trigger)
-    }
-
-    /** 退出 subNodes 焦点的行为 */
+    /** 退出 subNodes 焦点 */
     function exitSubNodesHandler(e) {
-      if (disabledEsc) return;
-      if (enabledCover) {
-        trappedFromCover = false;
-        _onEscape?.(e);
-        return focus(_coverNode);
-      } else {
-        removeListeners();
-        _onEscape?.(e);
-        return _trigger && focus(_trigger);
+      if (disabledEsc) return false;
+
+      for (const exit of exits) {
+        const exitKey = exit.key;
+        const affectedNode = element(exit.node);
+        const focusTarget = element(exit.target);
+        const on = exit.on;
+        if (affectedNode != null && e.target !== affectedNode) continue;
+        if (exitKey && exitKey(e)) {
+          if (focusTarget) {
+            if (exitKey(e)) {
+              enabledCover && (trappedFromCover = false);
+              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
+              removeListeners();
+              (on ?? _onEscape)?.(e);
+              return focusTarget && focus(focusTarget);
+            }
+
+          } else {
+            if (enabledCover) {
+              trappedFromCover = false;
+              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
+              (on ?? _onEscape)?.(e);
+              return focus(_coverNode);
+            } else {
+              removeListeners();
+              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
+              (on ?? _onEscape)?.(e);
+              return _trigger && focus(_trigger);
+            }
+          }
+        }
+
       }
+      return false;
     }
 
     /** 退出封面焦点的行为 */
@@ -451,14 +498,15 @@ const focusBagel = (...props) => {
 
     /** 移除监听事件 */
     function removeListeners() {
+      addedListeners = false;
       if (removeListenersEachExit) {
         _rootNode.removeEventListener("keydown", subNodesHandler);
-        _exitNode?.removeEventListener("click", exitHandler);
+        _rootNode.removeEventListener("click", clickRootExitHandler);
         _coverNode?.removeEventListener("keydown", coverHandler);
         _coverNext?.removeEventListener("keydown", coverNextHandler);
         _coverPrev?.removeEventListener("keydown", coverPrevHandler);
         _tail?.removeEventListener("focus", tailHandler);
-        _rootNode.removeEventListener("click", clickRootHandler);
+        _rootNode.removeEventListener("click", clickRootTailHandler);
       }
     }
   }
