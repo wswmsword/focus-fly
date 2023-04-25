@@ -191,7 +191,7 @@ focusNoJutsu(dialog, ["#head", "#second", "#tail"], {
 |:--|:--|:--|:--|:--|
 | node | element | N | null | *出口*元素，将用于监听点击事件，用于退出*列表*时聚焦使用 |
 | key | iskey | N | null | 自定义退出*列表*组合键 |
-| on | handleKeydown | N | null | 退出时被调用，退出*列表*前的行为，如果有*封面*就退出至封面，如果没有就退出至*入口*，设置该选项后，按键按下 <kbd>esc<kbd> 同样生效 |
+| on | handleKeydown | N | null | 退出时被调用，退出*列表*前的行为，如果有*封面*就退出至封面，如果没有就退出至*入口*，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
 | target | element | N | null | 退出至哪个元素？ |
 
 ### options.cover
