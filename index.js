@@ -24,7 +24,7 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, handleEsc, isForw
   if (handledEsc) return;
 
   if ((isForward ?? isTabForward)(e)) {
-    onForward && onForward(e);
+    onForward?.(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex + 1;
     activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
@@ -33,7 +33,7 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, handleEsc, isForw
     focus(subNodes[activeIndex]);
   }
   else if ((isBackward ?? isTabBackward)(e)) {
-    onBackward && onBackward(e);
+    onBackward?.(e);
     const itemsLen = subNodes.length;
     const nextI = activeIndex - 1;
     activeIndex = isClamp ? Math.max(0, nextI) : nextI;
@@ -53,14 +53,14 @@ const focusSubNodes = (head, tail, isClamp, handleEsc, onForward, onBackward, co
   if (handledEsc) return;
 
   if (isTabForward(e)) {
-    onForward && onForward(e);
+    onForward?.(e);
     if (targ === tail) {
       e.preventDefault();
       if (!isClamp) focus(head);
     }
   }
   else if (isTabBackward(e)) {
-    onBackward && onBackward(e);
+    onBackward?.(e);
     if (targ === head) {
       e.preventDefault();
       if (!isClamp) focus(tail);
@@ -151,17 +151,39 @@ const focusBagel = (...props) => {
     demo = false,
   } = options;
   isDemo = demo;
+
   const {
-    node: enterNode,
-    on: onEnter,
-    key: enterKey,
-  } = enter;
+    /** 封面节点 */
+    node: coverNode,
+    /** 封面节点的后一个元素 */
+    next: coverNextNode,
+    /** 移动至后面元素的自定义组合键 */
+    nextKey: coverNextKey,
+    /** 从后面节点回到封面节点的组合键 */
+    nextKeyBack: coverNextKeyBack,
+    /** 移动至后面节点的行为 */
+    onNext: onCoverNext,
+    /** 从后面回到封面的行为 */
+    onNextBack: onCoverNextBack,
+    prev: coverPrevNode,
+    prevKey: coverPrevKey,
+    prevKeyBack: coverPrevKeyBack,
+    onPrev: onCoverPrev,
+    onPrevBack: onCoverPrevBack,
+    enterKey: coverEnterKey,
+    onEnter: onEnterCover,
+    exitKey: coverExitKey,
+    onExit: onExitCover,
+  } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
 
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
 
-  /** 入口，触发打开焦点的元素 */
-  let _trigger = element(trigger || enterNode);
+  /** 入口们 */
+  const enters = [].concat(enter).filter(o => o != null);
+
+  /** 默认入口 */
+  let _trigger = element(trigger || enters[0].node);
   // 无 node 则监听 rootNode keydown
   // 有 node 则监听 rootNode click，同时监听 rootNode keydown
   // 有 target 则聚焦 target，无但有封面，则聚焦封面，无封面则聚焦入口
@@ -188,30 +210,6 @@ const focusBagel = (...props) => {
     key: isBackward,
     on: onBackward,
   } = isObj(backward) ? backward : { key: backward };
-
-  const {
-    /** 封面节点 */
-    node: coverNode,
-    /** 封面节点的后一个元素 */
-    next: coverNextNode,
-    /** 移动至后面元素的自定义组合键 */
-    nextKey: coverNextKey,
-    /** 从后面节点回到封面节点的组合键 */
-    nextKeyBack: coverNextKeyBack,
-    /** 移动至后面节点的行为 */
-    onNext: onCoverNext,
-    /** 从后面回到封面的行为 */
-    onNextBack: onCoverNextBack,
-    prev: coverPrevNode,
-    prevKey: coverPrevKey,
-    prevKeyBack: coverPrevKeyBack,
-    onPrev: onCoverPrev,
-    onPrevBack: onCoverPrevBack,
-    enterKey: coverEnterKey,
-    onEnter: onEnterCover,
-    exitKey: coverExitKey,
-    onExit: onExitCover,
-  } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
 
   const {
     rootNode: _rootNode,
@@ -251,11 +249,16 @@ const focusBagel = (...props) => {
   /** 是否通过 cover 进入的 subNodes */
   let trappedFromCover = false;
 
-  // 触发器点击事件
-  if (_trigger) {
-    _trigger.addEventListener("click", enterTriggerHandler);
-    enterKey && _trigger.addEventListener("keydown", e => {
-      if (enterKey(e)) enterTriggerHandler(e);
+  // 入口点击事件
+  for (let enter of enters) {
+    const { node: origin, on, key } = enter;
+    const node = element(origin);
+    node?.addEventListener("click", e => enterTriggerHandler(e, on));
+    key && node?.addEventListener("keydown", e => {
+      if (key(e)) {
+        e.preventDefault();
+        enterTriggerHandler(e, on);
+      }
     });
   }
 
@@ -281,8 +284,8 @@ const focusBagel = (...props) => {
     i: () => activeIndex,
   };
 
-  async function enterTriggerHandler(e) {
-    onEnter && onEnter(e);
+  async function enterTriggerHandler(e, onEnter) {
+    onEnter?.(e);
 
     if (isDelay) {
       if (promiseDelay) {
@@ -460,7 +463,7 @@ const focusBagel = (...props) => {
         const focusTarget = element(exit.target);
         const on = exit.on;
         if (affectedNode != null && e.target !== affectedNode) continue;
-        if (exitKey && exitKey(e)) {
+        if (exitKey?.(e)) {
           if (focusTarget) {
             if (exitKey(e)) {
               enabledCover && (trappedFromCover = false);
