@@ -72,13 +72,16 @@ const focusSubNodes = (head, tail, isClamp, handleEsc, onForward, onBackward, co
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHandler, isDefaultExitCover, tail, tailHandler, clickRootTailHandler, clickRootExitHandler) {
+const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHandler, isDefaultExitCover, tail, tailHandler, clickRootTailHandler, clickRootExitHandler, clickRootFocusListHandler) {
 
   // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", subNodesHandler);
 
   /** 点击退出列表 */
   rootNode.addEventListener("click", clickRootExitHandler);
+
+  /** 点击聚焦列表单项 */
+  rootNode.addEventListener("click", clickRootFocusListHandler);
  
   /** 封面的事件 */
   coverNode?.addEventListener("keydown", coverHandler);
@@ -322,7 +325,14 @@ const focusBagel = (...props) => {
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(_rootNode, subNodesHandler, _coverNode, coverHandler, isDefaultExitCover, _tail, tailHandler, clickRootTailHandler, clickRootExitHandler);
+      addedListeners = addEventListeners(_rootNode, subNodesHandler, _coverNode, coverHandler, isDefaultExitCover, _tail, tailHandler, clickRootTailHandler, clickRootExitHandler, clickRootFocusListHandler);
+
+    function clickRootFocusListHandler(e) {
+      const target = e.target;
+      const targetIndex = _subNodes.findIndex(e => e === target);
+      if (targetIndex > -1)
+        activeIndex = targetIndex;
+    }
 
     function clickRootExitHandler(e) {
       for (const exit of exits) {
@@ -454,6 +464,7 @@ const focusBagel = (...props) => {
       if (removeListenersEachExit) {
         _rootNode.removeEventListener("keydown", subNodesHandler);
         _rootNode.removeEventListener("click", clickRootExitHandler);
+        _rootNode.removeEventListener("click", clickRootFocusListHandler);
         _coverNode?.removeEventListener("keydown", coverHandler);
         _tail?.removeEventListener("focus", tailHandler);
         _rootNode.removeEventListener("click", clickRootTailHandler);
