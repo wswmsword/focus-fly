@@ -24,22 +24,21 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, handleEsc, isF
   if (handledEsc) return;
 
   const [index, setIndex] = useActiveIndex();
+  const itemsLen = subNodes.length;
   if ((isForward ?? isTabForward)(e)) {
-    onForward?.(e);
-    const itemsLen = subNodes.length;
     const incresedI = index + 1;
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
     nextI %= itemsLen;
+    onForward?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
   }
   else if ((isBackward ?? isTabBackward)(e)) {
-    onBackward?.(e);
-    const itemsLen = subNodes.length;
     const decresedI = index - 1;
     let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
     nextI = (nextI + itemsLen) % itemsLen;
+    onBackward?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
@@ -137,6 +136,8 @@ const focusBagel = (...props) => {
     exit = {},
     /** blur: 按下 esc 的行为，如果未设置，则取 exit.on */
     onEscape,
+    /** 列表单项聚焦之后的行为 */
+    onClick,
     /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素 */
     cover = false,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
@@ -329,9 +330,11 @@ const focusBagel = (...props) => {
 
     function clickRootFocusListHandler(e) {
       const target = e.target;
-      const targetIndex = _subNodes.findIndex(e => e === target);
-      if (targetIndex > -1)
+      const targetIndex = _subNodes.findIndex(e => e.contains(target));
+      if (targetIndex > -1) {
+        onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         activeIndex = targetIndex;
+      }
     }
 
     function clickRootExitHandler(e) {
