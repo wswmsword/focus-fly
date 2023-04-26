@@ -15,7 +15,7 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, activeIndex, isClamp, handleEsc, isForward, isBackward, onForward, onBackward, coverNode) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, handleEsc, isForward, isBackward, onForward, onBackward, coverNode) => e => {
   if (e.target === coverNode) return;
   else e.stopImmediatePropagation(); // 防止封面响应键盘事件
   e.stopImmediatePropagation(); // 防止封面响应键盘事件
@@ -23,23 +23,26 @@ const focusSubNodesManually = (subNodes, activeIndex, isClamp, handleEsc, isForw
   const handledEsc = handleEsc(e);
   if (handledEsc) return;
 
+  const [index, setIndex] = useActiveIndex();
   if ((isForward ?? isTabForward)(e)) {
     onForward?.(e);
     const itemsLen = subNodes.length;
-    const nextI = activeIndex + 1;
-    activeIndex = isClamp ? Math.min(itemsLen - 1, nextI) : nextI;
-    activeIndex %= itemsLen;
+    const incresedI = index + 1;
+    let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
+    nextI %= itemsLen;
     e.preventDefault();
-    focus(subNodes[activeIndex]);
+    focus(subNodes[nextI]);
+    setIndex(nextI);
   }
   else if ((isBackward ?? isTabBackward)(e)) {
     onBackward?.(e);
     const itemsLen = subNodes.length;
-    const nextI = activeIndex - 1;
-    activeIndex = isClamp ? Math.max(0, nextI) : nextI;
-    activeIndex = (activeIndex + itemsLen) % itemsLen;
+    const decresedI = index - 1;
+    let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
+    nextI = (nextI + itemsLen) % itemsLen;
     e.preventDefault();
-    focus(subNodes[activeIndex]);
+    focus(subNodes[nextI]);
+    setIndex(nextI);
   }
 };
 
@@ -280,9 +283,9 @@ const focusBagel = (...props) => {
     }
     else if (removeListenersEachExit && !addedListeners) {
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
-      focusCoverOrHead(_rootNode, head);
+      focusCoverOrList(_rootNode, head);
     }
-    else focusCoverOrHead(_rootNode, head);
+    else focusCoverOrList(_rootNode, head);
   }
 
   /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
@@ -294,12 +297,12 @@ const focusBagel = (...props) => {
     } = getNodes(rootNode, subNodes, coverNode);
 
     loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
-    focusCoverOrHead(_coverNode, head);
+    focusCoverOrList(_coverNode, head);
   }
 
-  function focusCoverOrHead(cover, head) {
+  function focusCoverOrList(cover, head) {
     if (enabledCover) tickFocus(cover); // 如果打开封面，首先聚焦封面
-    else tickFocus(head); // 如果未打开封面，聚焦内部聚焦列表
+    else tickFocus(_subNodes[activeIndex]); // 如果未打开封面，聚焦内部聚焦列表
   }
 
   /** 生成事件行为，添加事件监听器 */
@@ -310,9 +313,11 @@ const focusBagel = (...props) => {
     if (_head == null || _tail == null)
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
 
+    const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
+
     // 在焦点循环中触发聚焦
     const subNodesHandler = _manual ?
-      focusSubNodesManually(_subNodes, activeIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, _coverNode) :
+      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, _coverNode) :
       focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, _coverNode);
 
     if (removeListenersEachExit || !addedListeners)
