@@ -69,7 +69,7 @@ const focusSubNodes = (head, tail, isClamp, handleEsc, onForward, onBackward, co
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHandler, coverNext, coverNextHandler, coverPrev, coverPrevHandler, tail, tailHandler, clickRootTailHandler, clickRootExitHandler) {
+const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHandler, isDefaultExitCover, tail, tailHandler, clickRootTailHandler, clickRootExitHandler) {
 
   // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", subNodesHandler);
@@ -80,13 +80,7 @@ const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHa
   /** 封面的事件 */
   coverNode?.addEventListener("keydown", coverHandler);
 
-  /** 封面后一个元素的键盘事件 */
-  coverNext?.addEventListener("keydown", coverNextHandler);
-
-  /** 封面前一个元素的键盘事件 */
-  coverPrev?.addEventListener("keydown", coverPrevHandler);
-
-  if (coverNext == null && coverNode) {
+  if (isDefaultExitCover) {
 
     /** 尾部元素聚焦后的事件，用于返回封面 */
     tail?.addEventListener("focus", tailHandler);
@@ -99,14 +93,12 @@ const addEventListeners = function(rootNode, subNodesHandler, coverNode, coverHa
 };
 
 /** 获取关键节点 */
-const getNodes = function(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode) {
+const getNodes = function(rootNode, subNodes, coverNode) {
   const _subNodes = subNodes.map(item => element(item)).filter(item => item != null);
   const head = _subNodes[0];
   const tail = _subNodes.slice(-1)[0];
   const _rootNode = element(rootNode) ?? findLowestCommonAncestorNode(head, tail);
   const _coverNode = coverNode === true ? _rootNode : element(coverNode);
-  const _coverNextNode = element(coverNextNode);
-  const _coverPrevNode = element(coverPrevNode);
 
   return {
     rootNode: _rootNode,
@@ -114,8 +106,6 @@ const getNodes = function(rootNode, subNodes, coverNode, coverNextNode, coverPre
     head,
     tail,
     coverNode: _coverNode,
-    coverNext: _coverNextNode,
-    coverPrev: _coverPrevNode
   };
 };
 
@@ -155,25 +145,9 @@ const focusBagel = (...props) => {
   const {
     /** 封面节点 */
     node: coverNode,
-    /** 封面节点的后一个元素 */
-    next: coverNextNode,
-    /** 移动至后面元素的自定义组合键 */
-    nextKey: coverNextKey,
-    /** 从后面节点回到封面节点的组合键 */
-    nextKeyBack: coverNextKeyBack,
-    /** 移动至后面节点的行为 */
-    onNext: onCoverNext,
-    /** 从后面回到封面的行为 */
-    onNextBack: onCoverNextBack,
-    prev: coverPrevNode,
-    prevKey: coverPrevKey,
-    prevKeyBack: coverPrevKeyBack,
-    onPrev: onCoverPrev,
-    onPrevBack: onCoverPrevBack,
     enterKey: coverEnterKey,
     onEnter: onEnterCover,
-    exitKey: coverExitKey,
-    onExit: onExitCover,
+    exit: exitCover,
   } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
 
   /** 是否已经打开封面选项 */
@@ -184,6 +158,16 @@ const focusBagel = (...props) => {
 
   /** 默认入口 */
   let _trigger = element(trigger || enters[0].node);
+
+  /** 退出封面，封面的出口们 */
+  const exitsCover = [].concat(exitCover).filter(e => e != null).map(e => ({
+    ...e,
+    target: e.target ?? _trigger,
+  }));
+
+  /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
+  const isDefaultExitCover = enabledCover && exitCover.length === 0;
+
   // 无 node 则监听 rootNode keydown
   // 有 node 则监听 rootNode click，同时监听 rootNode keydown
   // 有 target 则聚焦 target，无但有封面，则聚焦封面，无封面则聚焦入口
@@ -195,6 +179,7 @@ const focusBagel = (...props) => {
   } : null;
   const tempExits = [escapeExit].concat(exit).filter(o => o != null);
   const setEscapeExit = tempExits.some(e => e.node == null); // 是否设置了直接按下 esc 的退出
+  /** 出口们，列表的出口们，subNodes 的出口们 */
   const exits = setEscapeExit ? tempExits : [{
     ...tempExits[0],
     key: tempExits[0].key ?? isEscapeEvent,
@@ -215,8 +200,7 @@ const focusBagel = (...props) => {
     rootNode: _rootNode,
     subNodes: _subNodes, head, tail,
     coverNode: _coverNode,
-    coverNext, coverPrev,
-  } = getNodes(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode);
+  } = getNodes(rootNode, subNodes, coverNode);
 
   const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
   const delayRes = isFunctionDelay && delayToFocus(() => {});
@@ -264,7 +248,7 @@ const focusBagel = (...props) => {
 
   // 不用延迟聚焦
   if (!isDelay)
-    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
+    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
 
   return {
     /** 进入循环，聚焦 */
@@ -296,7 +280,7 @@ const focusBagel = (...props) => {
       else if (commonDelay) findNodesToLoadListenersAndFocus();
     }
     else if (removeListenersEachExit && !addedListeners) {
-      loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
+      loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
       focusCoverOrHead(_rootNode, head);
     }
     else focusCoverOrHead(_rootNode, head);
@@ -308,10 +292,9 @@ const focusBagel = (...props) => {
       rootNode: _rootNode,
       subNodes: _subNodes, head, tail,
       coverNode: _coverNode,
-      coverNext, coverPrev,
-    } = getNodes(rootNode, subNodes, coverNode, coverNextNode, coverPrevNode);
+    } = getNodes(rootNode, subNodes, coverNode);
 
-    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode, coverNext, coverPrev);
+    loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
     focusCoverOrHead(_coverNode, head);
   }
 
@@ -321,7 +304,7 @@ const focusBagel = (...props) => {
   }
 
   /** 生成事件行为，添加事件监听器 */
-  function loadEventListeners(_rootNode, _subNodes, _head, _tail, _coverNode, _coverNext, _coverPrev) {
+  function loadEventListeners(_rootNode, _subNodes, _head, _tail, _coverNode) {
 
     if (_rootNode == null)
       throw new Error(`没有找到元素 ${rootNode}，您可以尝试 delayToFocus 选项，等待元素 ${rootNode} 渲染完毕后进行聚焦。`);
@@ -335,7 +318,7 @@ const focusBagel = (...props) => {
 
     if (removeListenersEachExit || !addedListeners)
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(_rootNode, subNodesHandler, _coverNode, coverHandler, _coverNext, coverNextHandler, _coverPrev, coverPrevHandler, _tail, tailHandler, clickRootTailHandler, clickRootExitHandler);
+      addedListeners = addEventListeners(_rootNode, subNodesHandler, _coverNode, coverHandler, isDefaultExitCover, _tail, tailHandler, clickRootTailHandler, clickRootExitHandler);
 
     function clickRootExitHandler(e) {
       for (const exit of exits) {
@@ -386,70 +369,33 @@ const focusBagel = (...props) => {
       }
     }
 
-    /** 封面后一个元素的事件响应 */
-    function coverNextHandler(e) {
-      if (coverNextKeyBack?.(e)) {
-        onCoverNextBack?.(e);
-        focus(_coverNode);
-      }
-      else if (isTabBackward(e)) {
-        onCoverNextBack?.(e);
-        e.preventDefault();
-        focus(_coverNode);
-      }
-    }
-
-    /** 封面前一个元素的事件响应 */
-    function coverPrevHandler(e) {
-      if (coverPrevKeyBack?.(e)) {
-        onCoverPrevBack?.(e);
-        focus(_coverNode);
-      }
-      else if (isTabForward(e)) {
-        onCoverPrevBack?.(e);
-        e.preventDefault();
-        focus(_coverNode);
-      }
-    }
-
     /** 封面的键盘事件响应 */
     function coverHandler(e) {
-      if (coverNextKey?.(e)) {
-        onCoverNext?.(e);
-        if (_coverNext == null)
-          console.warn("当前没有指定聚焦元素，请指定 cover.next。");
-        else focus(_coverNext);
-      }
-      else if (isTabForward(e)) {
-        onCoverNext?.(e);
-        if (_coverNext == null) focus(_tail);
-        else {
-          e.preventDefault();
-          focus(_coverNext);
+
+      if (isDefaultExitCover) {
+        if (isTabForward(e)) { // 虽然也是离开列表，但是这里移除监听事件，因为移除后就不能再次进入封面
+          focus(_tail);
+          return;
         }
-      }
-      else if (coverPrevKey?.(e)) {
-        onCoverPrev?.(e);
-        if (_coverPrev == null)
-          console.warn("当前没有指定聚焦元素，请指定 cover.prev。");
-        else focus(_coverPrev);
-      }
-      else if (isTabBackward(e)) {
-        onCoverPrev?.(e);
-        if (_coverPrev == null)
+        else if (isTabBackward(e)) { // 虽然也是离开列表，但是这里移除监听事件，因为移除后就不能再次进入封面
           focus(_coverNode);
-        else {
-          e.preventDefault();
-          focus(_coverPrev);
+          return;
+        }
+        else if (isEscapeEvent(e)) {
+          exitCoverHandler(e, null, _trigger);
+          return;
         }
       }
-      else if((coverEnterKey ?? isEnterEvent)(e)) {
+
+      for (let exit of exitsCover) {
+        const { key, on, target } = exit;
+        if (key(e)) exitCoverHandler(e, on, target);
+      }
+
+      if((coverEnterKey ?? isEnterEvent)(e)) {
         trappedFromCover = true;
         onEnterCover?.(e);
         focus(_head);
-      }
-      else if ((coverExitKey ?? isEscapeEvent)(e)) {
-        exitCoverHandler(e);
       }
     }
 
@@ -493,10 +439,10 @@ const focusBagel = (...props) => {
     }
 
     /** 退出封面焦点的行为 */
-    function exitCoverHandler(e) {
+    function exitCoverHandler(e, onExit, target) {
       removeListeners();
-      onExitCover?.(e);
-      return _trigger && focus(_trigger);
+      onExit?.(e);
+      return target && focus(target);
     }
 
     /** 移除监听事件 */
@@ -506,8 +452,6 @@ const focusBagel = (...props) => {
         _rootNode.removeEventListener("keydown", subNodesHandler);
         _rootNode.removeEventListener("click", clickRootExitHandler);
         _coverNode?.removeEventListener("keydown", coverHandler);
-        _coverNext?.removeEventListener("keydown", coverNextHandler);
-        _coverPrev?.removeEventListener("keydown", coverPrevHandler);
         _tail?.removeEventListener("focus", tailHandler);
         _rootNode.removeEventListener("click", clickRootTailHandler);
       }
