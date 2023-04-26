@@ -29,6 +29,9 @@ type enterSubNodes = {
 
   /** 点击触发器后的行为 */
   on?: handleKeydown;
+
+  /** 是否关闭点击事件 */
+  disableClick?: boolean;
 }
 
 type exitSubNodes = {

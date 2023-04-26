@@ -139,6 +139,7 @@ npm run start
 | node | element | N | null | *入口*元素，将用于监听点击事件，用于退出*列表*时聚焦使用 |
 | key | iskey | N | null | 自定义进入*列表*组合键 |
 | on | handleKeydown | N | null | 进入时被调用，进入*列表*前的行为，如果*列表*或*封面*在这里渲染，需要设置 `options.delayToFocus` 来延迟聚焦 |
+| disableClick | boolean | N | null | 是否关闭监听点击事件 |
 
 <details>
 <summary>

@@ -178,13 +178,17 @@ const focusBagel = (...props) => {
     target: enabledCover ? coverNode : _trigger,
   } : null;
   const tempExits = [escapeExit].concat(exit).filter(o => o != null);
-  const setEscapeExit = tempExits.some(e => e.node == null); // 是否设置了直接按下 esc 的退出
+  const setKeyExit = tempExits.some(e => e.node == null); // 是否设置了不需要点击、直接按键盘的退出
   /** 出口们，列表的出口们，subNodes 的出口们 */
-  const exits = setEscapeExit ? tempExits : [{
+  const exits = setKeyExit ? tempExits : [{
     ...tempExits[0],
     key: tempExits[0].key ?? isEscapeEvent,
     node: null,
   }].concat(tempExits);
+
+  /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
+  const _onEscape = onEscape ?? exits[0].on;
+  const disabledEsc = _onEscape === false || _onEscape == null;
 
   const {
     key: isForward,
@@ -218,12 +222,6 @@ const focusBagel = (...props) => {
   // 自定义前进或后退焦点函数，则设置 manual 为 true
   const _manual = !!(isForward || isBackward || manual);
 
-  /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
-  const _onEscape = onEscape ?? exits[0].on;
-  const disabledEsc = _onEscape === false || _onEscape == null;
-  /** 按下 esc 是否只聚焦 */
-  // const onlyEscapeFocus = _onEscape === true;
-
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
 
@@ -235,9 +233,10 @@ const focusBagel = (...props) => {
 
   // 入口点击事件
   for (let enter of enters) {
-    const { node: origin, on, key } = enter;
+    const { node: origin, on, key, disableClick } = enter;
     const node = element(origin);
-    node?.addEventListener("click", e => enterTriggerHandler(e, on));
+    if (!disableClick)
+      node?.addEventListener("click", e => enterTriggerHandler(e, on));
     key && node?.addEventListener("keydown", e => {
       if (key(e)) {
         e.preventDefault();
@@ -401,8 +400,7 @@ const focusBagel = (...props) => {
 
     /** 退出 subNodes 焦点 */
     function exitSubNodesHandler(e) {
-      if (disabledEsc) return false;
-
+      if (disabledEsc && isEscapeEvent(e)) return false;
       for (const exit of exits) {
         const exitKey = exit.key;
         const affectedNode = element(exit.node);
