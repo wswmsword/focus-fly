@@ -173,7 +173,7 @@ const focusBagel = (...props) => {
   }));
 
   /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
-  const isDefaultExitCover = enabledCover && exitCover.length === 0;
+  const isDefaultExitCover = enabledCover && exitsCover.length === 0;
 
   // 无 node 则监听 rootNode keydown
   // 有 node 则监听 rootNode click，同时监听 rootNode keydown
