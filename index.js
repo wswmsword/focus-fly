@@ -395,6 +395,14 @@ const focusBagel = (...props) => {
     /** 封面的键盘事件响应 */
     function coverHandler(e) {
 
+      if((coverEnterKey ?? isEnterEvent)(e)) {
+        e.preventDefault();
+        trappedFromCover = true;
+        onEnterCover?.(e);
+        focus(_subNodes[activeIndex]);
+        return;
+      }
+
       if (isDefaultExitCover) {
         if (isTabForward(e)) { // 虽然也是离开列表，但是这里移除监听事件，因为移除后就不能再次进入封面
           focus(_tail);
@@ -413,12 +421,6 @@ const focusBagel = (...props) => {
       for (let exit of exitsCover) {
         const { key, on, target } = exit;
         if (key(e)) exitCoverHandler(e, on, target);
-      }
-
-      if((coverEnterKey ?? isEnterEvent)(e)) {
-        trappedFromCover = true;
-        onEnterCover?.(e);
-        focus(_head);
       }
     }
 
