@@ -235,7 +235,7 @@ const focusBagel = (...props) => {
   /** 是否已添加监听事件 */
   let addedListeners = false;
 
-  /** 是否通过 cover 进入的 subNodes */
+  /** 是否通过 cover 进入的 subNodes，用于区分是如何聚焦到列表尾元素的，是从内部访问，还是从外部通过 shift-tab 访问 */
   let trappedFromCover = false;
 
   // 入口点击事件
@@ -351,6 +351,12 @@ const focusBagel = (...props) => {
           (on ?? _onEscape)?.(e);
           return focusTarget && focus(focusTarget);
         } else {
+          if (focusTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+            enabledCover && (trappedFromCover = false); // 标记离开列表
+            removeListeners();
+            (on ?? _onEscape)?.(e);
+            return;
+          }
           if (enabledCover) {
             trappedFromCover = false;
             (on ?? _onEscape)?.(e);
@@ -436,6 +442,12 @@ const focusBagel = (...props) => {
             }
 
           } else {
+            if (focusTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+              enabledCover && (trappedFromCover = false); // 标记离开列表
+              removeListeners();
+              (on ?? _onEscape)?.(e);
+              return;
+            }
             if (enabledCover) {
               trappedFromCover = false;
               e.preventDefault(); // 阻止 tab 等其它按键的默认行为
