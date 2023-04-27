@@ -151,11 +151,11 @@ const focusBagel = (...props) => {
 
   const {
     /** 封面节点 */
-    node: coverNode,
+    node: coverNode = rootNode || true,
     enterKey: coverEnterKey,
     onEnter: onEnterCover,
     exit: exitCover,
-  } = isObj(cover) ? cover : { node: !!cover ? (rootNode || true) : null };
+  } = isObj(cover) ? cover : { node: !!cover ? rootNode : null };
 
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
