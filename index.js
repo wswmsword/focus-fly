@@ -161,7 +161,10 @@ const focusBagel = (...props) => {
   const enabledCover = !!coverNode;
 
   /** 入口们 */
-  const enters = [].concat(enter).filter(o => o != null);
+  const enters = [].concat(enter).filter(o => o != null).map(enter => ({
+    ...enter,
+    type: enter.type === undefined ? ["keydown", "click"] : enter.type,
+  }));
 
   /** 默认入口 */
   let _trigger = element(trigger || enters[0].node);
@@ -240,16 +243,25 @@ const focusBagel = (...props) => {
 
   // 入口点击事件
   for (let enter of enters) {
-    const { node: origin, on, key, disableClick } = enter;
+    const { node: origin, on, key, type } = enter;
+    const types = [].concat(type);
+    const allTypes = ["keydown", "focus", "click"];
     const node = element(origin);
-    if (!disableClick)
-      node?.addEventListener("click", e => enterTriggerHandler(e, on));
-    key && node?.addEventListener("keydown", e => {
-      if (key(e)) {
+
+    types.forEach(type => {
+      allTypes.includes(type) && node?.addEventListener(type, type === "keydown" ? keyHandler : notKeyHandler);
+    });
+
+    function keyHandler(e) {
+      if (key?.(e)) {
         e.preventDefault();
         enterTriggerHandler(e, on);
       }
-    });
+    }
+
+    function notKeyHandler(e) {
+      enterTriggerHandler(e, on)
+    }
   }
 
   // 不用延迟聚焦
@@ -257,13 +269,18 @@ const focusBagel = (...props) => {
     loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
 
   return {
-    /** 进入循环，聚焦 */
+    /** 调用形式的入口 */
     enter() {
       _trigger = _trigger || getActiveElement();
-      const head = element(subNodes[0]);
-      if (head == null)
-        console.warn(`没有找到元素 ${subNodes[0]}，如果元素需要等待渲染，您需要延迟调用 enter 等待渲染完毕。`);
-      else focus(head);
+
+      for (let enter of enters) {
+        const { on, type, node } = enter;
+        const types = [].concat(type);
+        const invokeType = "invoke";
+
+        if (types.some(type => type == null || type === false || type === invokeType) || node == null)
+          enterTriggerHandler({ fromInvoke: true }, on);
+      }
     },
     /** 退出循环，聚焦触发元素 */
     exit() {
@@ -275,7 +292,7 @@ const focusBagel = (...props) => {
   };
 
   async function enterTriggerHandler(e, onEnter) {
-    onEnter?.(e);
+    await onEnter?.(e);
 
     if (isDelay) {
       if (promiseDelay) {
@@ -334,6 +351,7 @@ const focusBagel = (...props) => {
       if (targetIndex > -1) {
         onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         activeIndex = targetIndex;
+        _subNodes[activeIndex].focus(); // 兼容 Safari
       }
     }
 
