@@ -132,9 +132,9 @@ const focusBagel = (...props) => {
     /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 enter.selector 则不用设置 */
     trigger,
     /** focus: 触发触发器的配置 */
-    enter = {},
+    enter,
     /** blur: 触发退出触发器的配置 */
-    exit = {},
+    exit,
     /** blur: 按下 esc 的行为，如果未设置，则取 exit.on */
     onEscape,
     /** 列表单项聚焦之后的行为 */
@@ -193,7 +193,7 @@ const focusBagel = (...props) => {
     type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
   }));
   const setKeyExit = tempExits.some(e => e.node == null || e.type?.includes("keydown")); // 是否设置了不需要点击、直接按键盘的退出
-  const disabledEsc = onEscape === false || setKeyExit;
+  const disabledEsc = onEscape === false || setKeyExit !== true;
   /** 出口们，列表的出口们，subNodes 的出口们 */
   const exits = setKeyExit ? tempExits : (disabledEsc ? [] : [{
     ...tempExits[0],
