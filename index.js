@@ -202,8 +202,6 @@ const focusBagel = (...props) => {
     type: ["keydown"],
   }]).concat(tempExits);
 
-  if (isDemo) console.log(exits)
-
   /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
   const _onEscape = onEscape ?? exits.find(e => e.on != null)?.on;
 
