@@ -386,7 +386,7 @@ function initBagel(container, dialog, first, last, open, close) {
 }
 
 function initBagel_2(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, [first, last]);
+  const bagel = focusBagel(dialog, [first, last], { enter: { type: "invoke" } });
 
   return bagel
 }
@@ -402,7 +402,7 @@ function initBagel_3(container, dialog, first, last, open, close) {
 }
 
 function initBagel_4(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, [first, last], { manual: false });
+  const bagel = focusBagel(dialog, [first, last], { manual: false, enter: { type: "invoke" } });
 
   open.addEventListener('click', () => {
     bagel.enter();
@@ -449,6 +449,7 @@ function initBagel_8(container, dialog, first, last, open, close) {
 
 function initBagel_9(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
+    onEscape: true,
     enter: {
       node: open,
     },
@@ -488,6 +489,7 @@ function initBagel_11(container, dialog, first, last, open, close) {
 function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     manual: true,
+    onEscape: true,
     enter: {
       node: open,
       on() {},
