@@ -15,12 +15,8 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, handleExit, isForward, isBackward, onForward, onBackward, coverNode) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isForward, isBackward, onForward, onBackward, coverNode) => e => {
   if (e.target === coverNode) return;
-  e.stopImmediatePropagation(); // 防止封面响应键盘事件
-  
-  const handledExit = handleExit(e);
-  if (handledExit) return;
 
   const [index, setIndex] = useActiveIndex();
   const itemsLen = subNodes.length;
@@ -32,6 +28,7 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, handleExit, is
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
+    e.stopImmediatePropagation(); // 防止封面响应键盘事件
   }
   else if ((isBackward ?? isTabBackward)(e)) {
     const decresedI = index - 1;
@@ -41,28 +38,27 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, handleExit, is
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
+    e.stopImmediatePropagation(); // 防止封面响应键盘事件
   }
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, handleExit, onForward, onBackward, coverNode) => e => {
-  const targ = e.target;
-  if (targ === coverNode) return;
-  e.stopImmediatePropagation(); // 防止封面响应键盘事件
-
-  const handledExit = handleExit(e);
-  if (handledExit) return;
+const focusSubNodes = (head, tail, isClamp, onForward, onBackward, coverNode) => e => {
+  const current = e.target;
+  if (current === coverNode) return;
 
   if (isTabForward(e)) {
+    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onForward?.({ e });
-    if (targ === tail) {
+    if (current === tail) {
       e.preventDefault();
       if (!isClamp) focus(head);
     }
   }
   else if (isTabBackward(e)) {
+    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onBackward?.({ e });
-    if (targ === head) {
+    if (current === head) {
       e.preventDefault();
       if (!isClamp) focus(tail);
     }
@@ -70,13 +66,19 @@ const focusSubNodes = (head, tail, isClamp, handleExit, onForward, onBackward, c
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, keyListHandler, coverNode, keyCoverHandler, isDefaultExitCover, tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, clickListItemHandler) {
+const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyCoverHandler, isDefaultExitCover, tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler) {
 
-  // 聚焦根节点的键盘事件，例如 tab 或其它自定义组合键
-  rootNode.addEventListener("keydown", keyListHandler);
+  // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
+  rootNode.addEventListener("keydown", keyListMoveHandler);
 
-  /** 点击退出列表 */
-  rootNode.addEventListener("click", clickListExitHandler);
+  /** 列表点击出口 */
+  hasClickExits && rootNode.addEventListener("click", clickListExitHandler);
+
+  /** 列表聚焦出口 */
+  hasFocusExits && rootNode.addEventListener("focusin", focusListExitHandler);
+
+  /** 列表键盘出口 */
+  hasKeyExits && rootNode.addEventListener("keydown", keyListExitHandler);
 
   /** 点击聚焦列表单项 */
   rootNode.addEventListener("click", clickListItemHandler);
@@ -162,7 +164,7 @@ const focusBagel = (...props) => {
   /** 入口们 */
   const enters = [].concat(enter).filter(o => o != null).map(enter => ({
     ...enter,
-    type: enter.type === undefined ? ["keydown", "click"] : enter.type,
+    type: enter.type === undefined ? ["keydown", "click"] : [].concat(enter.type),
   }));
 
   /** 默认入口 */
@@ -177,27 +179,37 @@ const focusBagel = (...props) => {
   /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
   const isDefaultExitCover = enabledCover && exitsCover.length === 0;
 
-  // 无 node 则监听 rootNode keydown
-  // 有 node 则监听 rootNode click，同时监听 rootNode keydown
-  // 有 target 则聚焦 target，无但有封面，则聚焦封面，无封面则聚焦入口
   const escapeExit = objToStr(onEscape) === "[object Function]" ? {
     node: null,
     key: isEscapeEvent,
     on: onEscape,
     target: enabledCover ? coverNode : _trigger,
+    type: ["keydown"],
   } : null;
-  const tempExits = [escapeExit].concat(exit).filter(o => o != null);
-  const setKeyExit = tempExits.some(e => e.node == null); // 是否设置了不需要点击、直接按键盘的退出
+
+  const tempExits = [escapeExit].concat(exit).filter(o => o != null).map(e => ({
+    ...e,
+    // undefined 表示用户没有主动设置
+    type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
+  }));
+  const setKeyExit = tempExits.some(e => e.node == null || e.type?.includes("keydown")); // 是否设置了不需要点击、直接按键盘的退出
+  const disabledEsc = onEscape === false || setKeyExit;
   /** 出口们，列表的出口们，subNodes 的出口们 */
-  const exits = setKeyExit ? tempExits : [{
+  const exits = setKeyExit ? tempExits : (disabledEsc ? [] : [{
     ...tempExits[0],
     key: tempExits[0].key ?? isEscapeEvent,
     node: null,
-  }].concat(tempExits);
+    type: ["keydown"],
+  }]).concat(tempExits);
+
+  if (isDemo) console.log(exits)
 
   /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
-  const _onEscape = onEscape ?? exits[0].on;
-  const disabledEsc = _onEscape === false || _onEscape == null;
+  const _onEscape = onEscape ?? exits.find(e => e.on != null)?.on;
+
+  const keyExits = exits.filter(e => e.type?.includes("keydown"));
+  const clickExits = exits.filter(e => e.type?.includes("click"));
+  const focusExits = exits.filter(e => e.type?.includes("focus"));
 
   const {
     key: isForward,
@@ -263,6 +275,10 @@ const focusBagel = (...props) => {
     }
   }
 
+  // 用于 return.exit
+  let exitListWithTarget_outer = null;
+  let exitListWithoutTarget_outer = null;
+
   // 不用延迟聚焦
   if (!isDelay)
     loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
@@ -274,18 +290,27 @@ const focusBagel = (...props) => {
 
       for (let enter of enters) {
         const { on, type, node } = enter;
-        const types = [].concat(type);
         const invokeType = "invoke";
 
-        if (types.some(type => type == null || type === false || type === invokeType) || node == null)
+        if (type?.some(type => type == null || type === false || type === invokeType) || node == null)
           enterTriggerHandler({ fromInvoke: true }, on);
       }
     },
     /** 调用形式的出口 */
     exit() {
-      if (_trigger == null)
-        console.warn("未指定触发器，将不会聚焦触发器，您可以在调用 focusBagel 时传入选项 trigger 指定触发器，或者在触发触发器的时候调用函数 enter。");
-      else focus(_trigger);
+      for (const exit of exits) {
+        let { on, type, target } = exit;
+        target = element(target);
+        const invokeType = "invoke";
+
+        if (type?.some(type => type == null || type === false || type === invokeType)) {
+          if (target) {
+            return exitListWithTarget_outer?.({ fromInvoke: true }, on, target);
+          } else {
+            return exitListWithoutTarget_outer?.({ fromInvoke: true }, on, target);
+          }
+        }
+      }
     },
     i: () => activeIndex,
   };
@@ -337,13 +362,43 @@ const focusBagel = (...props) => {
     const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
 
     // 在焦点循环中触发聚焦
-    const keyListHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, exitSubNodesHandler, isForward, isBackward, onForward, onBackward, _coverNode) :
-      focusSubNodes(_head, _tail, isClamp, exitSubNodesHandler, onForward, onBackward, _coverNode);
+    const keyListMoveHandler = _manual ?
+      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isForward, isBackward, onForward, onBackward, _coverNode) :
+      focusSubNodes(_head, _tail, isClamp, onForward, onBackward, _coverNode);
 
-    if (removeListenersEachExit || !addedListeners)
+    const hasClickExits = clickExits.length > 0;
+    const hasFocusExits = focusExits.length > 0;
+    const hasKeyExits = keyExits.length > 0;
+
+    if (removeListenersEachExit || !addedListeners) {
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addedListeners = addEventListeners(_rootNode, keyListHandler, _coverNode, keyCoverHandler, isDefaultExitCover, _tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, clickListItemHandler);
+      addEventListeners(_rootNode, keyListMoveHandler, _coverNode, keyCoverHandler, isDefaultExitCover, _tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler);
+      addedListeners = true;
+    }
+
+    // 用以 return.exit
+    exitListWithTarget_outer = exitListWithTarget;
+    exitListWithoutTarget_outer = exitListWithoutTarget;
+    
+    /** 聚焦列表一个单项而退出 */
+    function focusListExitHandler(e) {
+      const current = e.target;
+
+      for (const exit of focusExits) {
+        let { node, on, target } = exit;
+        node = element(node);
+        target = element(target);
+  
+        if (node == null) continue;
+        if (node != null && current !== node) continue;
+        if (target) {
+          return exitListWithTarget(e, on, target);
+        } else {
+          return exitListWithoutTarget(e, on, target);
+        }
+      }
+
+    }
 
     /** 点击聚焦列表某一单项 */
     function clickListItemHandler(e) {
@@ -354,42 +409,27 @@ const focusBagel = (...props) => {
         activeIndex = targetIndex;
         _subNodes[activeIndex].focus(); // 兼容 Safari
       }
+
     }
 
     /** 点击列表的出口 */
     function clickListExitHandler(e) {
-      for (const exit of exits) {
-        const affectedNode = element(exit.node);
-        const focusTarget = element(exit.target);
-        const on = exit.on;
-
-        if (affectedNode == null) continue;
-        if (affectedNode != null && e.target !== affectedNode) continue;
-        if (focusTarget) {
-          enabledCover && (trappedFromCover = false); // 标记离开列表
-          removeListeners();
-          (on ?? _onEscape)?.(e);
-          return focusTarget && focus(focusTarget);
+      for (const exit of clickExits) {
+        let { node, on, target } = exit;
+        node = element(node);
+        target = element(target);
+  
+        if (node == null) continue;
+        if (node != null && e.target !== node) continue;
+        if (target) {
+          return exitListWithTarget(e, on, target);
         } else {
-          if (focusTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-            enabledCover && (trappedFromCover = false); // 标记离开列表
-            removeListeners();
-            (on ?? _onEscape)?.(e);
-            return;
-          }
-          if (enabledCover) {
-            trappedFromCover = false;
-            (on ?? _onEscape)?.(e);
-            return focus(_coverNode);
-          } else {
-            removeListeners();
-            (on ?? _onEscape)?.(e);
-            return _trigger && focus(_trigger);
-          }
+          return exitListWithoutTarget(e, on, target);
         }
       }
-
+  
       return false;
+
     }
 
     /** 点击 rootNode 的事件，click 事件响应的顺序在 focus 之后 */
@@ -397,7 +437,7 @@ const focusBagel = (...props) => {
       const targ = e.target;
       if (getActiveElement() !== _coverNode)
         trappedFromCover = true;
-
+  
       if (targ === _tail) { // 如果触发了 tail，首先响应 tail 的 focus 事件，封面被聚焦，这里将焦点重新设置到 tail
         focus(_tail);
         trappedFromCover = true;
@@ -410,11 +450,14 @@ const focusBagel = (...props) => {
       if (prevFocus !== _coverNode && !trappedFromCover) { // subNodes 里聚焦元素同样会聚焦到 tail，这里做区分，如果是从非 subNodes 的范围聚焦这个 tail，就重新聚焦到封面
         focus(_coverNode);
       }
+
     }
 
     /** 封面的键盘事件响应 */
     function keyCoverHandler(e) {
+      if (e.target !== _coverNode) return;
 
+      // 入口
       if((coverEnterKey ?? isEnterEvent)(e)) {
         e.preventDefault();
         trappedFromCover = true;
@@ -423,12 +466,23 @@ const focusBagel = (...props) => {
         return;
       }
 
+      // 出口
+      for (let exit of exitsCover) {
+        let { key, on, target } = exit;
+        target = element(target);
+        if (key?.(e)) {
+          exitCoverHandler(e, on, target);
+          return;
+        }
+      }
+
+      // 默认出口
       if (isDefaultExitCover) {
-        if (isTabForward(e)) { // 虽然也是离开列表，但是这里移除监听事件，因为移除后就不能再次进入封面
+        if (isTabForward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
           focus(_tail);
           return;
         }
-        else if (isTabBackward(e)) { // 虽然也是离开列表，但是这里移除监听事件，因为移除后就不能再次进入封面
+        else if (isTabBackward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
           focus(_coverNode);
           return;
         }
@@ -436,11 +490,6 @@ const focusBagel = (...props) => {
           exitCoverHandler(e, null, _trigger);
           return;
         }
-      }
-
-      for (let exit of exitsCover) {
-        const { key, on, target } = exit;
-        if (key(e)) exitCoverHandler(e, on, target);
       }
 
       /** 退出封面焦点的行为 */
@@ -451,56 +500,76 @@ const focusBagel = (...props) => {
       }
     }
 
-    /** 退出 subNodes 焦点 */
-    function exitSubNodesHandler(e) {
-      if (disabledEsc && isEscapeEvent(e)) return false;
-      for (const exit of exits) {
-        const exitKey = exit.key;
-        const affectedNode = element(exit.node);
-        const focusTarget = element(exit.target);
-        const on = exit.on;
-        if (affectedNode != null && e.target !== affectedNode) continue;
-        if (exitKey?.(e)) {
-          if (focusTarget) {
-            if (exitKey(e)) {
-              enabledCover && (trappedFromCover = false);
-              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
-              removeListeners();
-              (on ?? _onEscape)?.(e);
-              return focusTarget && focus(focusTarget);
-            }
+    /** 触发键盘退出列表，退出 subNodes 焦点 */
+    function keyListExitHandler(e) {
+      if (e.target === _coverNode) return; // 被封面触发直接返回
 
+      if (disabledEsc && isEscapeEvent(e)) return;
+
+      for (const exit of keyExits) {
+        let { key, node, target, on } = exit;
+        node = element(node);
+        target = element(target);
+        if (node != null && e.target !== node) continue;
+        if (key?.(e)) {
+          if (target) {
+            if (key(e)) {
+              const exited = exitListWithTarget(e, on, target);
+              exited && e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
+              return exited;
+            }
+  
           } else {
-            if (focusTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-              enabledCover && (trappedFromCover = false); // 标记离开列表
-              removeListeners();
-              (on ?? _onEscape)?.(e);
-              return;
-            }
-            if (enabledCover) {
-              trappedFromCover = false;
-              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
-              (on ?? _onEscape)?.(e);
-              return focus(_coverNode);
-            } else {
-              removeListeners();
-              e.preventDefault(); // 阻止 tab 等其它按键的默认行为
-              (on ?? _onEscape)?.(e);
-              return _trigger && focus(_trigger);
-            }
+            const exited = exitListWithoutTarget(e, on, target);
+            exited && e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
+            return exited;
           }
         }
-
+  
       }
       return false;
+
+    }
+
+    /** 退出列表，有 target */
+    function exitListWithTarget(e, on, target) {
+      enabledCover && target !== _coverNode &&  (trappedFromCover = false);
+      e.preventDefault(); // 阻止 tab 等其它按键的默认行为
+      target !== _coverNode && removeListeners();
+      (on ?? _onEscape)?.(e);
+      return focus(target);
+    }
+
+    /** 退出列表，无 target */
+    function exitListWithoutTarget(e, on, target) {
+      if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+        enabledCover && (trappedFromCover = false); // 标记离开列表
+        removeListeners();
+        (on ?? _onEscape)?.(e);
+        e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，enter button 触发 click 事件
+        return true;
+      }
+      if (enabledCover) {
+        trappedFromCover = false;
+        (on ?? _onEscape)?.(e);
+        e.preventDefault();
+        return focus(_coverNode);
+      } else {
+        removeListeners();
+        (on ?? _onEscape)?.(e);
+        e.preventDefault();
+        return _trigger && focus(_trigger);
+      }
     }
 
     /** 移除监听事件 */
     function removeListeners() {
       addedListeners = false;
       if (removeListenersEachExit) {
-        _rootNode.removeEventListener("keydown", keyListHandler);
+        _rootNode.removeEventListener("keydown", keyListMoveHandler);
         _rootNode.removeEventListener("click", clickListExitHandler);
+        _rootNode.removeEventListener("focusin", focusListExitHandler);
+        _rootNode.removeEventListener("keydown", keyListExitHandler);
         _rootNode.removeEventListener("click", clickListItemHandler);
         _coverNode?.removeEventListener("keydown", keyCoverHandler);
         _tail?.removeEventListener("focus", focusListTailHandler);
