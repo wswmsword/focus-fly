@@ -164,7 +164,7 @@ const focusBagel = (...props) => {
   /** 入口们 */
   const enters = [].concat(enter).filter(o => o != null).map(enter => ({
     ...enter,
-    type: enter.type === undefined ? ["keydown", "click"] : [].concat(enter.type),
+    type: enter.type === undefined ? [enter.key == null ? '' : "keydown", enter.node == null ? '' : "click"].filter(t => t != '') : [].concat(enter.type),
   }));
 
   /** 默认入口 */
