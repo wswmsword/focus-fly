@@ -4,6 +4,9 @@ export const objToStr = obj => Object.prototype.toString.call(obj);
 /** 参数是否是对象 */
 export const isObj = obj => objToStr(obj) === "[object Object]";
 
+/** 是否为函数 */
+export const isFun = fun => objToStr(fun) === "[object Function]";
+
 /** document.activeElement 的快捷方式 */
 export const getActiveElement = () => document.activeElement;
 

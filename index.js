@@ -1,4 +1,4 @@
-import { objToStr, isObj, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode } from "./utils";
+import { objToStr, isObj, isFun, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode } from "./utils";
 let isDemo = false;
 /** 聚焦，如果是 input，则聚焦后选中 */
 const focus = function(e) {
@@ -168,7 +168,7 @@ const focusBagel = (...props) => {
   }));
 
   /** 默认入口 */
-  let _trigger = element(trigger || enters[0].node);
+  let _trigger = element(trigger || enters[0]?.node);
 
   /** 退出封面，封面的出口们 */
   const exitsCover = [].concat(exitCover).filter(e => e != null).map(e => ({
@@ -179,31 +179,27 @@ const focusBagel = (...props) => {
   /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
   const isDefaultExitCover = enabledCover && exitsCover.length === 0;
 
-  const escapeExit = objToStr(onEscape) === "[object Function]" ? {
-    node: null,
-    key: isEscapeEvent,
-    on: onEscape,
-    target: enabledCover ? coverNode : _trigger,
-    type: ["keydown"],
-  } : null;
+  /** 禁用左上角 esc 出口 */
+  const disabledEsc = onEscape === false;
 
-  const tempExits = [escapeExit].concat(exit).filter(o => o != null).map(e => ({
+  let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
     ...e,
     // undefined 表示用户没有主动设置
     type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
   }));
-  const setKeyExit = tempExits.some(e => e.node == null || e.type?.includes("keydown")); // 是否设置了不需要点击、直接按键盘的退出
-  const disabledEsc = onEscape === false || setKeyExit !== true;
-  /** 出口们，列表的出口们，subNodes 的出口们 */
-  const exits = setKeyExit ? tempExits : (disabledEsc ? [] : [{
-    ...tempExits[0],
-    key: tempExits[0].key ?? isEscapeEvent,
+  let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
+  /** 按下 esc 的出口 */
+  const escapeExit = isFun(_onEscape) ? {
     node: null,
+    key: isEscapeEvent,
+    on: _onEscape,
+    target: enabledCover ? coverNode : _trigger,
     type: ["keydown"],
-  }]).concat(tempExits);
+  } : null;
 
-  /** 按下 esc 的反馈，如果未设置，则取触发退出的函数 */
-  const _onEscape = onEscape ?? exits.find(e => e.on != null)?.on;
+  /** 出口们，列表的出口们，subNodes 的出口们 */
+  const exits = [escapeExit].concat(tempExits).filter(e => e != null);
+
 
   const keyExits = exits.filter(e => e.type?.includes("keydown"));
   const clickExits = exits.filter(e => e.type?.includes("click"));
@@ -225,7 +221,7 @@ const focusBagel = (...props) => {
     coverNode: _coverNode,
   } = getNodes(rootNode, subNodes, coverNode);
 
-  const isFunctionDelay = objToStr(delayToFocus) === "[object Function]";
+  const isFunctionDelay = isFun(delayToFocus);
   const delayRes = isFunctionDelay && delayToFocus(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
@@ -534,7 +530,7 @@ const focusBagel = (...props) => {
       enabledCover && target !== _coverNode &&  (trappedFromCover = false);
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
       target !== _coverNode && removeListeners();
-      (on ?? _onEscape)?.(e);
+      on?.(e);
       return focus(target);
     }
 
@@ -543,18 +539,18 @@ const focusBagel = (...props) => {
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         enabledCover && (trappedFromCover = false); // 标记离开列表
         removeListeners();
-        (on ?? _onEscape)?.(e);
+        on?.(e);
         e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，enter button 触发 click 事件
         return true;
       }
       if (enabledCover) {
         trappedFromCover = false;
-        (on ?? _onEscape)?.(e);
+        on?.(e);
         e.preventDefault();
         return focus(_coverNode);
       } else {
         removeListeners();
-        (on ?? _onEscape)?.(e);
+        on?.(e);
         e.preventDefault();
         return _trigger && focus(_trigger);
       }
