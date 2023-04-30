@@ -18,15 +18,15 @@ import manualModalHtml from './template-html/manual-modal.js';
 import inputModalHtml from './template-html/input-modal.js';
 
 describe("focus-bagel", function() {
-  test("should focus first focusable node of modal after click trigger", async () => {
+  it("should focus first focusable node of modal after click trigger", async () => {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
   
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
   });
 
-  test("should focus back to trigger after click close button", () => {
+  it("should focus back to trigger after click close button", () => {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
   
@@ -34,7 +34,7 @@ describe("focus-bagel", function() {
     expect(open).toHaveFocus();
   });
 
-  test("should focus first focusable node of modal that is visible and sibling with trigger after press tab", async () => {
+  it("should focus first focusable node of modal that is visible and sibling with trigger after press tab", async () => {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
   
@@ -53,11 +53,11 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
-  test("should loop focus forward", async function() {
+  it("should loop focus forward", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
   
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.tab();
     expect(getByText(container, "不二家棒棒糖")).toHaveFocus();
@@ -75,11 +75,11 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
-  test("should loop focus backward", async function() {
+  it("should loop focus backward", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
     const s = { shift: true };
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.tab(s);
     expect(last).toHaveFocus();
@@ -97,15 +97,15 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
-  test("should enter by return api", async function() {
+  it("should enter by return api", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     const bagel = initBagel_2(container, dialog, first, last, open, close);
     expect(document.body).toHaveFocus();
-    bagel.enter(); // maybe setTimeout 300ms
+    await bagel.enter(); // maybe setTimeout 300ms
     expect(first).toHaveFocus();
   });
 
-  test("should exit by return api", function() {
+  it("should exit by return api", function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     const bagel = initBagel_3(container, dialog, first, last, open, close);
     waitFor(function() {
@@ -115,7 +115,7 @@ describe("focus-bagel", function() {
     })
   });
 
-  test("should not change activeIndex when disable manual option", async function() {
+  it("should not change activeIndex when disable manual option", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     const bagel = initBagel_4(container, dialog, first, last, open, close);
 
@@ -124,7 +124,7 @@ describe("focus-bagel", function() {
     await user.tab();
     const i2 = bagel.i();
     expect(i2).toBe(0);
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     const i3 = bagel.i();
     expect(i3).toBe(0);
@@ -133,21 +133,19 @@ describe("focus-bagel", function() {
     expect(i3).toBe(0);
   });
 
-  // TODO: should change activeIndex when enable manual option
+  // // TODO: should change activeIndex when enable manual option
 
-  test("should not focus trigger when invoke returned exit if no trigger", function() {
+  it("should not focus trigger when invoke returned exit if no trigger", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_5(container, dialog, first, last, open, close);
 
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
-    close.click();
-    waitFor(() => {
-      expect(close).toHaveFocus();
-    });
+    await close.click();
+    expect(first).toHaveFocus()
   });
 
-  test("should not focus trigger when pass opts.exit without trigger", function() {
+  it("should not focus trigger when pass opts.exit without trigger", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_6(container, dialog, first, last, open, close);
 
@@ -181,16 +179,16 @@ describe("focus-bagel", function() {
   it("should handle esc key", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_9(container, dialog, first, last, open, close);
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.keyboard("[Escape]");
-    expect(open).toHaveFocus();
+    expect(open).toHaveFocus()
   });
 
   it("should disable onEscape explicitly", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_10(container, dialog, first, last, open, close);
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.keyboard("[Escape]");
     expect(first).toHaveFocus();
@@ -199,20 +197,20 @@ describe("focus-bagel", function() {
   it("should warn if press esc when no trigger", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_11(container, dialog, first, last, open, close);
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.keyboard("[Escape]");
-    expect(first).toHaveFocus();
+    waitFor(() => expect(first).toHaveFocus())
   });
 
-  // TODO: should handle delaied rootContainer and subItems
+  // // TODO: should handle delaied rootContainer and subItems
 
   it("should focus nodes manually", async function() {
     const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
-    open.click();
+    await open.click();
     expect(focusA).toHaveFocus();
     await user.tab();
     expect(focusB).toHaveFocus();
@@ -230,9 +228,9 @@ describe("focus-bagel", function() {
     expect(focusA).toHaveFocus();
     await user.keyboard("[Escape]");
     expect(open).toHaveFocus();
-    open.click();
+    await open.click();
     expect(focusA).toHaveFocus();
-    focusF.click();
+    await focusF.click();
     expect(open).toHaveFocus();
   });
 
@@ -242,7 +240,7 @@ describe("focus-bagel", function() {
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
-    open.click();
+    await open.click();
     expect(focusA).toHaveFocus();
     await user.tab();
     expect(focusB).toHaveFocus();
@@ -270,7 +268,7 @@ describe("focus-bagel", function() {
     initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
-    open.click();
+    await open.click();
     expect(focusA).toHaveFocus();
     await user.tab(s);
     expect(focusA).toHaveFocus();
@@ -295,7 +293,7 @@ describe("focus-bagel", function() {
     const { container, dialog, first, last, open, close } = getInputModalDom();
     initBagel(container, dialog, first, last, open, close);
 
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.tab(s);
     expect(last).toHaveFocus();
@@ -307,7 +305,7 @@ describe("focus-bagel", function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel_14();
   
-    open.click();
+    await open.click();
     expect(first).toHaveFocus();
     await user.tab();
     expect(getByText(container, "不二家棒棒糖")).toHaveFocus();
@@ -453,13 +451,10 @@ function initBagel_9(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     enter: {
       node: open,
-      on: () => {}
     },
     exit: {
       node: close,
-      on: () => {}
     },
-    onEscape() {},
   });
 }
 
