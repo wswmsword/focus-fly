@@ -1,5 +1,11 @@
 type handleKeydown = (e: KeyboardEvent) => any;
 
+type handleEnter = (e: KeyboardEvent | MouseEvent | FocusEvent | { fromInvoke: boolean }) => any;
+
+type handleExit = handleEnter;
+
+type handleClick = (obj: { e: MouseEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
+
 type element = string | Element | HTMLElement;
 
 type isKey = (e: KeyboardEvent) => boolean;
@@ -20,6 +26,9 @@ type subNodesBackward = {
   on?: handleKeydown;
 };
 
+type enterType = "keydown" | "focus" | "click" | "invoke";
+type exitType = enterType;
+
 type enterSubNodes = {
   /** 触发器，将用于监听点击事件，用于退出焦点循环时聚焦使用 */
   node?: element;
@@ -28,10 +37,10 @@ type enterSubNodes = {
   key?: iskey;
 
   /** 点击触发器后的行为 */
-  on?: handleKeydown;
+  on?: handleEnter;
 
-  /** 是否关闭点击事件 */
-  disableClick?: boolean;
+  /** 入口的事件类型 */
+  type?: enterType[];
 }
 
 type exitSubNodes = {
@@ -43,7 +52,10 @@ type exitSubNodes = {
   key?: iskey;
 
   /** 点击退出循环焦点的触发器后的行为 */
-  on?: handleKeydown;
+  on?: handleExit;
+
+  /** 出口的事件类型 */
+  type?: exitType[];
 
   /** 退出至哪个元素？ */
   target?: element;
@@ -94,20 +106,23 @@ interface Options {
   /** 自定义*后退*焦点函数，设置后，`manual` 将默认为 true */
   backward?: isKey | subNodesBackward;
 
-  /** 触发器，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` */
+  /** 显式设置入口，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` */
   trigger?: element;
 
-  /** 进入 subNodes */
+  /** 入口，进入 subNodes */
   enter?: enterSubNodes | enterSubNodes[];
 
-  /** 退出 subNodes */
+  /** 出口，退出 subNodes */
   exit?: exitSubNodes | exitSubNodes[];
 
   /** 按下 `esc` 的行为，如果未设置，默认取 `exit.on` */
-  onEscape?: false | handleKeydown;
+  onEscape?: boolean | handleKeydown;
+
+  /** 点击列表单项的响应，行为 */
+  onClick?: handleClick;
 
   /** 封面相关 */
-  cover?: cover;
+  cover?: boolean | cover;
 
   /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦 */
   delayToFocus?: promiseDelay | callbackDelay;
@@ -128,9 +143,7 @@ interface Return {
   i(): number;
 }
 
-declare const focusBagel: (rootNode: element, subNodes: element[], options?: Options) => Return;
+declare function focusBagel(rootNode: element, subNodes: element[], options?: Options): Return;
+declare function focusBagel(subNodes: element[], options?: Options): Return;
 
 export default focusBagel;
-
-// export function focusBagel(rootNode: element, subNodes: element[], options?: Options): Return;
-// export function focusBagel(subNodes: element[], options?: Options): Return;
