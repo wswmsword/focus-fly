@@ -116,7 +116,7 @@ const getNodes = function(rootNode, subNodes, coverNode) {
 };
 
 /** 获取（生成）出口 */
-const getExits = function(exit, onEscape, enabledCover, _coverNode, _trigger) {
+const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
   let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
     ...e,
     // undefined 表示用户没有主动设置
@@ -128,10 +128,27 @@ const getExits = function(exit, onEscape, enabledCover, _coverNode, _trigger) {
     node: null,
     key: isEscapeEvent,
     on: _onEscape,
-    target: enabledCover ? _coverNode : _trigger,
+    target: enabledCover ? cover : trigger,
     type: ["keydown"],
   } : null;
-  return [escapeExit].concat(tempExits).filter(e => e != null);
+  const exits = [escapeExit].concat(tempExits).filter(e => e != null);
+
+  return {
+    exits,
+    ...splitExits(),
+  }
+
+  function splitExits() {
+    const keyExits = exits.filter(e => e.type?.includes("keydown"));
+    const clickExits = exits.filter(e => e.type?.includes("click"));
+    const focusExits = exits.filter(e => e.type?.includes("focus"));
+  
+    const hasClickExits = clickExits.length > 0;
+    const hasFocusExits = focusExits.length > 0;
+    const hasKeyExits = keyExits.length > 0;
+    
+    return { keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits };
+  }
 }
 
 const focusBagel = (...props) => {
@@ -358,15 +375,9 @@ const focusBagel = (...props) => {
       focusSubNodes(_head, _tail, isClamp, onForward, onBackward, _coverNode);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
-    const exits = exits_outer = getExits(exit, onEscape, enabledCover, _coverNode, _trigger);
-
-    const keyExits = exits.filter(e => e.type?.includes("keydown"));
-    const clickExits = exits.filter(e => e.type?.includes("click"));
-    const focusExits = exits.filter(e => e.type?.includes("focus"));
-
-    const hasClickExits = clickExits.length > 0;
-    const hasFocusExits = focusExits.length > 0;
-    const hasKeyExits = keyExits.length > 0;
+    const {
+      exits, keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
+    } = getExits(exit, onEscape, enabledCover, _coverNode, _trigger);
 
     if (removeListenersEachExit || !addedListeners) {
       // 添加除 trigger 以外其它和焦点相关的事件监听器
@@ -377,6 +388,7 @@ const focusBagel = (...props) => {
     // 用以 return.exit
     exitListWithTarget_outer = exitListWithTarget;
     exitListWithoutTarget_outer = exitListWithoutTarget;
+    exits_outer = exits;
     
     /** 聚焦列表一个单项而退出 */
     function focusListExitHandler(e) {
