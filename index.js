@@ -115,6 +115,25 @@ const getNodes = function(rootNode, subNodes, coverNode) {
   };
 };
 
+/** 获取（生成）出口 */
+const getExits = function(exit, onEscape, enabledCover, _coverNode, _trigger) {
+  let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
+    ...e,
+    // undefined 表示用户没有主动设置
+    type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
+  }));
+  let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
+  /** 按下 esc 的出口 */
+  const escapeExit = isFun(_onEscape) ? {
+    node: null,
+    key: isEscapeEvent,
+    on: _onEscape,
+    target: enabledCover ? _coverNode : _trigger,
+    type: ["keydown"],
+  } : null;
+  return [escapeExit].concat(tempExits).filter(e => e != null);
+}
+
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
@@ -181,29 +200,6 @@ const focusBagel = (...props) => {
 
   /** 禁用左上角 esc 出口 */
   const disabledEsc = onEscape === false;
-
-  let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
-    ...e,
-    // undefined 表示用户没有主动设置
-    type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
-  }));
-  let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
-  /** 按下 esc 的出口 */
-  const escapeExit = isFun(_onEscape) ? {
-    node: null,
-    key: isEscapeEvent,
-    on: _onEscape,
-    target: enabledCover ? coverNode : _trigger,
-    type: ["keydown"],
-  } : null;
-
-  /** 出口们，列表的出口们，subNodes 的出口们 */
-  const exits = [escapeExit].concat(tempExits).filter(e => e != null);
-
-
-  const keyExits = exits.filter(e => e.type?.includes("keydown"));
-  const clickExits = exits.filter(e => e.type?.includes("click"));
-  const focusExits = exits.filter(e => e.type?.includes("focus"));
 
   const {
     key: isForward,
@@ -272,6 +268,7 @@ const focusBagel = (...props) => {
   // 用于 return.exit
   let exitListWithTarget_outer = null;
   let exitListWithoutTarget_outer = null;
+  let exits_outer = null;
 
   // 不用延迟聚焦
   if (!isDelay)
@@ -292,7 +289,7 @@ const focusBagel = (...props) => {
     },
     /** 调用形式的出口 */
     exit() {
-      for (const exit of exits) {
+      for (const exit of exits_outer) {
         let { on, type, target } = exit;
         target = element(target);
         const invokeType = "invoke";
@@ -359,6 +356,13 @@ const focusBagel = (...props) => {
     const keyListMoveHandler = _manual ?
       focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isForward, isBackward, onForward, onBackward, _coverNode) :
       focusSubNodes(_head, _tail, isClamp, onForward, onBackward, _coverNode);
+  
+    /** 出口们，列表的出口们，subNodes 的出口们 */
+    const exits = exits_outer = getExits(exit, onEscape, enabledCover, _coverNode, _trigger);
+
+    const keyExits = exits.filter(e => e.type?.includes("keydown"));
+    const clickExits = exits.filter(e => e.type?.includes("click"));
+    const focusExits = exits.filter(e => e.type?.includes("focus"));
 
     const hasClickExits = clickExits.length > 0;
     const hasFocusExits = focusExits.length > 0;
