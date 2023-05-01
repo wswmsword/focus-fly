@@ -192,7 +192,7 @@ const focusBagel = (...props) => {
     enterKey: coverEnterKey,
     onEnter: onEnterCover,
     exit: exitCover,
-  } = isObj(cover) ? cover : { node: !!cover ? rootNode : null };
+  } = isObj(cover) ? cover : cover === true ? {} : { node: !!cover ? rootNode : null };
 
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
