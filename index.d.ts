@@ -10,6 +10,16 @@ type element = string | Element | HTMLElement;
 
 type isKey = (e: KeyboardEvent) => boolean;
 
+type entryTargetOpts = {
+  list: element[],
+  cover: element,
+  root: element,
+  last: element,
+  lastI: number,
+}
+
+type getTarget = (opts: entryTargetOpts) => element;
+
 type subNodesForward = {
   /** 自定义前进 subNodes 的组合键 */
   key?: isKey;
@@ -41,6 +51,9 @@ type enterSubNodes = {
 
   /** 入口的事件类型 */
   type?: enterType[];
+
+  /** 进入到哪个元素？ */
+  target?: element | getTarget;
 }
 
 type exitSubNodes = {
