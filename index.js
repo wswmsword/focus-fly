@@ -71,6 +71,9 @@ const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyC
   // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", keyListMoveHandler);
 
+  /** 点击聚焦列表单项 */
+  rootNode.addEventListener("click", clickListItemHandler);
+
   /** 列表点击出口 */
   hasClickExits && rootNode.addEventListener("click", clickListExitHandler);
 
@@ -79,9 +82,6 @@ const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyC
 
   /** 列表键盘出口 */
   hasKeyExits && rootNode.addEventListener("keydown", keyListExitHandler);
-
-  /** 点击聚焦列表单项 */
-  rootNode.addEventListener("click", clickListItemHandler);
  
   /** 封面的事件 */
   coverNode?.addEventListener("keydown", keyCoverHandler);
@@ -261,7 +261,7 @@ const focusBagel = (...props) => {
 
   // 入口点击事件
   for (let enter of enters) {
-    const { node: origin, on, key, type } = enter;
+    const { node: origin, on, key, type, target } = enter;
     const types = [].concat(type);
     const allTypes = ["keydown", "focus", "click"];
     const node = element(origin);
@@ -273,12 +273,12 @@ const focusBagel = (...props) => {
     function keyHandler(e) {
       if (key?.(e)) {
         e.preventDefault();
-        enterTriggerHandler(e, on);
+        enterTriggerHandler(e, on, target);
       }
     }
 
     function notKeyHandler(e) {
-      enterTriggerHandler(e, on)
+      enterTriggerHandler(e, on, target)
     }
   }
 
@@ -297,11 +297,11 @@ const focusBagel = (...props) => {
       _trigger = _trigger || getActiveElement();
 
       for (let enter of enters) {
-        const { on, type, node } = enter;
+        const { on, type, node, target } = enter;
         const invokeType = "invoke";
 
         if (type?.some(type => type == null || type === false || type === invokeType) || node == null)
-          enterTriggerHandler({ fromInvoke: true }, on);
+          enterTriggerHandler({ fromInvoke: true }, on, target);
       }
     },
     /** 调用形式的出口 */
@@ -323,7 +323,7 @@ const focusBagel = (...props) => {
     i: () => activeIndex,
   };
 
-  async function enterTriggerHandler(e, onEnter) {
+  async function enterTriggerHandler(e, onEnter, target) {
     await onEnter?.(e);
 
     if (isDelay) {
@@ -336,9 +336,9 @@ const focusBagel = (...props) => {
     }
     else if (removeListenersEachExit && !addedListeners) {
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
-      focusCoverOrList(_rootNode, head);
+      focusEntryTarget(_coverNode, target, _subNodes, _rootNode);
     }
-    else focusCoverOrList(_rootNode, head);
+    else focusEntryTarget(_coverNode, target, _subNodes, _rootNode);
 
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
@@ -350,12 +350,20 @@ const focusBagel = (...props) => {
       } = getNodes(rootNode, subNodes, coverNode);
 
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
-      focusCoverOrList(_coverNode, head);
+      focusEntryTarget(_coverNode, target, _subNodes, _rootNode);
     }
 
-    function focusCoverOrList(cover, head) {
-      if (enabledCover) tickFocus(cover); // 如果打开封面，首先聚焦封面
-      else tickFocus(_subNodes[activeIndex]); // 如果未打开封面，聚焦内部聚焦列表
+    function focusEntryTarget(cover, target, subNodes, rootNode) {
+      if (target == null) {
+        if (enabledCover) tickFocus(cover); // 如果打开封面，首先聚焦封面
+        else tickFocus(subNodes[activeIndex]); // 如果未打开封面，聚焦内部聚焦列表
+      } else if (isFun(target)) {
+        const gotTarget = target({ list: subNodes, cover, root: rootNode, last: subNodes[activeIndex], lastI: activeIndex });
+        gotTarget && focus(gotTarget);
+      } else {
+        const eTarget = element(target);
+        eTarget && focus(eTarget);
+      }
     }
   }
 
@@ -577,10 +585,11 @@ const focusBagel = (...props) => {
       addedListeners = false;
       if (removeListenersEachExit) {
         _rootNode.removeEventListener("keydown", keyListMoveHandler);
+        _rootNode.removeEventListener("click", clickListItemHandler);
+
         _rootNode.removeEventListener("click", clickListExitHandler);
         _rootNode.removeEventListener("focusin", focusListExitHandler);
         _rootNode.removeEventListener("keydown", keyListExitHandler);
-        _rootNode.removeEventListener("click", clickListItemHandler);
         _coverNode?.removeEventListener("keydown", keyCoverHandler);
         _tail?.removeEventListener("focus", focusListTailHandler);
         _rootNode.removeEventListener("click", clickListTailHandler);
