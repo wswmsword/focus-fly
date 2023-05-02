@@ -468,7 +468,6 @@ const focusBagel = (...props) => {
       if (prevFocus !== _coverNode && !trappedFromCover) { // subNodes 里聚焦元素同样会聚焦到 tail，这里做区分，如果是从非 subNodes 的范围聚焦这个 tail，就重新聚焦到封面
         focus(_coverNode);
       }
-
     }
 
     /** 封面的键盘事件响应 */
@@ -486,8 +485,8 @@ const focusBagel = (...props) => {
 
       // 出口
       for (let exit of exitsCover) {
-        let { key, on, target } = exit;
-        target = element(target);
+        const { key, on, target: origin } = exit;
+        const target = element(origin);
         if (key?.(e)) {
           exitCoverHandler(e, on, target);
           return;
@@ -502,10 +501,6 @@ const focusBagel = (...props) => {
         }
         else if (isTabBackward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
           focus(_coverNode);
-          return;
-        }
-        else if (isEscapeEvent(e)) {
-          exitCoverHandler(e, null, _trigger);
           return;
         }
       }
@@ -551,7 +546,7 @@ const focusBagel = (...props) => {
 
     /** 退出列表，有 target */
     function exitListWithTarget(e, on, target) {
-      enabledCover && target !== _coverNode &&  (trappedFromCover = false);
+      enabledCover && target === _coverNode &&  (trappedFromCover = false);
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
       target !== _coverNode && removeListeners();
       on?.(e);
