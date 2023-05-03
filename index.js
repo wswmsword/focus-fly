@@ -9,9 +9,11 @@ const focus = function(e) {
 };
 
 /** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
-const tickFocus = function(e) {
-  if (e == null) tick(() => e && focus(e));
-  else focus(e);
+const tickFocus = async function(e) {
+  return new Promise(resolve => {
+    if (e == null) tick(() => resolve(e && focus(e)));
+    else resolve(focus(e));
+  })
 };
 
 /** 手动聚焦下一个元素 */
@@ -66,7 +68,18 @@ const focusSubNodes = (head, tail, isClamp, onForward, onBackward, coverNode) =>
 };
 
 /** 添加焦点需要的事件监听器 */
-const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyCoverHandler, isDefaultExitCover, tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler) {
+const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyCoverHandler, isDefaultExitCover, tail, focusListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler, focusTrapListHandler, blurTrapListHandler, focusTrapCoverHandler, blurTrapCoverHandler) {
+
+  rootNode.addEventListener("focusin", focusTrapListHandler);
+
+  rootNode.addEventListener("focusout", blurTrapListHandler);
+
+  if (rootNode !== coverNode && coverNode != null) {
+
+    coverNode.addEventListener("focus", focusTrapCoverHandler);
+
+    coverNode.addEventListener("blur", blurTrapCoverHandler);
+  }
 
   // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
   rootNode.addEventListener("keydown", keyListMoveHandler);
@@ -90,12 +103,7 @@ const addEventListeners = function(rootNode, keyListMoveHandler, coverNode, keyC
 
     /** 尾部元素聚焦后的事件，用于返回封面 */
     tail?.addEventListener("focus", focusListTailHandler);
-
-    /** subNodes 点击事件，用于配合 tail focus */
-    rootNode.addEventListener("click", clickListTailHandler);
   }
-
-  return true;
 };
 
 /** 获取关键节点 */
@@ -256,8 +264,8 @@ const focusBagel = (...props) => {
   /** 是否已添加监听事件 */
   let addedListeners = false;
 
-  /** 是否通过 cover 进入的 subNodes，用于区分是如何聚焦到列表尾元素的，是从内部访问，还是从外部通过 shift-tab 访问 */
-  let trappedFromCover = false;
+  let trappedList = false;
+  let trappedCover = false;
 
   // 入口点击事件
   for (let enter of enters) {
@@ -389,7 +397,7 @@ const focusBagel = (...props) => {
 
     if (removeListenersEachExit || !addedListeners) {
       // 添加除 trigger 以外其它和焦点相关的事件监听器
-      addEventListeners(_rootNode, keyListMoveHandler, _coverNode, keyCoverHandler, isDefaultExitCover, _tail, focusListTailHandler, clickListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler);
+      addEventListeners(_rootNode, keyListMoveHandler, _coverNode, keyCoverHandler, isDefaultExitCover, _tail, focusListTailHandler, clickListExitHandler, hasClickExits, clickListItemHandler, hasFocusExits, focusListExitHandler, hasKeyExits, keyListExitHandler, focusTrapListHandler, blurTrapListHandler, focusTrapCoverHandler, blurTrapCoverHandler);
       addedListeners = true;
     }
 
@@ -397,6 +405,22 @@ const focusBagel = (...props) => {
     exitListWithTarget_outer = exitListWithTarget;
     exitListWithoutTarget_outer = exitListWithoutTarget;
     exits_outer = exits;
+
+    function focusTrapListHandler() {
+      trappedList = true;
+    }
+
+    function blurTrapListHandler() {
+      trappedList = false;
+    }
+
+    function focusTrapCoverHandler() {
+      trappedCover = true;
+    }
+
+    function blurTrapCoverHandler() {
+      trappedCover = false;
+    }
     
     /** 聚焦列表一个单项而退出 */
     function focusListExitHandler(e) {
@@ -425,7 +449,6 @@ const focusBagel = (...props) => {
       if (targetIndex > -1) {
         onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         activeIndex = targetIndex;
-        _subNodes[activeIndex].focus(); // 兼容 Safari
       }
 
     }
@@ -450,24 +473,12 @@ const focusBagel = (...props) => {
 
     }
 
-    /** 点击 rootNode 的事件，click 事件响应的顺序在 focus 之后 */
-    function clickListTailHandler(e) {
-      const targ = e.target;
-      if (getActiveElement() !== _coverNode)
-        trappedFromCover = true;
-  
-      if (targ === _tail) { // 如果触发了 tail，首先响应 tail 的 focus 事件，封面被聚焦，这里将焦点重新设置到 tail
-        focus(_tail);
-        trappedFromCover = true;
-      }
-    }
-
     /** subNodes 最后一个元素的聚焦事件 */
     function focusListTailHandler(e) {
       const prevFocus = e.relatedTarget; // 理想情况只在 tail 后面一个元素 shift-tab 时触发，可是还存在点击触发的情况，所以需要在点击时调整
-      if (prevFocus !== _coverNode && !trappedFromCover) { // subNodes 里聚焦元素同样会聚焦到 tail，这里做区分，如果是从非 subNodes 的范围聚焦这个 tail，就重新聚焦到封面
-        focus(_coverNode);
-      }
+
+      if (!(prevFocus === _coverNode || _rootNode.contains(prevFocus)))
+        focus(_coverNode) // 如果从列表以外的区域进入，则聚焦封面
     }
 
     /** 封面的键盘事件响应 */
@@ -477,7 +488,6 @@ const focusBagel = (...props) => {
       // 入口
       if((coverEnterKey ?? isEnterEvent)(e)) {
         e.preventDefault();
-        trappedFromCover = true;
         onEnterCover?.(e);
         focus(_subNodes[activeIndex]);
         return;
@@ -546,32 +556,28 @@ const focusBagel = (...props) => {
 
     /** 退出列表，有 target */
     function exitListWithTarget(e, on, target) {
-      enabledCover && target === _coverNode &&  (trappedFromCover = false);
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
       target !== _coverNode && removeListeners();
       on?.(e);
-      return focus(target);
+      focus(target);
     }
 
     /** 退出列表，无 target */
     function exitListWithoutTarget(e, on, target) {
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-        enabledCover && (trappedFromCover = false); // 标记离开列表
         removeListeners();
         on?.(e);
         e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，enter button 触发 click 事件
-        return true;
       }
       if (enabledCover) {
-        trappedFromCover = false;
         on?.(e);
         e.preventDefault();
-        return focus(_coverNode);
+        focus(_coverNode);
       } else {
         removeListeners();
         on?.(e);
         e.preventDefault();
-        return _trigger && focus(_trigger);
+        _trigger && focus(_trigger);
       }
     }
 
@@ -579,6 +585,11 @@ const focusBagel = (...props) => {
     function removeListeners() {
       addedListeners = false;
       if (removeListenersEachExit) {
+        _rootNode.removeEventListener("focusin", focusTrapListHandler);
+        _rootNode.removeEventListener("focusout", blurTrapListHandler);
+        _coverNode?.removeEventListener("focus", focusTrapCoverHandler);
+        _coverNode?.removeEventListener("blur", blurTrapCoverHandler);
+
         _rootNode.removeEventListener("keydown", keyListMoveHandler);
         _rootNode.removeEventListener("click", clickListItemHandler);
 
@@ -587,7 +598,6 @@ const focusBagel = (...props) => {
         _rootNode.removeEventListener("keydown", keyListExitHandler);
         _coverNode?.removeEventListener("keydown", keyCoverHandler);
         _tail?.removeEventListener("focus", focusListTailHandler);
-        _rootNode.removeEventListener("click", clickListTailHandler);
       }
     }
   }
