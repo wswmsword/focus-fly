@@ -286,7 +286,7 @@ const focusBagel = (...props) => {
     }
 
     function notKeyHandler(e) {
-      enterTriggerHandler(e, on, target)
+      enterTriggerHandler(e, on, target);
     }
   }
 
@@ -332,6 +332,9 @@ const focusBagel = (...props) => {
   };
 
   async function enterTriggerHandler(e, onEnter, target) {
+
+    if (trappedCover || trappedList) return;
+
     await onEnter?.(e);
 
     if (isDelay) {
@@ -517,9 +520,9 @@ const focusBagel = (...props) => {
 
       /** 退出封面焦点的行为 */
       function exitCoverHandler(e, onExit, target) {
-        removeListeners();
         onExit?.(e);
-        return target && focus(target);
+        target && focus(target);
+        removeListeners();
       }
     }
 
@@ -557,34 +560,34 @@ const focusBagel = (...props) => {
     /** 退出列表，有 target */
     function exitListWithTarget(e, on, target) {
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
-      target !== _coverNode && removeListeners();
       on?.(e);
       focus(target);
+      target !== _coverNode && removeListeners();
     }
 
     /** 退出列表，无 target */
     function exitListWithoutTarget(e, on, target) {
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-        removeListeners();
         on?.(e);
         e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，enter button 触发 click 事件
+        removeListeners();
       }
       if (enabledCover) {
         on?.(e);
         e.preventDefault();
         focus(_coverNode);
       } else {
-        removeListeners();
         on?.(e);
         e.preventDefault();
         _trigger && focus(_trigger);
+        removeListeners();
       }
     }
 
     /** 移除监听事件 */
     function removeListeners() {
-      addedListeners = false;
       if (removeListenersEachExit) {
+        addedListeners = false;
         _rootNode.removeEventListener("focusin", focusTrapListHandler);
         _rootNode.removeEventListener("focusout", blurTrapListHandler);
         _coverNode?.removeEventListener("focus", focusTrapCoverHandler);
