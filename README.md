@@ -1,8 +1,8 @@
-# focus-no-jutsu 🍜
+# Focus-no-Jutsu
 
-focus-no-jutsu，聚焦之术，属于 B 级幻术。
+Focus-no-Jutsu（Focus の術），属于 B 级[幻术](https://naruto.fandom.com/wiki/Genjutsu)。
 
-网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入到这些情景里之后，我们希望焦点被施加一个幻术，或者在情景里陷入循环，或者被卡在首尾元素之间的秘密空间，直到我们按下按键 <kbd>Esc</kbd> 或者点击按钮“返回”解开幻术。
+网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入到这些情景里之后，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下按键 <kbd>Esc</kbd> 或者点击按钮“返回”解开幻术。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述如何进入焦点，进入后如何移动焦点，以及如何退出焦点。
 
@@ -112,8 +112,10 @@ npm run start
 | enter | enterSubNodes \| enterSubNodes[] | N | {} | *入口*相关配置，进入*列表* |
 | exit | exitSubNodes \| exitSubNodes[] | N | {} | *出口*相关配置，退出*列表* |
 | onEscape | false \| handleKeydown | N | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取 `options.exit.on` |
+| onClick | handleKeydown | N null | 点击列表里的某一项后的行为 |
 | cover | cover | N | false | *封面*相关配置 |
 | delayToFocus | promiseDelay \| callbackDelay | N | null | 延迟聚焦，执行完 `options.enter.on` 后，等待执行 delayToFocus 完成后聚焦 |
+| delayToBlur | promiseDelay \| callbackDelay | N | null | 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur |
 | removeListenersEachExit | boolean | N | true | 每次退出*列表*后是否移除所有监听事件 |
 
 ### options.forward
@@ -139,7 +141,9 @@ npm run start
 | node | element | N | null | *入口*元素，将用于监听点击事件，用于退出*列表*时聚焦使用 |
 | key | iskey | N | null | 自定义进入*列表*组合键 |
 | on | handleKeydown | N | null | 进入时被调用，进入*列表*前的行为，如果*列表*或*封面*在这里渲染，需要设置 `options.delayToFocus` 来延迟聚焦 |
-| disableClick | boolean | N | null | 是否关闭监听点击事件 |
+| type | enterType[] | N | ["keydown", "click"] | 入口的监听方式 |
+| target | element \| getTarget | N | null | 进入到哪个元素？ |
+| delay | false \| promiseDelay \| callbackDelay | null | 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 |
 
 <details>
 <summary>
@@ -194,6 +198,7 @@ focusNoJutsu(dialog, ["#head", "#second", "#tail"], {
 | key | iskey | N | null | 自定义退出*列表*组合键 |
 | on | handleKeydown | N | null | 退出时被调用，退出*列表*前的行为，如果有*封面*就退出至封面，如果没有就退出至*入口*，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
 | target | element | N | null | 退出至哪个元素？ |
+| delay | false \| promiseDelay \| callbackDelay | N | null | 延迟失焦，触发 node 后等待执行 delay 完成后失焦 |
 
 ### options.cover
 

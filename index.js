@@ -157,7 +157,36 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
     
     return { keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits };
   }
-}
+};
+
+/** 获取聚焦或失焦时延迟的类型 */
+const getDelayType = function(getCommonDelay, delay) {
+  const isFunctionDelay = isFun(delay);
+  const delayRes = isFunctionDelay && delay(() => {});
+  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
+  const callbackDelay = isFunctionDelay && !promiseDelay;
+  const commonDelay = getCommonDelay(promiseDelay, callbackDelay);
+  const isDelay = promiseDelay || callbackDelay || commonDelay;
+  return {
+    promiseDelay,
+    callbackDelay,
+    commonDelay,
+    isDelay,
+  };
+};
+
+/** 获取聚焦列表时延迟的类型 */
+const getDelayFocusType = function(delay, head, tail, enabledCover, _coverNode) {
+  return getDelayType((p, c) => (
+    (head == null || tail == null) ||
+    (enabledCover && _coverNode == null)) &&
+    !p && !c, delay);
+};
+
+/** 获取列表失焦时的延迟的类型 */
+// const getDelayBlurType = function(delay, target) {
+//   return getDelayType((p, c) => target == null && !p && !c, delay);
+// };
 
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
@@ -242,15 +271,9 @@ const focusBagel = (...props) => {
     coverNode: _coverNode,
   } = getNodes(rootNode, subNodes, coverNode);
 
-  const isFunctionDelay = isFun(delayToFocus);
-  const delayRes = isFunctionDelay && delayToFocus(() => {});
-  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
-  const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = (
-    (head == null || tail == null) ||
-    (enabledCover && _coverNode == null)) &&
-    !promiseDelay && !callbackDelay;
-  const isDelay = promiseDelay || callbackDelay || commonDelay;
+  const {
+    promiseDelay, callbackDelay, commonDelay, isDelay,
+  } = getDelayFocusType(delayToFocus, head, tail, enabledCover, _coverNode);
 
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
@@ -269,7 +292,7 @@ const focusBagel = (...props) => {
 
   // 入口点击事件
   for (let enter of enters) {
-    const { node: origin, on, key, type, target } = enter;
+    const { node: origin, on, key, type, target, delay } = enter;
     const types = [].concat(type);
     const allTypes = ["keydown", "focus", "click"];
     const node = element(origin);
@@ -281,12 +304,12 @@ const focusBagel = (...props) => {
     function keyHandler(e) {
       if (key?.(e)) {
         e.preventDefault();
-        enterTriggerHandler(e, on, target);
+        enterTriggerHandler(e, on, target, delay);
       }
     }
 
     function notKeyHandler(e) {
-      enterTriggerHandler(e, on, target);
+      enterTriggerHandler(e, on, target, delay);
     }
   }
 
@@ -305,11 +328,11 @@ const focusBagel = (...props) => {
       _trigger = _trigger || getActiveElement();
 
       for (let enter of enters) {
-        const { on, type, node, target } = enter;
+        const { on, type, node, target, delay } = enter;
         const invokeType = "invoke";
 
         if (type?.some(type => type == null || type === false || type === invokeType) || node == null)
-          enterTriggerHandler({ fromInvoke: true }, on, target);
+          enterTriggerHandler({ fromInvoke: true }, on, target, delay);
       }
     },
     /** 调用形式的出口 */
@@ -331,19 +354,28 @@ const focusBagel = (...props) => {
     i: () => activeIndex,
   };
 
-  async function enterTriggerHandler(e, onEnter, target) {
+  async function enterTriggerHandler(e, onEnter, target, delay) {
 
+    // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
 
     await onEnter?.(e);
 
-    if (isDelay) {
-      if (promiseDelay) {
-        await delayToFocus(() => {});
+    let [_isDelay, _promiseDelay, ,_callbackDelay, _commonDelay, _delayToFocusList] = [isDelay, promiseDelay, callbackDelay, commonDelay, delayToFocus];
+    if (delay !== undefined) {
+      const {
+        promiseDelay, callbackDelay, commonDelay, isDelay,
+      } = getDelayFocusType(delay, head, tail, enabledCover, _coverNode);
+      [_isDelay, _promiseDelay, ,_callbackDelay, _commonDelay, _delayToFocusList] = [isDelay, promiseDelay, callbackDelay, commonDelay, delay];
+    }
+
+    if (_isDelay) {
+      if (_promiseDelay) {
+        await _delayToFocusList(() => {});
         findNodesToLoadListenersAndFocus();
       }
-      else if (callbackDelay) delayToFocus(findNodesToLoadListenersAndFocus);
-      else if (commonDelay) findNodesToLoadListenersAndFocus();
+      else if (_callbackDelay) _delayToFocusList(findNodesToLoadListenersAndFocus);
+      else if (_commonDelay) findNodesToLoadListenersAndFocus();
     }
     else if (removeListenersEachExit && !addedListeners) {
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);

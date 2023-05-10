@@ -54,6 +54,9 @@ type enterSubNodes = {
 
   /** 进入到哪个元素？ */
   target?: element | getTarget;
+
+  /** 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 */
+  delay?: false | promiseDelay | callbackDelay;
 }
 
 type exitSubNodes = {
@@ -72,6 +75,9 @@ type exitSubNodes = {
 
   /** 退出至哪个元素？ */
   target?: element;
+
+  /** 延迟失焦，触发 node 后等待执行 delay 完成后失焦 */
+  delay?: false | promiseDelay | callbackDelay;
 };
 
 type exitCover = {
@@ -139,6 +145,9 @@ interface Options {
 
   /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦 */
   delayToFocus?: promiseDelay | callbackDelay;
+
+  /** 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur */
+  delayToBlur?: promiseDelay | callbackDelay;
 
   /** 每次退出至 trigger 是否移除事件 */
   removeListenersEachExit?: boolean;
