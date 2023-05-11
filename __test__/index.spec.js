@@ -26,11 +26,11 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
-  it("should focus back to trigger after click close button", () => {
+  it("should focus back to trigger after click close button", async () => {
     const { container, dialog, first, last, open, close } = getModalDom();
     initBagel(container, dialog, first, last, open, close)
   
-    close.click();
+    await close.click();
     expect(open).toHaveFocus();
   });
 
@@ -163,7 +163,8 @@ describe("focus-bagel", function() {
       try {
         initBagel_7(container, dialog, first, last, open, close);
       } catch(e) {
-        expect(e).toBe("至少需要包含两个可以聚焦的元素。");
+        const errStr = e.toString();
+        expect(errStr).toBe("Error: 至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
       }
     });
 
