@@ -120,10 +120,10 @@ interface Options {
   loop?: boolean;
 
   /** 自定义*前进*焦点函数，设置后，`manual` 将默认为 true */
-  forward?: isKey | subNodesForward;
+  next?: isKey | subNodesForward;
 
   /** 自定义*后退*焦点函数，设置后，`manual` 将默认为 true */
-  backward?: isKey | subNodesBackward;
+  prev?: isKey | subNodesBackward;
 
   /** 显式设置入口，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` */
   trigger?: element;

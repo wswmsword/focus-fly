@@ -17,26 +17,26 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isForward, isBackward, onForward, onBackward, coverNode) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode) => e => {
   if (e.target === coverNode) return;
 
   const [index, setIndex] = useActiveIndex();
   const itemsLen = subNodes.length;
-  if ((isForward ?? isTabForward)(e)) {
+  if ((isNext ?? isTabForward)(e)) {
     const incresedI = index + 1;
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
     nextI %= itemsLen;
-    onForward?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
+    onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
   }
-  else if ((isBackward ?? isTabBackward)(e)) {
+  else if ((isPrev ?? isTabBackward)(e)) {
     const decresedI = index - 1;
     let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
     nextI = (nextI + itemsLen) % itemsLen;
-    onBackward?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
+    onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     e.preventDefault();
     focus(subNodes[nextI]);
     setIndex(nextI);
@@ -45,13 +45,13 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isForward, isB
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onForward, onBackward, coverNode) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode) => e => {
   const current = e.target;
   if (current === coverNode) return;
 
   if (isTabForward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
-    onForward?.({ e });
+    onNext?.({ e });
     if (current === tail) {
       e.preventDefault();
       if (!isClamp) focus(head);
@@ -59,7 +59,7 @@ const focusSubNodes = (head, tail, isClamp, onForward, onBackward, coverNode) =>
   }
   else if (isTabBackward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
-    onBackward?.({ e });
+    onPrev?.({ e });
     if (current === head) {
       e.preventDefault();
       if (!isClamp) focus(tail);
@@ -171,9 +171,9 @@ const focusBagel = (...props) => {
     /** move: 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
     /** move: 自定义前进焦点函数 */
-    forward,
+    next,
     /** move: 自定义后退焦点函数 */
-    backward,
+    prev,
     /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 enter.selector 则不用设置 */
     trigger,
     /** focus: 触发触发器的配置 */
@@ -232,14 +232,14 @@ const focusBagel = (...props) => {
   const disabledEsc = onEscape === false;
 
   const {
-    key: isForward,
-    on: onForward,
-  } = isObj(forward) ? forward : { key: forward };
+    key: isNext,
+    on: onNext,
+  } = isObj(next) ? next : { key: next };
 
   const {
-    key: isBackward,
-    on: onBackward,
-  } = isObj(backward) ? backward : { key: backward };
+    key: isPrev,
+    on: onPrev,
+  } = isObj(prev) ? prev : { key: prev };
 
   const {
     rootNode: _rootNode,
@@ -251,7 +251,7 @@ const focusBagel = (...props) => {
   const isClamp = !(loop ?? true);
 
   // 自定义前进或后退焦点函数，则设置 manual 为 true
-  const _manual = !!(isForward || isBackward || manual);
+  const _manual = !!(isNext || isPrev || manual);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
@@ -367,8 +367,8 @@ const focusBagel = (...props) => {
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isForward, isBackward, onForward, onBackward, _coverNode) :
-      focusSubNodes(_head, _tail, isClamp, onForward, onBackward, _coverNode);
+      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, _coverNode) :
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _coverNode);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
