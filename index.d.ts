@@ -149,8 +149,11 @@ interface Options {
   /** 延迟失焦，触发出口后等待执行 delayToBlur 完成后失焦，延迟失焦的目的是等待失焦后再次被聚焦的元素已被渲染 */
   delayToBlur?: promiseDelay | callbackDelay;
 
-  /** 每次退出至 trigger 是否移除事件 */
+  /** 每次退出列表回到入口是否移除列表事件 */
   removeListenersEachExit?: boolean;
+
+  /** 每次进入列表是否移除入口事件 */
+  removeListenersEachEnter?: boolean;
 }
 
 interface Return {

@@ -116,7 +116,8 @@ npm run start
 | cover | cover | N | false | *封面*相关配置 |
 | delayToFocus | promiseDelay \| callbackDelay | N | null | 延迟聚焦，执行完 `options.enter.on` 后，等待执行 delayToFocus 完成后聚焦 |
 | delayToBlur | promiseDelay \| callbackDelay | N | null | 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur |
-| removeListenersEachExit | boolean | N | true | 每次退出*列表*后是否移除所有监听事件 |
+| removeListenersEachExit | boolean | N | true | 每次退出*列表*回到*入口*是否移除*列表*事件 |
+| removeListenersEachEnter | boolean | N | true | 每次进入*列表*后是否移除入口事件 |
 
 ### options.forward
 
