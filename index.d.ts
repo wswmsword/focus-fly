@@ -143,10 +143,10 @@ interface Options {
   /** 封面相关 */
   cover?: boolean | cover;
 
-  /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦 */
-  delayToFocus?: promiseDelay | callbackDelay;
+  /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦，延迟聚焦的目的是确认被聚焦的元素已被渲染 */
+  delayToFocus?: true | promiseDelay | callbackDelay;
 
-  /** 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur */
+  /** 延迟失焦，触发出口后等待执行 delayToBlur 完成后失焦，延迟失焦的目的是等待失焦后再次被聚焦的元素已被渲染 */
   delayToBlur?: promiseDelay | callbackDelay;
 
   /** 每次退出至 trigger 是否移除事件 */

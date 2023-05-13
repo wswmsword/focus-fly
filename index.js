@@ -165,7 +165,7 @@ const getDelayType = function(delay, target) {
   const delayRes = isFunctionDelay && delay(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = target == null && !promiseDelay && callbackDelay;
+  const commonDelay = (target == null || delay === true) && !promiseDelay && callbackDelay;
   const isDelay = promiseDelay || callbackDelay || commonDelay;
   return {
     promiseDelay,
@@ -187,11 +187,15 @@ const delayToProcess = async function(promiseDelay, callbackDelay, commonDelay, 
 
 /** 获取入口目标 */
 const getEntryTarget = function(target, cover, list, rootNode, enabledCover, activeIndex = 0) {
+  // 空 target 走默认
   if (target == null) {
     if (enabledCover) return cover;
     else return list[activeIndex];
-  } else if (isFun(target))
+  }
+  // 函数 target 则执行
+  else if (isFun(target))
     return target({ list, cover, root: rootNode, last: list[activeIndex], lastI: activeIndex });
+  // 选择器字符串或者节点
   else return element(target);
 }
 
@@ -383,7 +387,7 @@ const focusBagel = (...props) => {
     if (isDelay)
       delayToProcess(promiseDelay, callbackDelay, commonDelay, delay, findNodesToLoadListenersAndFocus);
     else {
-      !addedListeners && loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
+      loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
       focusTarget(_coverNode, _subNodes, _rootNode);
     }
 
