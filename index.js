@@ -640,8 +640,8 @@ const focusBagel = (...props) => {
       // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
       _rootNode.addEventListener("keydown", keyListMoveHandler);
 
-      /** 点击聚焦列表单项 */
-      _rootNode.addEventListener("click", clickListItemHandler);
+      /** 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex */
+      _manual && _rootNode.addEventListener("click", clickListItemHandler);
 
       /** 列表点击出口 */
       hasClickExits && _rootNode.addEventListener("click", clickListExitHandler);
