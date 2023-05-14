@@ -1,0 +1,65 @@
+[role="tablist"] {
+  min-width: 100%;
+}
+
+[role="tab"] {
+  display: inline-block;
+  position: relative;
+  margin: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-weight: bold;
+  flex-grow: 1;
+  color: #fbefea;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+[role="tab"]:hover, [role="tab"]:focus {
+  background-color: rgba(255, 255, 255, 0.213);
+}
+
+[role="tab"][aria-selected="true"] {
+  background-color: white;
+  color:#d64d23;
+  box-shadow: 0 1px 3px -1px #b14625;
+}
+
+[role="tab"] span {
+  display: inline-block;
+  margin: 2px;
+  padding: 4px 6px;
+}
+
+[role="tabpanel"] {
+  margin-top: 8px;
+  border-radius: 8px;
+  padding: 5px;
+  border: 1px solid #e0e0e0;
+  background: #f7f7f7;
+  min-height: 10em;
+  width: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+[role="tabpanel"].is-hidden {
+  display: none;
+}
+
+[role="tabpanel"] p {
+  margin: 0;
+}
+
+#tab_list {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-image: linear-gradient(90deg, #fcba21, #f05321);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}

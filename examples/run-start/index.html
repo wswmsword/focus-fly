@@ -3,109 +3,367 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>focus-bagel demo</title>
+    <title>Focus-no-Jutsu demo</title>
+    <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="missions/dialog.css">
+    <link rel="stylesheet" href="missions/tabs.css">
+    <link rel="stylesheet" href="missions/player.css">
     <meta name="description" content="A demo of focus-bagel">
   </head>
   <body>
-    <h1>一些例子</h1>
+    <div id="app">
+      <header>
+        <h1><code>Focus-no-Jutsu</code> 范例</h1>
+      </header>
 
-    <hr />
-    <h2>默认弹窗（无动画，无需 innerHtml，无需 display）</h2>
-    <button id="open">打开一包糖</button>
-    <button id="walk">走两步</button>
-    <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog"
-      tabindex="0">
-      <h3 id="modal-title">吃一颗糖</h3>
-      <ul>
-        <li><a id="firstFocusA" href="#">椰蓉酥心糖</a></li>
-        <li><a href="#">不二家棒棒糖</a></li>
-        <li><a href="#">樱花软糖</a></li>
-        <li><a href="#">大白兔奶糖</a></li>
-        <li><a href="#">夹心巧克力</a></li>
-      </ul>
-      <div class="ctrls">
-        <button id="close">Close</button>
-        <button id="lastFocusBtn">OK</button>
+      <p><code>Focus-no-Jutsu</code>（Focus の術），一个 B 级<a href="https://naruto.fandom.com/wiki/Genjutsu">幻术</a>。</p>
+      
+      <p>网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。</p>
+
+      <p>现在开始我们用 <code>Focus-no-Jutsu</code> 完成和焦点控制有关的一系列任务！🥷</p>
+
+      <!-- <hr />
+
+      <div>
+        <button id="b0">E</button>
+        <button id="b1">D</button>
+        <button>C</button>
+
+        <button>B</button>
+        <button id="b2">A</button>
+        <button>S</button>
       </div>
-    </div>
-    <hr />
-    <h2>触发后需要 innerHtml 的弹窗</h2>
-    <button id="open_2">打开一包糖</button>
-    <button id="walk_2">走两步</button>
-    <div id="place_holder"></div>
 
-    <hr />
-    <h2>触发后需要 display: block 的弹窗</h2>
-    <button id="open_3">打开一包糖</button>
-    <button id="walk_3">走两步</button>
-    <div id="dialog_3"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      class="dialog centre"
-      style="display: none"
-      role="dialog"
-      tabindex="0">
-      <h3 id="modal-title_3">吃一颗糖</h3>
-      <ul>
-        <li><a id="firstFocusA_3" href="#">椰蓉酥心糖</a></li>
-        <li><a href="#">不二家棒棒糖</a></li>
-        <li><a href="#">樱花软糖</a></li>
-        <li><a href="#">大白兔奶糖</a></li>
-        <li><a href="#">夹心巧克力</a></li>
+
+      <hr />
+
+      <button id="t1">第一</button>
+      <ul tabindex="0" id="cover">
+        <li><button id="l1">测试</button></li>
+        <li><button>测试</button></li>
+        <li><button>测试</button></li>
+        <li><button>测试</button></li>
+        <li><div tabindex="0">测试<div tabindex="0">asdf<div tabindex="0">asdf</div></div></li>
+        <li><button id="l9">测试</button></li>
       </ul>
-      <div class="ctrls">
-        <button id="close_3">Close</button>
-        <button id="lastFocusBtn_3">OK</button>
+      <button>最后</button> -->
+
+
+      <h2>对话框</h2>
+
+      <p>对话框通常是一个弹窗，当 <kbd>Tab</kbd> 访问到“打开”按钮，焦点聚焦按钮，<kbd>Enter</kbd>（或者 <kbd>Space</kbd> 和鼠标点击）触发“打开”之后，弹出对话框，焦点聚焦对话框的首个可聚焦元素，这时如果继续 <kbd>Tab</kbd>，焦点只能访问对话框内的元素，不能逃出对话框或者回到“打开”按钮，最后，我们按下 <kbd>Esc</kbd> 或者触发“返回”按钮，焦点回到“打开”按钮。</p>
+
+      <button class="button" id="open" aria-haspopup="dialog" aria-expanded="false" aria-controls="dialog">打开一包糖</button>
+      <div id="dialog_mask" class="closed_mask"></div>
+      <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog">
+        <h3 id="modal-title">吃一颗糖果</h3>
+        <p>爱吃糖果的小可爱，你的糖果已送达，请注意查收。不需冷藏，无需加热，横扫饥饿，一颗提神醒脑，两颗永不疲劳，三颗长生不老～</p>
+        <div class="ctrls">
+          <button class="button" id="firstFocusBtn">巧克力！克力！力！</button>
+          <button class="button" id="confirm">吃吃吃</button>
+        </div>
+        <button id="close" aria-label="Close" type="button">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
       </div>
-    </div>
 
-    <hr />
-    <h2>动画弹窗</h2>
-    <button id="open_4">打开一包糖</button>
-    <button id="walk_4">走两步</button>
-    <div id="dialog_4"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      class="dialog centre closedDialog transition-out"
-      role="dialog"
-      tabindex="0">
-      <h3 id="modal-title_4">吃一颗糖</h3>
-      <ul>
-        <li><a id="firstFocusA_4" href="#">椰蓉酥心糖</a></li>
-        <li><a href="#">不二家棒棒糖</a></li>
-        <li><a href="#">樱花软糖</a></li>
-        <li><a href="#">大白兔奶糖</a></li>
-        <li><a href="#">夹心巧克力</a></li>
-      </ul>
-      <div class="ctrls">
-        <button id="close_4">Close</button>
-        <button id="lastFocusBtn_4">OK</button>
+      <details>
+        <summary id="dialog_code">查看源码。</summary>
+
+        <pre>
+          <code>
+const dialog = document.getElementById("dialog");
+const mask = document.getElementById("dialog_mask");
+const entry = document.getElementById("open");
+
+const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
+  loop: false,
+  enter: {
+    node: entry,
+    on() {
+      dialog.classList.add("openedDialog");
+      dialog.classList.remove("closedDialog");
+      dialog_mask.classList.remove("closed_mask");
+      entry.ariaExpanded = true;
+    },
+  },
+  exit: [{
+    node: "#close",
+    on: closeDialog,
+  }, {
+    node: "#firstFocusBtn",
+    on: closeDialog,
+  }, {
+    node: "#confirm",
+    on: closeDialog,
+  }, {
+    node: "#dialog_mask",
+    on: closeDialog,
+  }],
+  onEscape: true,
+});
+
+function closeDialog() {
+  dialog.classList.remove("openedDialog");
+  dialog.classList.add("closedDialog");
+  dialog_mask.classList.add("closed_mask");
+  entry.ariaExpanded = false;
+}
+          </code>
+        </pre>
+      </details>
+
+      <h2>选项卡</h2>
+
+      <p>选项卡包含一个选项卡列表和一个面板，切换选项卡的时候，改变选项卡面板的内容。<kbd>Tab</kbd> 首先访问选项卡列表，焦点落入选项卡列表，再次 <kbd>Tab</kbd> 焦点将离开选项卡。在选项卡列表里，使用 <kbd>Left Arrow</kbd> 和 <kbd>Right Arrow</kbd> 访问每一个选项卡，有的选项卡也支持使用 <kbd>Home</kbd> 和 <kbd>End</kbd> 聚焦第一个和最后一个选项卡。</p>
+
+      <div id="tabs" role="tablist" aria-labelledby="tab-1">
+        <div id="tab_list">
+          <button id="tab_1" role="tab" aria-selected="true" aria-controls="tabpanel_1" tabindex="0">
+            <span>椰蓉酥心糖</span>
+          </button>
+          <button id="tab_2" role="tab" aria-selected="false" aria-controls="tabpanel_2" tabindex="0">
+            <span>棉花糖</span>
+          </button>
+          <button id="tab_3" role="tab" aria-selected="false" aria-controls="tabpanel_3" tabindex="0">
+            <span>绿箭口香糖</span>
+          </button>
+          <button id="tab_4" role="tab" aria-selected="false" aria-controls="tabpanel_4" tabindex="0">
+            <span>大白兔奶糖</span>
+          </button>
+          <button id="tab_5" role="tab" aria-selected="false" aria-controls="tabpanel_5" tabindex="0">
+            <span>瑞士糖</span>
+          </button>
+        </div>
+        <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1">椰蓉酥心糖</div>
+        <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2" class="is-hidden">棉花糖</div>
+        <div id="tabpanel_3" role="tabpanel" aria-labelledby="tab_3" class="is-hidden">绿箭口香糖</div>
+        <div id="tabpanel_4" role="tabpanel" aria-labelledby="tab_4" class="is-hidden">大白兔奶糖</div>
+        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5" class="is-hidden">瑞士糖</div>
       </div>
-    </div>
 
-    <hr />
-    <h2>触发后需要 innerHtml 的动画弹窗</h2>
-    <button id="open_5">打开一包糖</button>
-    <button id="walk_5">走两步</button>
-    <div id="place_holder_5"></div>
+      <details>
+        <summary id="tags_code">查看源码。</summary>
 
-    <hr />
-    <h2>进入一个带有封面的列表</h2>
-    <h3>查看一些糖</h3>
-    <ul tabindex="0">
-      <li><a id="firstFocusA_6" href="#">椰蓉酥心糖</a></li>
-      <li><a href="#">不二家棒棒糖</a></li>
-      <li><a href="#">樱花软糖</a></li>
-      <li><a href="#">大白兔奶糖</a></li>
-      <li><a id="lastFocusBtn_6" href="#">夹心巧克力</a></li>
-    </ul>
+        <pre>
+          <code>
+const tabs = document.getElementById("tab_list");
+
+const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
+const tabsBagel = focusBagel(tabs, tabList, {
+  onClick: onFocus,
+  forward: {
+    key: e => e.key === "ArrowRight",
+    on: onFocus
+  },
+  backward: {
+    key: e => e.key === "ArrowLeft",
+    on: onFocus
+  },
+  exit: [{
+    key: e => e.key === "Tab" && !e.shiftKey,
+    target: "#tags_code",
+  }, {
+    key: e => e.key === "Tab" && e.shiftKey,
+    target: "#dialog_code",
+  }],
+  enter: [{
+    node: "#dialog_code",
+    key: e => e.key === "Tab" && !e.shiftKey,
+    type: "keydown",
+  }, {
+    node: "#tags_code",
+    key: e => e.key === "Tab" && e.shiftKey,
+    type: "keydown",
+  }],
+  removeListenersEachExit: false,
+});
+
+function onFocus({ prev, cur, prevI, curI }) {
+  if (curI === prevI) return;
+  prev.setAttribute("aria-selected", "false");
+  cur.setAttribute("aria-selected", "true");
+  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1));
+  const curPanel = document.getElementById("tabpanel_" + (curI + 1));
+  prevPanel.classList.add('is-hidden');
+  curPanel.classList.remove('is-hidden');
+}
+          </code>
+        </pre>
+      </details>
+
+      <h2>播放列表</h2>
+
+      <p>这个“播放列表”是一个真实例子，是 Spotify 的专辑界面，Spotify 网页有很好的键盘体验。如果有一类元素组成了列表，这类元素的每一个内部又包含很多可聚焦的子元素，这时使用 <kbd>Tab</kbd> 从头到尾的访问体验是崩溃的，因为元素太多花费时间太长了。Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点进入单曲，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素，回过头如果要访问每一首单曲，只要当焦点在专辑列表的时候使用 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 就可以了。</p>
+
+      <div class="player">
+        <div class="head">
+          <img class="cover_img" src="./assets/cover.jpg">
+          <div class="infos">
+            <span class="type">专辑</span>
+            <h3 class="title">NARUTO -ナルト- オリジナルサウンドトラック</h3>
+            <div class="details">
+              <a id="artist" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw" target="_blank">Toshio Masuda</a>
+              <span class="dot"></span>
+              <a href="https://open.spotify.com/artist/1HNngbrg0LENVuq56iQo0m" target="_blank">MUSASHI PROJECT</a>
+              <span class="dot"></span>
+              <span>2003</span>
+              <span class="dot"></span>
+              <span>20 首歌曲, </span>
+              <span class="time">39 分钟 54 秒</span>
+            </div>
+          </div>
+        </div>
+        <div class="ctrls&body">
+          <div class="ctrls">
+            <div class="mock_play" tabindex="0"></div>
+            <div class="mock_like" tabindex="0"></div>
+            <div class="moke_more" tabindex="0"></div>
+          </div>
+          <div class="body">
+            <div class="table_head" role="presentation">
+              <div class="table_head_inner" role="row" aria-rowindex="1">
+                <div role="columnheader" aria-colindex="1">#</div>
+                <div role="columnheader" aria-colindex="2">标题</div>
+                <div role="columnheader" aria-colindex="3">播放量</div>
+                <div role="columnheader" aria-colindex="4" aria-label="时长" class="time">
+                  <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" class="time"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>
+                </div>
+              </div>
+            </div>
+            <div id="list_wrapper" class="cells_wrapper" tabindex="0">
+              <div id="song_1" role="row" aria-rowindex="2" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">1</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_2" role="row" aria-rowindex="3" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">2</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_3" role="row" aria-rowindex="4" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">3</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_4" role="row" aria-rowindex="5" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">4</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_5" role="row" aria-rowindex="6" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">5</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_6" role="row" aria-rowindex="7" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">6</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">オレがナルトだってばよ!</div>
+                  <div>Toshio Masuda</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">654,962</div>
+                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+              </div>
+
+              <div id="song_7" role="row" aria-rowindex="8" aria-selected="false" class="song" tabindex="0">
+                <div role="gridcell" aria-colindex="1">...</div>
+                <div role="gridcell" aria-colindex="2">
+                  <div class="title">...</div>
+                  <div>...</div>
+                </div>
+                <div role="gridcell" aria-colindex="3">...</div>
+                <div role="gridcell" aria-colindex="4" class="last">...</div>
+              </div>
+            </div>
+            <div class="other_infos">
+              <div>2003年3月19日</div>
+              <div class="copyright">℗ 2003 TV Tokyo, SME Visual Works Inc.</div>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="more">
+            <a id="more_from" class="more_1" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw/discography" target="_blank">更多来自 Toshio Masuda 的内容</a>
+            <a class="more_2" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw/discography" target="_blank">查看唱片目录</a>
+          </div>
+        </div>
+      </div>
+
+      <details>
+        <summary>查看源码。</summary>
+        <pre>
+          <code>
+const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
+
+const focusPlayer = focusBagel("#list_wrapper", songs, {
+  cover: {
+    enterKey: e => (e.key === "Tab" && !e.shiftKey) || e.key === "ArrowDown" || e.key === "ArrowUp",
+  },
+  forward: e => e.key === "ArrowDown",
+  backward: e => e.key === "ArrowUp",
+  exit: [{
+    key: e => e.key === "Tab" && !e.shiftKey,
+    target: "#more_from",
+  }, {
+    key: e => e.key === "Tab" && e.shiftKey,
+  }],
+  enter: [{
+    node: "#more_from",
+    key: e => e.key === "Tab" && e.shiftKey,
+    type: "keydown",
+  }]
+});
+        </code>
+      </pre>
+      </details>
+
+      <!-- <h2>菜单</h2>
+
+      <h2>复选框</h2> -->
+    </main>
   </body>
   <script src="demo.js"></script>
-  <script src="index.js"></script>
-  <script src="cases/inner-html.js"></script>
-  <script src="cases/display.js"></script>
-  <script src="cases/transition.js"></script>
-  <script src="cases/transition-inner-html.js"></script>
-  <script src="cases/cover.js"></script>
+  <script src="missions/dialog.js"></script>
+  <script src="missions/tabs.js"></script>
+  <script src="missions/player.js"></script>
+
+  <script>
+    // const bg = focusBagel(["#b1", "#b2"], {
+    //   onEscape: true,
+    // });
+
+    // focusBagel(["#l1", "#l9"], {
+    //   cover: true,
+    //   onEscape: true,
+    // })
+
+  </script>
 </html>

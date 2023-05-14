@@ -1,0 +1,67 @@
+:root {
+  --orange: rgb(255, 96, 27);
+  --dark-orange: rgb(233, 86, 23);
+  --gray: grey;
+}
+
+body {
+  margin: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 0.1em 0.3em;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 0.2em;
+  box-shadow: inset 0 -1px 0 #bbb;
+  font-size: .9em;
+}
+
+/* button {
+  border: 2px solid black;
+  background-color: white;
+  font-weight: bold;
+  padding: .3em .7em;
+  color: black;
+}
+
+button:active, button:focus {
+  background-color: black;
+  color: white;
+} */
+
+ul, li {
+  list-style: none;
+}
+
+h1 {
+  color: #333332;
+  text-align: center;
+  font-size: 45px;
+}
+
+h2 {
+  font-size: 32px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--gray);
+  color: #333332;
+}
+
+h3 {
+  font-size: 24px;
+  margin: 12px 0;
+}
+
+a:focus, button:focus, .dialog:focus {
+  outline: 2px dashed var(--orange);
+  outline-offset: 3px;
+}
+
+details {
+  margin: 16px 0;
+  cursor: pointer;
+}
