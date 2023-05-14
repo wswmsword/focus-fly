@@ -107,6 +107,22 @@ type cover = {
   onEnter?: handleKeydown;
 };
 
+// /** 转发 */
+// type forward = {
+
+//   /** 中转元素 */
+//   node?: element;
+
+//   /** 中转键位 */
+//   key?: isKey;
+
+//   /** 转发目标 */
+//   target?: element;
+
+//   /** 中转时的行为 */
+//   on?: handleKeydown;
+// };
+
 type promiseDelay = () => Promise<unknown>;
 
 type callbackDelay = (fn: () => any) => any;
@@ -142,6 +158,9 @@ interface Options {
 
   /** 封面相关 */
   cover?: boolean | cover;
+
+  // /** 转发 */
+  // forward?: forward;
 
   /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦，延迟聚焦的目的是确认被聚焦的元素已被渲染 */
   delayToFocus?: true | promiseDelay | callbackDelay;
