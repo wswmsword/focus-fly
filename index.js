@@ -17,7 +17,7 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, trappedFrom) => e => {
   if (e.target === coverNode) return;
 
   const [index, setIndex] = useActiveIndex();
@@ -27,30 +27,33 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
     nextI %= itemsLen;
     onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    e.preventDefault();
+    trappedFrom.list(); // 标记从列表进入列表
     focus(subNodes[nextI]);
     setIndex(nextI);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
+    e.preventDefault();
   }
   else if ((isPrev ?? isTabBackward)(e)) {
     const decresedI = index - 1;
     let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
     nextI = (nextI + itemsLen) % itemsLen;
     onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    e.preventDefault();
+    trappedFrom.list(); // 标记从列表进入列表
     focus(subNodes[nextI]);
     setIndex(nextI);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
+    e.preventDefault();
   }
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode, trappedFrom) => e => {
   const current = e.target;
   if (current === coverNode) return;
 
   if (isTabForward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
+    trappedFrom.list(); // 标记从列表进入列表
     onNext?.({ e });
     if (current === tail) {
       e.preventDefault();
@@ -59,6 +62,7 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode) => e => {
   }
   else if (isTabBackward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
+    trappedFrom.list(); // 标记从列表进入列表
     onPrev?.({ e });
     if (current === head) {
       e.preventDefault();
@@ -177,6 +181,34 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
   else return element(target);
 }
 
+/** 记录焦点是如何进入列表的 */
+class TrappedFrom {
+  constructor() {
+    this.clean();
+  }
+  entry() {
+    this._entry = true;
+  }
+  cover() {
+    this._cover = true;
+  }
+  click() {
+    this._click = true;
+  }
+  list() {
+    this._list = true;
+  }
+  clean() {
+    this._entry = false;
+    this._cover = false;
+    this._click = false;
+    this._list = false;
+  }
+  internal() {
+    return this._entry || this._cover || this._click || this._list;
+  }
+}
+
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
@@ -279,6 +311,9 @@ const focusBagel = (...props) => {
   let trappedList = false;
   let trappedCover = false;
 
+  /** 记录焦点是如何进入列表的，用来纠正从未知渠道进入列表之后的焦点错误问题 */
+  const trappedFrom = new TrappedFrom();
+
   let addedEntryListeners = false;
   // 入口点击事件
   addEntryListeners();
@@ -367,6 +402,7 @@ const focusBagel = (...props) => {
     
     function focusTarget(cover, list, rootNode) {
       const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
+      if (cover !== rootNode && rootNode.contains(gotTarget)) trappedFrom.entry(); // 标记
       tickFocus(gotTarget);
     }
   }
@@ -386,8 +422,8 @@ const focusBagel = (...props) => {
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, _coverNode) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _coverNode);
+      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, trappedFrom) :
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _coverNode, trappedFrom);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
@@ -408,21 +444,43 @@ const focusBagel = (...props) => {
     exitListWithoutTarget_outer = exitListWithoutTarget;
     exits_outer = exits;
 
-    function focusTrapListHandler() { trappedList = true; }
+    let isTrappedFromMousedown = -1;
 
-    function blurTrapListHandler() { trappedList = false; }
+    function focusTrapListHandler(e) {
+
+      if (e.target === _coverNode) return;
+
+      if (_manual && !trappedFrom.internal()) {
+        tickFocus(_subNodes[activeIndex]);
+      }
+      trappedFrom.clean();
+      trappedList = true;
+    }
+
+    function blurTrapListHandler(e) {
+      trappedList = false;
+    }
 
     function focusTrapCoverHandler() { trappedCover = true; }
 
     function blurTrapCoverHandler() { trappedCover = false; }
 
-    /** 点击聚焦列表某一单项 */
-    function clickListItemHandler(e) {
+    function mousedownListItemHandler(e) {
       const target = e.target;
       const targetIndex = _subNodes.findIndex(e => e.contains(target));
       if (targetIndex > -1) {
+        isTrappedFromMousedown = targetIndex;
+        trappedFrom.click();
+      }
+    }
+
+    /** 点击聚焦列表某一单项 */
+    function clickListItemHandler(e) {
+      const targetIndex = isTrappedFromMousedown;
+      if (isTrappedFromMousedown > -1) {
         onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         activeIndex = targetIndex;
+        isTrappedFromMousedown = -1;
       }
     }
 
@@ -442,6 +500,7 @@ const focusBagel = (...props) => {
       if((coverEnterKey ?? isEnterEvent)(e)) {
         e.preventDefault();
         onEnterCover?.(e);
+        trappedFrom.cover(); // 标记从封面进入列表
         focus(_subNodes[activeIndex]);
         return;
       }
@@ -642,6 +701,9 @@ const focusBagel = (...props) => {
 
       /** 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex */
       _manual && _rootNode.addEventListener("click", clickListItemHandler);
+
+      /** 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位 */
+      _manual && _rootNode.addEventListener("mousedown", mousedownListItemHandler);
 
       /** 列表点击出口 */
       hasClickExits && _rootNode.addEventListener("click", clickListExitHandler);
