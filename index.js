@@ -745,6 +745,8 @@ const focusBagel = (...props) => {
         _rootNode.removeEventListener("keydown", keyListMoveHandler);
         _rootNode.removeEventListener("click", clickListItemHandler);
 
+        _rootNode.removeEventListener("mousedown", mousedownListItemHandler);
+
         _rootNode.removeEventListener("click", clickListExitHandler);
         _rootNode.removeEventListener("focusin", focusListExitHandler);
         _rootNode.removeEventListener("keydown", keyListExitHandler);
