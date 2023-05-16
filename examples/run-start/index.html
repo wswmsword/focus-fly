@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -112,12 +112,12 @@ function closeDialog() {
         </pre>
       </details>
 
-      <h2>选项卡</h2>
+      <h2 id="tablist">选项卡</h2>
 
       <p>选项卡包含一个选项卡列表和一个面板，切换选项卡的时候，改变选项卡面板的内容。<kbd>Tab</kbd> 首先访问选项卡列表，焦点落入选项卡列表，再次 <kbd>Tab</kbd> 焦点将离开选项卡。在选项卡列表里，使用 <kbd>Left Arrow</kbd> 和 <kbd>Right Arrow</kbd> 访问每一个选项卡，有的选项卡也支持使用 <kbd>Home</kbd> 和 <kbd>End</kbd> 聚焦第一个和最后一个选项卡。</p>
 
-      <div id="tabs" role="tablist" aria-labelledby="tab-1">
-        <div id="tab_list">
+      <div id="tabs">
+        <div id="tab_list" role="tablist" aria-labelledby="tablist">
           <button id="tab_1" role="tab" aria-selected="true" aria-controls="tabpanel_1" tabindex="0">
             <span>椰蓉酥心糖</span>
           </button>
@@ -195,7 +195,7 @@ function onFocus({ prev, cur, prevI, curI }) {
 
       <div class="player">
         <div class="head">
-          <img class="cover_img" src="./assets/cover.jpg">
+          <img class="cover_img" src="./assets/cover.jpg" alt="NARUTO -ナルト- オリジナルサウンドトラック">
           <div class="infos">
             <span class="type">专辑</span>
             <h3 class="title">NARUTO -ナルト- オリジナルサウンドトラック</h3>
@@ -218,85 +218,87 @@ function onFocus({ prev, cur, prevI, curI }) {
             <div class="moke_more" tabindex="0"></div>
           </div>
           <div class="body">
-            <div class="table_head" role="presentation">
-              <div class="table_head_inner" role="row" aria-rowindex="1">
-                <div role="columnheader" aria-colindex="1">#</div>
-                <div role="columnheader" aria-colindex="2">标题</div>
-                <div role="columnheader" aria-colindex="3">播放量</div>
-                <div role="columnheader" aria-colindex="4" aria-label="时长" class="time">
-                  <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" class="time"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>
+            <div id="grid_wrapper" role="grid" aria-colcount="4" aria-rowcount="8" tabindex="0">
+              <div class="table_head" role="presentation">
+                <div class="table_head_inner" role="row" aria-rowindex="1">
+                  <div role="columnheader" aria-colindex="1">#</div>
+                  <div role="columnheader" aria-colindex="2">标题</div>
+                  <div role="columnheader" aria-colindex="3">播放量</div>
+                  <div role="columnheader" aria-colindex="4" aria-label="时长" class="time">
+                    <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" class="time"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div id="list_wrapper" class="cells_wrapper" tabindex="0">
-              <div id="song_1" role="row" aria-rowindex="2" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">1</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+              <div class="cells_wrapper" role="presentation">
+                <div id="song_1" role="row" aria-rowindex="2" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">1</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_2" role="row" aria-rowindex="3" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">2</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+                <div id="song_2" role="row" aria-rowindex="3" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">2</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_3" role="row" aria-rowindex="4" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">3</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+                <div id="song_3" role="row" aria-rowindex="4" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">3</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_4" role="row" aria-rowindex="5" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">4</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+                <div id="song_4" role="row" aria-rowindex="5" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">4</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_5" role="row" aria-rowindex="6" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">5</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+                <div id="song_5" role="row" aria-rowindex="6" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">5</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_6" role="row" aria-rowindex="7" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">6</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">オレがナルトだってばよ!</div>
-                  <div>Toshio Masuda</div>
+                <div id="song_6" role="row" aria-rowindex="7" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">6</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">オレがナルトだってばよ!</div>
+                    <div>Toshio Masuda</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">654,962</div>
-                <div role="gridcell" aria-colindex="4" class="last">1:38</div>
-              </div>
 
-              <div id="song_7" role="row" aria-rowindex="8" aria-selected="false" class="song" tabindex="0">
-                <div role="gridcell" aria-colindex="1">...</div>
-                <div role="gridcell" aria-colindex="2">
-                  <div class="title">...</div>
-                  <div>...</div>
+                <div id="song_7" role="row" aria-rowindex="8" aria-selected="false" class="song" tabindex="0">
+                  <div role="gridcell" aria-colindex="1">...</div>
+                  <div role="gridcell" aria-colindex="2">
+                    <div class="title">...</div>
+                    <div>...</div>
+                  </div>
+                  <div role="gridcell" aria-colindex="3">...</div>
+                  <div role="gridcell" aria-colindex="4" class="last">...</div>
                 </div>
-                <div role="gridcell" aria-colindex="3">...</div>
-                <div role="gridcell" aria-colindex="4" class="last">...</div>
               </div>
             </div>
             <div class="other_infos">
