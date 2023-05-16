@@ -521,10 +521,6 @@ const focusBagel = (...props) => {
           focus(_tail);
           return;
         }
-        else if (isTabBackward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
-          focus(_coverNode);
-          return;
-        }
       }
 
       /** 退出封面焦点的行为 */
@@ -631,7 +627,8 @@ const focusBagel = (...props) => {
 
       function focusThenRemoveListeners() {
         focus(target);
-        target !== _coverNode && removeListListeners();
+        if (target !== _coverNode)
+          removeListListeners();
         addEntryListeners();
       }
     }
@@ -735,6 +732,10 @@ const focusBagel = (...props) => {
 
     /** 移除监听事件 */
     function removeListListeners() {
+
+      // 如果是默认的，没有定义出口的封面，则不移除事件
+      if (isDefaultExitCover) return;
+
       if (removeListenersEachExit) {
         addedListeners = false;
         _rootNode.removeEventListener("focusin", focusTrapListHandler);
