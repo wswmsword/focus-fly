@@ -487,9 +487,14 @@ const focusBagel = (...props) => {
     /** subNodes 最后一个元素的聚焦事件 */
     function focusListTailHandler(e) {
       const prevFocus = e.relatedTarget; // 理想情况只在 tail 后面一个元素 shift-tab 时触发，可是还存在点击触发的情况，所以需要在点击时调整
-
-      if (!(prevFocus === _coverNode || _rootNode.contains(prevFocus)))
+      const some = e => element(e.node) === prevFocus;
+      if (!(
+        prevFocus === _coverNode ||
+        _rootNode.contains(prevFocus) ||
+        isTrappedFromMousedown > -1 ||
+        enters.some(some))) {
         focus(_coverNode) // 如果从列表以外的区域进入，则聚焦封面
+      }
     }
 
     /** 封面的键盘事件响应 */
