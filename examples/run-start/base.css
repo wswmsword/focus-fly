@@ -65,3 +65,8 @@ details {
   margin: 16px 0;
   cursor: pointer;
 }
+
+pre>code {
+  display: block;
+  overflow-x: auto;
+}

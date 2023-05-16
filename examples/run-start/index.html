@@ -33,10 +33,10 @@
         <button>B</button>
         <button id="b2">A</button>
         <button>S</button>
-      </div>
+      </div> -->
 
 
-      <hr />
+      <!-- <hr />
 
       <button id="t1">第一</button>
       <ul tabindex="0" id="cover">
@@ -72,8 +72,7 @@
         <summary id="dialog_code">查看源码。</summary>
 
         <pre>
-          <code>
-const dialog = document.getElementById("dialog");
+<code>const dialog = document.getElementById("dialog");
 const mask = document.getElementById("dialog_mask");
 const entry = document.getElementById("open");
 
@@ -109,8 +108,7 @@ function closeDialog() {
   dialog.classList.add("closedDialog");
   dialog_mask.classList.add("closed_mask");
   entry.ariaExpanded = false;
-}
-          </code>
+}</code>
         </pre>
       </details>
 
@@ -146,9 +144,8 @@ function closeDialog() {
       <details>
         <summary id="tags_code">查看源码。</summary>
 
-        <pre>
-          <code>
-const tabs = document.getElementById("tab_list");
+        <pre>          
+<code>const tabs = document.getElementById("tab_list");
 
 const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
 const tabsBagel = focusBagel(tabs, tabList, {
@@ -188,8 +185,7 @@ function onFocus({ prev, cur, prevI, curI }) {
   const curPanel = document.getElementById("tabpanel_" + (curI + 1));
   prevPanel.classList.add('is-hidden');
   curPanel.classList.remove('is-hidden');
-}
-          </code>
+}</code>
         </pre>
       </details>
 
@@ -320,8 +316,7 @@ function onFocus({ prev, cur, prevI, curI }) {
       <details>
         <summary>查看源码。</summary>
         <pre>
-          <code>
-const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
+<code>const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 
 const focusPlayer = focusBagel("#list_wrapper", songs, {
   cover: {
@@ -340,8 +335,7 @@ const focusPlayer = focusBagel("#list_wrapper", songs, {
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
   }]
-});
-        </code>
+});</code>
       </pre>
       </details>
 
