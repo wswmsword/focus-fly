@@ -88,6 +88,16 @@ const getNodes = function(rootNode, subNodes, coverNode) {
   };
 };
 
+/** 用于处理节点属性可以传递数组的情况，用于入口和出口 */
+const nodesReducer = function(acc, cur) {
+  const isAryNodes = Array.isArray(cur.node);
+  const nodes = isAryNodes ? cur.node.map(n => ({
+    ...cur,
+    node: n,
+  })) : cur;
+  return acc.concat(nodes);
+};
+
 /** 获取（生成）出口 */
 const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
 
@@ -95,7 +105,7 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
     ...e,
     // undefined 表示用户没有主动设置
     type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
-  }));
+  })).reduce(nodesReducer, []);
   let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
   /** 按下 esc 的出口 */
   const escapeExit = isFun(_onEscape) ? {
@@ -263,7 +273,7 @@ const focusBagel = (...props) => {
   const enters = [].concat(enter).filter(o => o != null).map(enter => ({
     ...enter,
     type: enter.type === undefined ? [enter.key == null ? '' : "keydown", enter.node == null ? '' : "click"].filter(t => t != '') : [].concat(enter.type),
-  }));
+  })).reduce(nodesReducer, []);
 
   /** 默认入口 */
   let _trigger = element(trigger || enters[0]?.node);
