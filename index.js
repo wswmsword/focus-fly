@@ -486,10 +486,9 @@ const focusBagel = (...props) => {
     function mousedownListItemHandler(e) {
       const target = e.target;
       const targetIndex = _subNodes.findIndex(e => e.contains(target));
-      if (targetIndex > -1) {
+      if (targetIndex > -1)
         isTrappedFromMousedown = targetIndex;
-        trappedFrom.click();
-      }
+      trappedFrom.click();
     }
 
     /** 点击聚焦列表某一单项 */
