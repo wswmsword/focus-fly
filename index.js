@@ -47,7 +47,7 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode, trappedFrom) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedFrom) => e => {
   const current = e.target;
   if (current === coverNode) return;
 
@@ -59,6 +59,10 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode, trappedFr
       e.preventDefault();
       if (!isClamp) focus(head);
     }
+    if (current === rootNode) {
+      e.preventDefault();
+      focus(head)
+    }
   }
   else if (isTabBackward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
@@ -67,6 +71,10 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, coverNode, trappedFr
     if (current === head) {
       e.preventDefault();
       if (!isClamp) focus(tail);
+    }
+    if (current === rootNode) {
+      e.preventDefault();
+      focus(tail);
     }
   }
 };
@@ -433,7 +441,7 @@ const focusBagel = (...props) => {
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
       focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, trappedFrom) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _coverNode, trappedFrom);
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, trappedFrom);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
