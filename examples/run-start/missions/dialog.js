@@ -14,19 +14,10 @@ const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
       entry.ariaExpanded = true;
     },
   },
-  exit: [{
-    node: "#close",
+  exit: {
+    node: ["#close", "#firstFocusBtn", "#confirm", "#dialog_mask"],
     on: closeDialog,
-  }, {
-    node: "#firstFocusBtn",
-    on: closeDialog,
-  }, {
-    node: "#confirm",
-    on: closeDialog,
-  }, {
-    node: "#dialog_mask",
-    on: closeDialog,
-  }],
+  },
   onEscape: true,
 });
 

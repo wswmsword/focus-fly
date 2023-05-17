@@ -87,19 +87,10 @@ const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
       entry.ariaExpanded = true;
     },
   },
-  exit: [{
-    node: "#close",
+  exit: {
+    node: ["#close", "#firstFocusBtn", "#confirm", "#dialog_mask"],
     on: closeDialog,
-  }, {
-    node: "#firstFocusBtn",
-    on: closeDialog,
-  }, {
-    node: "#confirm",
-    on: closeDialog,
-  }, {
-    node: "#dialog_mask",
-    on: closeDialog,
-  }],
+  },
   onEscape: true,
 });
 
@@ -332,11 +323,11 @@ const focusPlayer = focusBagel("#list_wrapper", songs, {
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
   }],
-  enter: [{
+  enter: {
     node: "#more_from",
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
-  }]
+  }
 });</code>
       </pre>
       </details>

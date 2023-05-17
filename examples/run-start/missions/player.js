@@ -13,10 +13,10 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
   }],
-  enter: [{
+  enter: {
     node: "#more_from",
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
     target: ({ last }) => last,
-  }],
+  },
 });
