@@ -56,7 +56,7 @@
 
       <button class="button" id="open" aria-haspopup="dialog" aria-expanded="false" aria-controls="dialog">打开一包糖</button>
       <div id="dialog_mask" class="closed_mask"></div>
-      <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog">
+      <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog" tabindex="-1">
         <h3 id="modal-title">吃一颗糖果</h3>
         <p>爱吃糖果的小可爱，你的糖果已送达，请注意查收。不需冷藏，无需加热，横扫饥饿，一颗提神醒脑，两颗永不疲劳，三颗长生不老～</p>
         <div class="ctrls">
@@ -80,12 +80,7 @@ const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
   loop: false,
   enter: {
     node: entry,
-    on() {
-      dialog.classList.add("openedDialog");
-      dialog.classList.remove("closedDialog");
-      dialog_mask.classList.remove("closed_mask");
-      entry.ariaExpanded = true;
-    },
+    on: openDialog,
   },
   exit: {
     node: ["#close", "#firstFocusBtn", "#confirm", "#dialog_mask"],
@@ -93,6 +88,13 @@ const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
   },
   onEscape: true,
 });
+
+function openDialog() {
+  dialog.classList.add("openedDialog");
+  dialog.classList.remove("closedDialog");
+  dialog_mask.classList.remove("closed_mask");
+  entry.ariaExpanded = true;
+}
 
 function closeDialog() {
   dialog.classList.remove("openedDialog");
