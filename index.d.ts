@@ -6,6 +6,8 @@ type handleExit = handleEnter;
 
 type handleClick = (obj: { e: MouseEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
 
+type handleNextOrPrev = (obj: { e: MouseEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
+
 type element = string | Element | HTMLElement;
 
 type isKey = (e: KeyboardEvent) => boolean;
@@ -25,7 +27,7 @@ type subNodesForward = {
   key?: isKey;
 
   /** 前进时的行为 */
-  on?: handleKeydown;
+  on?: handleNextOrPrev;
 };
 
 type subNodesBackward = {
@@ -33,7 +35,7 @@ type subNodesBackward = {
   key?: isKey;
 
   /** 后退时的行为 */
-  on?: handleKeydown;
+  on?: handleNextOrPrev;
 };
 
 type enterType = "keydown" | "focus" | "click" | "invoke";
