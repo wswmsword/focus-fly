@@ -199,7 +199,7 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
   else return element(target);
 }
 
-/** 记录焦点是如何进入列表的 */
+/** 记录焦点是如何进入列表的，主要用来纠正从未知领域进入列表的焦点 */
 class TrappedFrom {
   constructor() {
     this.clean();
@@ -467,7 +467,9 @@ const focusBagel = (...props) => {
     function focusTrapListHandler(e) {
 
       if (e.target === _coverNode) return;
+      if (_rootNode.contains(e.target)) return; // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
 
+      // 纠正外部聚焦进来的焦点
       if (_manual && !trappedFrom.internal()) {
         tickFocus(_subNodes[activeIndex]);
       }
