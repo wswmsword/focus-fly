@@ -471,12 +471,12 @@ const focusBagel = (...props) => {
     function focusTrapListHandler(e) {
 
       if (e.target === _coverNode) return;
-      if (_rootNode.contains(e.target)) return; // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
 
       // 纠正外部聚焦进来的焦点
-      if (_manual && !trappedFrom.internal()) {
-        tickFocus(_subNodes[activeIndex]);
-      }
+      if (_manual &&
+        !trappedFrom.internal() &&
+        !_rootNode.contains(e.target)) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      { tickFocus(_subNodes[activeIndex]); }
       trappedFrom.clean();
       trappedList = true;
     }
