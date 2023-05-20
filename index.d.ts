@@ -39,7 +39,7 @@ type subNodesBackward = {
 };
 
 type enterType = "keydown" | "focus" | "click" | "invoke";
-type exitType = enterType;
+type exitType = enterType | "outlist";
 
 type enterSubNodes = {
   /** 触发器，将用于监听点击事件，用于退出焦点循环时聚焦使用 */

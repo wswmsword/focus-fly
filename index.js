@@ -134,19 +134,21 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
     /** 生效的节点是否在根元素内部（列表中） */
     const isInnerRoot = node => (node != null && root.contains(element(node))) || node == null;
   
-    const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild] = exits.reduce((acc, e) => {
-      let [key, click, focus, key_wild, click_wild, focus_wild] = acc;
+    const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
+      let [key, click, focus, key_wild, click_wild, focus_wild, outList] = acc;
       if (isInnerRoot(e.node)) {
         if (e.type?.includes("keydown")) key = key.concat(e);
         if (e.type?.includes("click")) click = click.concat(e);
         if (e.type?.includes("focus")) focus = focus.concat(e);
+        if (e.type?.includes("outlist")) outList = outList.concat(e);
       } else {
         if (e.type?.includes("keydown")) key_wild = key_wild.concat(e);
         if (e.type?.includes("click")) click_wild = click_wild.concat(e);
         if (e.type?.includes("focus")) focus_wild = focus_wild.concat(e);
+        if (e.type?.includes("outlist")) outList = outList.concat(e);
       }
-      return [key, click, focus, key_wild, click_wild, focus_wild];
-    }, new Array(6).fill([]));
+      return [key, click, focus, key_wild, click_wild, focus_wild, outList];
+    }, new Array(7).fill([]));
 
     const hasClickExits = clickExits.length > 0;
     const hasFocusExits = focusExits.length > 0;
@@ -155,6 +157,7 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
     return {
       keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
       keyExits_wild, clickExits_wild, focusExits_wild,
+      outListExits,
     };
   }
 };
@@ -447,6 +450,7 @@ const focusBagel = (...props) => {
     const {
       exits, keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
       keyExits_wild, clickExits_wild, focusExits_wild,
+      outListExits,
     } = getExits(exit, onEscape, enabledCover, _coverNode, _trigger, _rootNode);
 
     /** 非跟节点内的，是跟节点之外的出口 */
@@ -478,6 +482,10 @@ const focusBagel = (...props) => {
     }
 
     function blurTrapListHandler(e) {
+      const active = getActiveElement();
+      if (!_rootNode.contains(active)) {
+        outListExitHandler(e);
+      }
       trappedList = false;
     }
 
@@ -556,6 +564,16 @@ const focusBagel = (...props) => {
     }
 
     /**************** E **** X **** I ***** T ***************/
+
+    function outListExitHandler(e) {
+      for (const exit of outListExits) {
+        const { on, target: origin_target, delay } = exit;
+        const target = element(origin_target);
+        if (target) exitListWithTarget(e, on, target, delay);
+        else exitListWithoutTarget(e, on, target, delay);
+        break;
+      }
+    }
 
     function clickExitHandler(e, exit) {
       const { node: origin_node, on, target: origin_target, delay } = exit;
