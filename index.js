@@ -482,11 +482,13 @@ const focusBagel = (...props) => {
     }
 
     function blurTrapListHandler(e) {
-      const active = getActiveElement();
-      if (!_rootNode.contains(active)) {
-        outListExitHandler(e);
-      }
-      trappedList = false;
+      setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
+        const active = getActiveElement();
+        if (!_rootNode.contains(active)) {
+          outListExitHandler(e);
+          trappedList = false;
+        }
+      });
     }
 
     function focusTrapCoverHandler() { trappedCover = true; }
