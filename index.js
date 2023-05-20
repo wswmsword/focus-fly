@@ -17,10 +17,11 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, trappedFrom) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, isClamp, isNext, isPrev, onNext, onPrev, coverNode, trappedFrom) => e => {
   if (e.target === coverNode) return;
 
   const [index, setIndex] = useActiveIndex();
+  const [, setPrev] = usePrevActive();
   const itemsLen = subNodes.length;
   if ((isNext ?? isTabForward)(e)) {
     const incresedI = index + 1;
@@ -30,6 +31,8 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev
     trappedFrom.list(); // 标记从列表进入列表
     focus(subNodes[nextI]);
     setIndex(nextI);
+    setPrev(index);
+    reStay();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -41,6 +44,8 @@ const focusSubNodesManually = (subNodes, useActiveIndex, isClamp, isNext, isPrev
     trappedFrom.list(); // 标记从列表进入列表
     focus(subNodes[nextI]);
     setIndex(nextI);
+    setPrev(index);
+    reStay();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -254,6 +259,10 @@ const focusBagel = (...props) => {
     onEscape,
     /** 列表单项聚焦之后的行为 */
     onClick,
+    /** 焦点在列表单项或者其内部 */
+    onStay,
+    /** 焦点离开整个单项 */
+    onLeave,
     /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素 */
     cover = false,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
@@ -325,6 +334,10 @@ const focusBagel = (...props) => {
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = 0;
+  let prevActive = 0;
+
+  /** 用于表示当前的焦点是否在某个元素上，包括它的子元素，列表的 id */
+  let isStayListItem = false;
 
   /** 是否已添加监听事件 */
   let addedListeners = false;
@@ -440,10 +453,11 @@ const focusBagel = (...props) => {
       throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
 
     const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
+    const usePrevActive = () => [, prev => prevActive = prev];
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, trappedFrom) :
+      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, () => isStayListItem = false, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, trappedFrom) :
       focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, trappedFrom);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
@@ -477,6 +491,12 @@ const focusBagel = (...props) => {
         !trappedFrom.internal() &&
         !_rootNode.contains(e.target)) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
+
+      if (!isStayListItem) {
+        isStayListItem = true;
+        onStay?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
+      }
+
       trappedFrom.clean();
       trappedList = true;
     }
@@ -487,6 +507,10 @@ const focusBagel = (...props) => {
         if (!_rootNode.contains(active)) {
           outListExitHandler(e);
           trappedList = false;
+        }
+
+        if (!_subNodes[activeIndex].contains(active)) {
+          onLeave?.({ e, prev: _subNodes[activeIndex], cur: active, prevI: activeIndex, curI: -1 });
         }
       });
     }
@@ -508,7 +532,9 @@ const focusBagel = (...props) => {
       const targetIndex = isTrappedFromMousedown;
       if (isTrappedFromMousedown > -1) {
         onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
+        prevActive = activeIndex;
         activeIndex = targetIndex;
+        prevActive !== activeIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
         isTrappedFromMousedown = -1;
       }
     }
