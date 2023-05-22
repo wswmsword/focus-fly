@@ -29,10 +29,10 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     nextI %= itemsLen;
     onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     trappedFrom.list(); // 标记从列表进入列表
-    focus(subNodes[nextI]);
     setIndex(nextI);
     setPrev(index);
     reStay();
+    focus(subNodes[nextI]);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -42,10 +42,10 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     nextI = (nextI + itemsLen) % itemsLen;
     onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     trappedFrom.list(); // 标记从列表进入列表
-    focus(subNodes[nextI]);
     setIndex(nextI);
     setPrev(index);
     reStay();
+    focus(subNodes[nextI]);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -198,7 +198,7 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
   // 空 target 走默认
   if (target == null) {
     if (enabledCover) return cover;
-    else return list[activeIndex];
+    else return list[activeIndex === -1 ? 0 : activeIndex];
   }
   // 函数 target 则执行
   else if (isFun(target))
@@ -333,8 +333,8 @@ const focusBagel = (...props) => {
   const _manual = !!(isNext || isPrev || manual);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
-  let activeIndex = 0;
-  let prevActive = 0;
+  let activeIndex = -1;
+  let prevActive = -1;
 
   /** 用于表示当前的焦点是否在某个元素上，包括它的子元素，列表的 id */
   let isStayListItem = false;
@@ -436,6 +436,8 @@ const focusBagel = (...props) => {
     
     function focusTarget(cover, list, rootNode) {
       const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
+      const targetIdx = list.indexOf(gotTarget);
+      if (targetIdx > -1) activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
       if (cover !== rootNode && rootNode.contains(gotTarget)) trappedFrom.entry(); // 标记
       tickFocus(gotTarget);
     }
@@ -526,8 +528,10 @@ const focusBagel = (...props) => {
     function mousedownListItemHandler(e) {
       const target = e.target;
       const targetIndex = _subNodes.findIndex(e => e.contains(target));
-      if (targetIndex > -1)
+      if (targetIndex > -1) {
         isTrappedFromMousedown = targetIndex;
+        activeIndex !== targetIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
+      }
       trappedFrom.click();
     }
 
@@ -538,7 +542,6 @@ const focusBagel = (...props) => {
         onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         prevActive = activeIndex;
         activeIndex = targetIndex;
-        prevActive !== activeIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
         isTrappedFromMousedown = -1;
       }
     }
@@ -565,6 +568,7 @@ const focusBagel = (...props) => {
         e.preventDefault();
         onEnterCover?.(e);
         trappedFrom.cover(); // 标记从封面进入列表
+        activeIndex = activeIndex === -1 ? 0 : activeIndex;
         focus(_subNodes[activeIndex]);
         return;
       }
