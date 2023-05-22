@@ -504,6 +504,9 @@ const focusBagel = (...props) => {
     }
 
     function blurTrapListHandler(e) {
+
+      if (e.target === _coverNode) return;
+
       setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
         const active = getActiveElement();
         if (!_rootNode.contains(active)) {
@@ -511,7 +514,10 @@ const focusBagel = (...props) => {
           trappedList = false;
         }
 
-        if (!_subNodes[activeIndex].contains(active)) {
+        const isActiveListItem = _subNodes.includes(active);
+        if (isActiveListItem &&
+          _subNodes.find(item => item.contains(e.target)) !== active)
+        {
           const curI = _subNodes.indexOf(active);
           if (curI > -1) // blur 到另一个列表元素
             onLeave?.({ e, prev: _subNodes[prevActive], cur: active, prevI: prevActive, curI });
