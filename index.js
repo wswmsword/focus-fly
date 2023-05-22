@@ -489,9 +489,7 @@ const focusBagel = (...props) => {
       if (e.target === _coverNode) return;
 
       // 纠正外部聚焦进来的焦点
-      if (_manual &&
-        !trappedFrom.internal() &&
-        !_rootNode.contains(e.target)) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (_manual && trappedList === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
 
       if (!isStayListItem || trappedList === false) {
@@ -540,6 +538,7 @@ const focusBagel = (...props) => {
         activeIndex !== targetIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
       }
       trappedFrom.click();
+      trappedList = true;
     }
 
     /** 点击聚焦列表某一单项 */
