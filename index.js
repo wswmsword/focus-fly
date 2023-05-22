@@ -515,8 +515,9 @@ const focusBagel = (...props) => {
         }
 
         const isActiveListItem = _subNodes.includes(active);
-        if (isActiveListItem &&
-          _subNodes.find(item => item.contains(e.target)) !== active)
+        if ((isActiveListItem && // 列表内的移动
+          _subNodes.find(item => item.contains(e.target)) !== active) ||
+          !isActiveListItem) // 退出整个列表
         {
           const curI = _subNodes.indexOf(active);
           if (curI > -1) // blur 到另一个列表元素
