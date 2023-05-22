@@ -494,7 +494,7 @@ const focusBagel = (...props) => {
         !_rootNode.contains(e.target)) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
 
-      if (!isStayListItem) {
+      if (!isStayListItem || trappedList === false) {
         isStayListItem = true;
         onStay?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
       }
