@@ -510,7 +510,7 @@ const focusBagel = (...props) => {
         }
 
         if (!_subNodes[activeIndex].contains(active)) {
-          const curI = _subNodes.findIndex(active);
+          const curI = _subNodes.indexOf(active);
           if (curI > -1) // blur 到另一个列表元素
             onLeave?.({ e, prev: _subNodes[prevActive], cur: active, prevI: prevActive, curI });
           else // blur 到了列表之外
