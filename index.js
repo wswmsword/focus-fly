@@ -13,11 +13,11 @@ const tickFocus = async function(e) {
   return new Promise(resolve => {
     if (e == null) tick(() => resolve(e && focus(e)));
     else resolve(focus(e));
-  })
+  });
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, isClamp, isNext, isPrev, onNext, onPrev, coverNode) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove) => e => {
   if (e.target === coverNode) return;
 
   const [index, setIndex] = useActiveIndex();
@@ -28,9 +28,9 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
     nextI %= itemsLen;
     onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
+    onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
     setPrev(index);
-    reStay();
     focus(subNodes[nextI]);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
@@ -40,9 +40,9 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
     nextI = (nextI + itemsLen) % itemsLen;
     onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
+    onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
     setPrev(index);
-    reStay();
     focus(subNodes[nextI]);
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
@@ -227,10 +227,8 @@ const focusBagel = (...props) => {
     onEscape,
     /** 列表单项聚焦之后的行为 */
     onClick,
-    /** 焦点在列表单项或者其内部 */
-    onStay,
-    /** 焦点离开整个单项 */
-    onLeave,
+    /** 移动的时候触发 */
+    onMove,
     /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素 */
     cover = false,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
@@ -303,9 +301,6 @@ const focusBagel = (...props) => {
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = -1;
   let prevActive = -1;
-
-  /** 用于表示当前的焦点是否在某个元素上，包括它的子元素，列表的 id */
-  let isStayListItem = false;
 
   /** 是否已添加监听事件 */
   let addedListeners = false;
@@ -402,7 +397,10 @@ const focusBagel = (...props) => {
     function focusTarget(cover, list, rootNode) {
       const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
       const targetIdx = list.indexOf(gotTarget);
-      if (targetIdx > -1) activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
+      if (targetIdx > -1) {
+        activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
+        onMove?.({ e, prev: null, cur: gotTarget, prevI: -1, curI: activeIndex });
+      }
       tickFocus(gotTarget);
     }
   }
@@ -423,7 +421,7 @@ const focusBagel = (...props) => {
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, () => isStayListItem = false, isClamp, isNext, isPrev, onNext, onPrev, _coverNode) :
+      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove) :
       focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
@@ -450,18 +448,15 @@ const focusBagel = (...props) => {
 
     function focusTrapListHandler(e) {
 
-      if (e.target === _coverNode) return;
+      const focusTarget = e.target;
+
+      if (focusTarget === _coverNode) return;
 
       // 纠正外部聚焦进来的焦点
-      if (_manual && trappedList === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (_manual && trappedList === false && isTrappedFromMousedown === -1) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
 
-      if (!isStayListItem || trappedList === false) {
-        isStayListItem = true;
-        onStay?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
-      }
-
-      trappedList = true;
+      if (isTrappedFromMousedown === -1) trappedList = true; // 排除从点击进入的情况
     }
 
     function blurTrapListHandler(e) {
@@ -472,19 +467,8 @@ const focusBagel = (...props) => {
         const active = getActiveElement();
         if (!_rootNode.contains(active)) {
           outListExitHandler(e);
+          onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           trappedList = false;
-        }
-
-        const isActiveListItem = _subNodes.includes(active);
-        if ((isActiveListItem && // 列表内的移动
-          _subNodes.find(item => item.contains(e.target)) !== active) ||
-          !isActiveListItem) // 退出整个列表
-        {
-          const curI = _subNodes.indexOf(active);
-          if (curI > -1) // blur 到另一个列表元素
-            onLeave?.({ e, prev: _subNodes[prevActive], cur: active, prevI: prevActive, curI });
-          else // blur 到了列表之外
-            onLeave?.({ e, prev: _subNodes[activeIndex], cur: active, prevI: activeIndex, curI });
         }
       });
     }
@@ -496,21 +480,22 @@ const focusBagel = (...props) => {
     function mousedownListItemHandler(e) {
       const target = e.target;
       const targetIndex = _subNodes.findIndex(e => e.contains(target));
-      if (targetIndex > -1) {
+      if (targetIndex > -1)
         isTrappedFromMousedown = targetIndex;
-        activeIndex !== targetIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
-      }
-      trappedList = true;
     }
 
     /** 点击聚焦列表某一单项 */
     function clickListItemHandler(e) {
       const targetIndex = isTrappedFromMousedown;
       if (isTrappedFromMousedown > -1) {
-        onClick?.({ e, prev: _subNodes[activeIndex], cur: _subNodes[targetIndex], prevI: activeIndex, curI: targetIndex });
         prevActive = activeIndex;
         activeIndex = targetIndex;
+
+        onClick?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
+        if (prevActive !== activeIndex || trappedList === false)
+          onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
         isTrappedFromMousedown = -1;
+        trappedList = true;
       }
     }
 
@@ -537,6 +522,7 @@ const focusBagel = (...props) => {
         onEnterCover?.(e);
         activeIndex = activeIndex === -1 ? 0 : activeIndex;
         focus(_subNodes[activeIndex]);
+        onMove?.({ e, prev: null, cur: _subNodes[activeIndex], prevI: null, curI: activeIndex });
         return;
       }
 
@@ -656,6 +642,7 @@ const focusBagel = (...props) => {
 
     /** 退出列表，有 target */
     async function exitListWithTarget(e, on, target, delay) {
+
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
 
       delay = delay ?? delayToBlur;
@@ -672,6 +659,7 @@ const focusBagel = (...props) => {
 
       function focusThenRemoveListeners() {
         focus(target);
+        onMove?.({ e, prev: _subNodes[activeIndex], cur: target, prevI: activeIndex, curI: -1 });
         if (target !== _coverNode)
           removeListListeners();
         addEntryListeners();
@@ -683,12 +671,14 @@ const focusBagel = (...props) => {
       e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，例如 enter button 触发 click 事件
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         await on?.(e);
+        onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
         removeListListeners();
         addEntryListeners();
         return ;
       }
       if (enabledCover) {
         await on?.(e);
+        onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
         focus(_coverNode);
       } else {
         await on?.(e);
@@ -700,6 +690,7 @@ const focusBagel = (...props) => {
 
         function focusThenRemoveListeners() {
           _trigger && focus(_trigger);
+          onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           removeListListeners();
           addEntryListeners();
         }
