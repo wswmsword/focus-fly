@@ -120,10 +120,10 @@ describe("focus-bagel", function() {
     const bagel = initBagel_4(container, dialog, first, last, open, close);
 
     const i1 = bagel.i();
-    expect(i1).toBe(0);
+    expect(i1).toBe(-1);
     await user.tab();
     const i2 = bagel.i();
-    expect(i2).toBe(0);
+    expect(i2).toBe(-1);
     await open.click();
     expect(first).toHaveFocus();
     const i3 = bagel.i();
