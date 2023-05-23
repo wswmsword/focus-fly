@@ -17,7 +17,7 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, isClamp, isNext, isPrev, onNext, onPrev, coverNode, trappedFrom) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, isClamp, isNext, isPrev, onNext, onPrev, coverNode) => e => {
   if (e.target === coverNode) return;
 
   const [index, setIndex] = useActiveIndex();
@@ -28,7 +28,6 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
     nextI %= itemsLen;
     onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    trappedFrom.list(); // 标记从列表进入列表
     setIndex(nextI);
     setPrev(index);
     reStay();
@@ -41,7 +40,6 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
     let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
     nextI = (nextI + itemsLen) % itemsLen;
     onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    trappedFrom.list(); // 标记从列表进入列表
     setIndex(nextI);
     setPrev(index);
     reStay();
@@ -52,13 +50,12 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, reStay, 
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedFrom) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode) => e => {
   const current = e.target;
   if (current === coverNode) return;
 
   if (isTabForward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
-    trappedFrom.list(); // 标记从列表进入列表
     onNext?.({ e });
     if (current === tail) {
       e.preventDefault();
@@ -71,7 +68,6 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode,
   }
   else if (isTabBackward(e)) {
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
-    trappedFrom.list(); // 标记从列表进入列表
     onPrev?.({ e });
     if (current === head) {
       e.preventDefault();
@@ -207,34 +203,6 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
   else return element(target);
 }
 
-/** 记录焦点是如何进入列表的，主要用来纠正从未知领域进入列表的焦点 */
-class TrappedFrom {
-  constructor() {
-    this.clean();
-  }
-  entry() {
-    this._entry = true;
-  }
-  cover() {
-    this._cover = true;
-  }
-  click() {
-    this._click = true;
-  }
-  list() {
-    this._list = true;
-  }
-  clean() {
-    this._entry = false;
-    this._cover = false;
-    this._click = false;
-    this._list = false;
-  }
-  internal() {
-    return this._entry || this._cover || this._click || this._list;
-  }
-}
-
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
@@ -345,9 +313,6 @@ const focusBagel = (...props) => {
   let trappedList = false;
   let trappedCover = false;
 
-  /** 记录焦点是如何进入列表的，用来纠正从未知渠道进入列表之后的焦点错误问题 */
-  const trappedFrom = new TrappedFrom();
-
   let addedEntryListeners = false;
   // 入口点击事件
   addEntryListeners();
@@ -438,7 +403,6 @@ const focusBagel = (...props) => {
       const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
       const targetIdx = list.indexOf(gotTarget);
       if (targetIdx > -1) activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-      if (cover !== rootNode && rootNode.contains(gotTarget)) trappedFrom.entry(); // 标记
       tickFocus(gotTarget);
     }
   }
@@ -459,8 +423,8 @@ const focusBagel = (...props) => {
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, () => isStayListItem = false, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, trappedFrom) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, trappedFrom);
+      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, () => isStayListItem = false, isClamp, isNext, isPrev, onNext, onPrev, _coverNode) :
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
@@ -497,7 +461,6 @@ const focusBagel = (...props) => {
         onStay?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
       }
 
-      trappedFrom.clean();
       trappedList = true;
     }
 
@@ -537,7 +500,6 @@ const focusBagel = (...props) => {
         isTrappedFromMousedown = targetIndex;
         activeIndex !== targetIndex && (isStayListItem = false); // 改变了 activeIndex 才需要重置 isStayListItem
       }
-      trappedFrom.click();
       trappedList = true;
     }
 
@@ -573,7 +535,6 @@ const focusBagel = (...props) => {
       if((coverEnterKey ?? isEnterEvent)(e)) {
         e.preventDefault();
         onEnterCover?.(e);
-        trappedFrom.cover(); // 标记从封面进入列表
         activeIndex = activeIndex === -1 ? 0 : activeIndex;
         focus(_subNodes[activeIndex]);
         return;
