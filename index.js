@@ -450,7 +450,7 @@ const focusBagel = (...props) => {
     exitListWithoutTarget_outer = exitListWithoutTarget;
     exits_outer = exits;
 
-    let isTrappedFromMousedown = -1;
+    let isMouseDown = false;
 
     function focusTrapListHandler(e) {
 
@@ -459,10 +459,10 @@ const focusBagel = (...props) => {
       if (focusTarget === _coverNode) return;
 
       // 纠正外部聚焦进来的焦点
-      if (_manual && trappedList === false && isTrappedFromMousedown === -1) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (_manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
 
-      if (isTrappedFromMousedown === -1) trappedList = true; // 排除从点击进入的情况
+      if (isMouseDown === false) trappedList = true; // 排除从点击进入的情况
     }
 
     function blurTrapListHandler(e) {
@@ -483,24 +483,24 @@ const focusBagel = (...props) => {
 
     function blurTrapCoverHandler() { trappedCover = false; }
 
-    function mousedownListItemHandler(e) {
-      const target = e.target;
-      const targetIndex = _subNodes.findIndex(e => e.contains(target));
-      if (targetIndex > -1)
-        isTrappedFromMousedown = targetIndex;
+    function mousedownListItemHandler() {
+      isMouseDown = true;
+      setTimeout(() => {
+        isMouseDown = false; // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
+      });
     }
 
     /** 点击聚焦列表某一单项 */
     function clickListItemHandler(e) {
-      const targetIndex = isTrappedFromMousedown;
-      if (isTrappedFromMousedown > -1) {
+      const target = e.target;
+      const targetIndex = _subNodes.findIndex(e => e.contains(target));
+      if (targetIndex > -1) {
         prevActive = activeIndex;
         activeIndex = targetIndex;
 
         onClick?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
         if (prevActive !== activeIndex || trappedList === false)
           onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
-        isTrappedFromMousedown = -1;
         trappedList = true;
       }
     }
@@ -512,7 +512,7 @@ const focusBagel = (...props) => {
       if (!(
         prevFocus === _coverNode ||
         _rootNode.contains(prevFocus) ||
-        isTrappedFromMousedown > -1 ||
+        isMouseDown ||
         enters.some(some))) {
         focus(_coverNode) // 如果从列表以外的区域进入，则聚焦封面
       }
