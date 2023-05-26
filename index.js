@@ -333,13 +333,19 @@ const focusBagel = (...props) => {
     enter() {
       _trigger = _trigger || getActiveElement();
 
+      let invokedByEntry = false;
+
       for (let enter of enters) {
         const { on, type, node, target, delay } = enter;
         const invokeType = "invoke";
 
-        if (type?.some(type => type == null || type === false || type === invokeType) || node == null)
+        if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
           enterTriggerHandler({ fromInvoke: true }, on, target, delay);
+          invokedByEntry = true;
+        }
       }
+
+      if (!invokedByEntry) enterTriggerHandler({ fromInvoke: true });
     },
     /** 调用形式的出口 */
     exit() {
