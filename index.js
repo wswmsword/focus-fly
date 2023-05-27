@@ -17,8 +17,9 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, bookTrappedList) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
   if (e.target === coverNode) return;
+  if (!trappedList()) return;
 
   const [index_, setIndex] = useActiveIndex();
   const [, setPrev] = usePrevActive();
@@ -33,7 +34,6 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp,
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
-    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -46,19 +46,18 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp,
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
-    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, bookTrappedList) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
   const current = e.target;
   if (current === coverNode) return;
+  if (!trappedList()) return;
 
   if (isTabForward(e)) {
-    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onNext?.({ e });
     if (current === tail) {
@@ -71,7 +70,6 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode,
     }
   }
   else if (isTabBackward(e)) {
-    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onPrev?.({ e });
     if (current === head) {
@@ -433,12 +431,11 @@ const focusBagel = (...props) => {
 
     const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
     const usePrevActive = () => [, prev => prevActive = prev];
-    const bookTrappedList = () => trappedList = true;
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, bookTrappedList) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, bookTrappedList);
+      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, () => trappedList) :
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
