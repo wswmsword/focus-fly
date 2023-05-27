@@ -17,11 +17,12 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove) => e => {
+const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, bookTrappedList) => e => {
   if (e.target === coverNode) return;
 
-  const [index, setIndex] = useActiveIndex();
+  const [index_, setIndex] = useActiveIndex();
   const [, setPrev] = usePrevActive();
+  const index = Math.max(0, index_);
   const itemsLen = subNodes.length;
   if ((isNext ?? isTabForward)(e)) {
     const incresedI = index + 1;
@@ -32,6 +33,7 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp,
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
+    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
@@ -44,17 +46,19 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp,
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
+    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode) => e => {
+const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, bookTrappedList) => e => {
   const current = e.target;
   if (current === coverNode) return;
 
   if (isTabForward(e)) {
+    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onNext?.({ e });
     if (current === tail) {
@@ -67,6 +71,7 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode)
     }
   }
   else if (isTabBackward(e)) {
+    bookTrappedList();
     e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onPrev?.({ e });
     if (current === head) {
@@ -371,6 +376,8 @@ const focusBagel = (...props) => {
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
 
+    trappedList = true
+
     await onEnter?.(e);
 
     delay = delay ?? delayToFocus;
@@ -424,11 +431,12 @@ const focusBagel = (...props) => {
 
     const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
     const usePrevActive = () => [, prev => prevActive = prev];
+    const bookTrappedList = () => trappedList = true;
 
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode);
+      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, bookTrappedList) :
+      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, bookTrappedList);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
@@ -461,8 +469,6 @@ const focusBagel = (...props) => {
       // 纠正外部聚焦进来的焦点
       if (_manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       { tickFocus(_subNodes[activeIndex]); }
-
-      if (isMouseDown === false) trappedList = true; // 排除从点击进入的情况
     }
 
     function blurTrapListHandler(e) {
@@ -527,8 +533,9 @@ const focusBagel = (...props) => {
       if (e.target !== _coverNode) return;
 
       // 入口
-      if((coverEnterKey ?? isEnterEvent)(e)) {
+      if((coverEnterKey ?? isEnterEvent)(e) && !trappedList) {
         e.preventDefault();
+        trappedList = true
         onEnterCover?.(e);
         activeIndex = activeIndex === -1 ? 0 : activeIndex;
         focus(_subNodes[activeIndex]);
@@ -653,6 +660,10 @@ const focusBagel = (...props) => {
     /** 退出列表，有 target */
     async function exitListWithTarget(e, on, target, delay) {
 
+      if (!trappedList) return;
+
+      trappedList = false;
+
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
 
       delay = delay ?? delayToBlur;
@@ -678,6 +689,11 @@ const focusBagel = (...props) => {
 
     /** 退出列表，无 target */
     async function exitListWithoutTarget(e, on, target, delay) {
+
+      if (!trappedList) return;
+
+      trappedList = false;
+
       e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，例如 enter button 触发 click 事件
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         await on?.(e);
@@ -823,9 +839,10 @@ const focusBagel = (...props) => {
       const types = [].concat(type);
       const allTypes = ["keydown", "focus", "click"];
       const node = element(origin);
-  
+
       types.forEach(type => {
         if (node && allTypes.includes(type)) {
+          // if (isDemo === "s") console.log(type)
           const handler = type === "keydown" ? keyHandler : notKeyHandler;
           node.addEventListener(type, handler);
           added.push({
