@@ -470,9 +470,13 @@ const focusBagel = (...props) => {
       if (e.target === _coverNode) return;
 
       setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
+
         const active = getActiveElement();
-        if (!_rootNode.contains(active)) {
+        const isOutRootNode = !_rootNode.contains(active);
+        const isActiveCover = active === _coverNode;
+        if (isOutRootNode && !isActiveCover) // 聚焦在 rootNode 之外，并且没有聚焦在封面上
           outListExitHandler(e);
+        if (isActiveCover || isOutRootNode) { // 聚焦在 rootNode 之外，或者聚焦在封面上
           onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           trappedList = false;
         }
