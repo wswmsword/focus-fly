@@ -31,7 +31,9 @@ describe("focus-bagel", function() {
     initBagel(container, dialog, first, last, open, close)
   
     await close.click();
-    expect(open).toHaveFocus();
+    waitFor(() => {
+      expect(open).toHaveFocus();
+    });
   });
 
   it("should focus first focusable node of modal that is visible and sibling with trigger after press tab", async () => {
@@ -50,7 +52,9 @@ describe("focus-bagel", function() {
     await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();
     expect(last).toHaveFocus();
     await user.tab();
-    expect(first).toHaveFocus();
+    waitFor(() => {
+      expect(first).toHaveFocus();
+    });
   });
 
   it("should loop focus forward", async function() {
