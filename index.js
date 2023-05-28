@@ -206,6 +206,15 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
   else return element(target);
 }
 
+/** 保存事件信息 */
+const pushListenerCache = function(cache, node, type, handler) {
+  cache.push({
+    node,
+    type,
+    handler,
+  });
+}
+
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
@@ -309,11 +318,14 @@ const focusBagel = (...props) => {
 
   /** 是否已添加监听事件 */
   let addedListeners = false;
+  let listListeners = [];
 
   let trappedList = false;
   let trappedCover = false;
 
+  /** 是否已添加入口的监听事件 */
   let addedEntryListeners = false;
+  let entryListeners = [];
   // 入口点击事件
   addEntryListeners();
   /** 是否已添加入口的监听事件 */
@@ -367,6 +379,13 @@ const focusBagel = (...props) => {
           }
         }
       }
+    },
+    /** 移出所有的监听事件 */
+    removeListeners() {
+      listListeners.forEach(l => l.node?.removeEventListener(l.type, l.handler));
+      entryListeners.forEach(l => l.node?.removeEventListener(l.type, l.handler));
+      addedListeners = false;
+      addedEntryListeners = false;
     },
     i: () => activeIndex,
   };
@@ -744,50 +763,76 @@ const focusBagel = (...props) => {
     function addListListeners() {
 
       _rootNode.addEventListener("focusin", focusTrapListHandler);
+      pushListenerCache(listListeners, _rootNode, "focusin", focusTrapListHandler);
 
       _rootNode.addEventListener("focusout", blurTrapListHandler);
+      pushListenerCache(listListeners, _rootNode, "focusout", blurTrapListHandler);
 
       if (_rootNode !== _coverNode && _coverNode != null) {
 
         _coverNode.addEventListener("focus", focusTrapCoverHandler);
+        pushListenerCache(listListeners, _coverNode, "focus", focusTrapCoverHandler);
 
         _coverNode.addEventListener("blur", blurTrapCoverHandler);
+        pushListenerCache(listListeners, _coverNode, "blur", blurTrapCoverHandler);
       }
 
       // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
       _rootNode.addEventListener("keydown", keyListMoveHandler);
+      pushListenerCache(listListeners, _rootNode, "keydown", keyListMoveHandler);
 
-      /** 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex */
-      _manual && _rootNode.addEventListener("click", clickListItemHandler);
+      if (_manual) {
+        /** 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex */
+        _rootNode.addEventListener("click", clickListItemHandler);
+        pushListenerCache(listListeners, _rootNode, "click", clickListItemHandler);
 
-      /** 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位 */
-      _manual && _rootNode.addEventListener("mousedown", mousedownListItemHandler);
+        /** 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位 */
+        _rootNode.addEventListener("mousedown", mousedownListItemHandler);
+        pushListenerCache(listListeners, _rootNode, "mousedown", mousedownListItemHandler);
+      }
 
-      /** 列表点击出口 */
-      hasClickExits && _rootNode.addEventListener("click", clickListExitHandler);
+      if (hasClickExits) {
+        /** 列表点击出口 */
+        _rootNode.addEventListener("click", clickListExitHandler);
+        pushListenerCache(listListeners, _rootNode, "click", clickListExitHandler);
+      }
 
-      /** 列表聚焦出口 */
-      hasFocusExits && _rootNode.addEventListener("focusin", focusListExitHandler);
+      if (hasFocusExits) {
+        /** 列表聚焦出口 */
+        _rootNode.addEventListener("focusin", focusListExitHandler);
+        pushListenerCache(listListeners, _rootNode, "focusin", focusListExitHandler);
+      }
 
-      /** 列表键盘出口 */
-      hasKeyExits && _rootNode.addEventListener("keydown", keyListExitHandler);
+      if (hasKeyExits) {
+        /** 列表键盘出口 */
+        _rootNode.addEventListener("keydown", keyListExitHandler);
+        pushListenerCache(listListeners, _rootNode, "keydown", keyListExitHandler);
+      }
 
       
       /** 非列表内的出口 */
-      focusListExitHandlers_wild.forEach(([node, handler]) =>
-        node?.addEventListener?.("focus", handler));
-      clickListExitHandlers_wild.forEach(([node, handler]) =>
-        node?.addEventListener?.("click", handler));
-      keyListExitHandlers_wild.forEach(([node, handler]) =>
-        node?.addEventListener?.("click", handler));
+      focusListExitHandlers_wild.forEach(([node, handler]) => {
+        node?.addEventListener?.("focus", handler);
+        pushListenerCache(listListeners, node, "focus", handler);
+      });
+      clickListExitHandlers_wild.forEach(([node, handler]) => {
+        node?.addEventListener?.("click", handler);
+        pushListenerCache(listListeners, node, "click", handler);
+      });
+      keyListExitHandlers_wild.forEach(([node, handler]) => {
+        node?.addEventListener?.("keydown", handler);
+        pushListenerCache(listListeners, node, "keydown", handler);
+      });
 
       /** 封面的事件 */
       _coverNode?.addEventListener("keydown", keyCoverHandler);
+      pushListenerCache(listListeners, _coverNode, "keydown", keyCoverHandler);
 
       if (isDefaultExitCover) {
 
         /** 尾部元素聚焦后的事件，用于返回封面 */
         _tail?.addEventListener("focus", focusListTailHandler);
+        pushListenerCache(listListeners, _tail, "focus", focusListTailHandler);
       }
     };
 
@@ -799,29 +844,9 @@ const focusBagel = (...props) => {
 
       if (removeListenersEachExit) {
         addedListeners = false;
-        _rootNode.removeEventListener("focusin", focusTrapListHandler);
-        _rootNode.removeEventListener("focusout", blurTrapListHandler);
-        _coverNode?.removeEventListener("focus", focusTrapCoverHandler);
-        _coverNode?.removeEventListener("blur", blurTrapCoverHandler);
 
-        _rootNode.removeEventListener("keydown", keyListMoveHandler);
-        _rootNode.removeEventListener("click", clickListItemHandler);
-
-        _rootNode.removeEventListener("mousedown", mousedownListItemHandler);
-
-        _rootNode.removeEventListener("click", clickListExitHandler);
-        _rootNode.removeEventListener("focusin", focusListExitHandler);
-        _rootNode.removeEventListener("keydown", keyListExitHandler);
-
-        focusListExitHandlers_wild.forEach(([node, handler]) =>
-          node?.removeEventListener?.("focus", handler));
-        clickListExitHandlers_wild.forEach(([node, handler]) =>
-          node?.removeEventListener?.("click", handler));
-        keyListExitHandlers_wild.forEach(([node, handler]) =>
-          node?.removeEventListener?.("click", handler));
-
-        _coverNode?.removeEventListener("keydown", keyCoverHandler);
-        _tail?.removeEventListener("focus", focusListTailHandler);
+        listListeners.forEach(l => l.node?.removeEventListener(l.type, l.handler));
+        listListeners = [];
       }
     }
   }
@@ -832,7 +857,6 @@ const focusBagel = (...props) => {
     if (addedEntryListeners) return;
     addedEntryListeners = true;
 
-    const added = [];
     for (let enter of enters) {
       const { node: origin, on, key, type, target, delay } = enter;
       const types = [].concat(type);
@@ -841,26 +865,23 @@ const focusBagel = (...props) => {
 
       types.forEach(type => {
         if (node && allTypes.includes(type)) {
-          // if (isDemo === "s") console.log(type)
-          const handler = type === "keydown" ? keyHandler : notKeyHandler;
+          const handler = type === "keydown"
+            ? entryKeyHandler
+            : entryNotKeyHandler;
           node.addEventListener(type, handler);
-          added.push({
-            node,
-            type,
-            handler,
-          })
+          pushListenerCache(entryListeners, node, type, handler); // 保存事件信息
         }
       });
-  
-      function keyHandler(e) {
+
+      function entryKeyHandler(e) {
         if (key?.(e)) {
           e.preventDefault();
           enterTriggerHandler(e, on, target, delay);
           removeEntryListeners();
         }
       }
-  
-      function notKeyHandler(e) {
+    
+      function entryNotKeyHandler(e) {
         enterTriggerHandler(e, on, target, delay);
         removeEntryListeners();
       }
@@ -869,9 +890,10 @@ const focusBagel = (...props) => {
     function removeEntryListeners() {
       if (!removeListenersEachEnter) return;
       addedEntryListeners = false;
-      added.forEach(l => l.node.removeEventListener(l.type, l.handler));
+      entryListeners.forEach(l => l.node.removeEventListener(l.type, l.handler));
+      entryListeners = [];
     }
-  };
+  }
 };
 
 export default focusBagel;
