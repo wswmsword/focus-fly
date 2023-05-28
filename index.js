@@ -486,7 +486,10 @@ const focusBagel = (...props) => {
 
       // 纠正外部聚焦进来的焦点
       if (!disableListFocusCorrection && _manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
-      { tickFocus(_subNodes[activeIndex]); }
+      {
+        tickFocus(_subNodes[activeIndex]);
+        trappedList = true;
+      }
     }
 
     function blurTrapListHandler(e) {
