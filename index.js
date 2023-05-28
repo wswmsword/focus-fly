@@ -487,6 +487,7 @@ const focusBagel = (...props) => {
       // 纠正外部聚焦进来的焦点
       if (!disableListFocusCorrection && _manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
+        if (activeIndex === -1) activeIndex = 0; // 从非入口进入，并且之前没有通过入口，设置为聚焦第一个元素
         tickFocus(_subNodes[activeIndex]);
         onMove?.({ e, prev: null, cur: _subNodes[activeIndex], prevI: -1, curI: activeIndex });
         trappedList = true;
