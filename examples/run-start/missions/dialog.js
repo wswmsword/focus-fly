@@ -10,8 +10,9 @@ const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
     on: openDialog,
   },
   exit: {
-    node: ["#close", "#firstFocusBtn", "#confirm", "#dialog_mask"],
+    node: ["#close", "#firstFocusBtn", "#confirm"],
     on: closeDialog,
+    type: ["click", "outlist"]
   },
   onEscape: true,
 });

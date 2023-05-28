@@ -124,6 +124,7 @@ span.time {
 
 div.time {
   justify-self: end;
+  padding-right: 22px;
 }
 
 svg.time {
@@ -133,6 +134,14 @@ svg.time {
 
 .cells_wrapper {
   padding-top: 16px;
+}
+
+.listeners_head, .listeners_cell {
+  text-align: right;
+}
+
+.song:hover .listeners_cell {
+  color: white;
 }
 
 .song {
@@ -148,14 +157,22 @@ svg.time {
   border-radius: 5px;
 }
 
-.song:focus {
+.song.focused {
   background-color: hsla(0,0%,100%,.3);
   border-radius: 5px;
 }
 
-[role=gridcell] {
+[role=gridcell], [role=gridcell] a {
   color: rgb(179, 179, 179);
   font-size: 12px;
+}
+
+[role=gridcell] a {
+  text-decoration: none;
+}
+
+.song:hover [role=gridcell] a {
+  color: white;
 }
 
 [role=gridcell] .title {
@@ -164,6 +181,57 @@ svg.time {
 
 [role=gridcell].last {
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.song_play {
+  border: none;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  margin-left: -4px;
+  display: none;
+}
+
+.song_play:hover {
+  transform: scale(1.1);
+}
+
+.song_like, .song_more {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gray);
+  border: none;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.song_more {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gray);
+}
+
+.song_like:hover , .song_more:hover {
+  background-color: rgb(194, 194, 194);
+}
+
+.song:hover .song_like, .song.focused .song_like,
+.song:hover .song_more, .song.focused .song_more {
+  opacity: 1;
+}
+
+.song:hover .song_play, .song.focused .song_play {
+  display: block;
+}
+
+.song:hover .song_idx, .song.focused .song_idx {
+  display: none;
 }
 
 .other_infos {

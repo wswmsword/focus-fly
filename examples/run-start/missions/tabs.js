@@ -33,9 +33,9 @@ const tabsBagel = focusBagel(tabs, tabList, {
 
 function onFocus({ prev, cur, prevI, curI }) {
   if (curI === prevI) return;
-  prev.setAttribute("aria-selected", "false");
+  (prev ?? document.getElementById("tab_1")).setAttribute("aria-selected", "false");
   cur.setAttribute("aria-selected", "true");
-  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1));
+  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1)) || document.getElementById("tabpanel_1");
   const curPanel = document.getElementById("tabpanel_" + (curI + 1));
   prevPanel.classList.add('is-hidden');
   curPanel.classList.remove('is-hidden');

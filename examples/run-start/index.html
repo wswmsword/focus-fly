@@ -58,7 +58,7 @@
       <div id="dialog_mask" class="closed_mask"></div>
       <div id="dialog" aria-modal="true" aria-labelledby="modal-title" class="dialog centre closedDialog" role="dialog" tabindex="-1">
         <h3 id="modal-title">吃一颗糖果</h3>
-        <p>爱吃糖果的小可爱，你的糖果已送达，请注意查收。不需冷藏，无需加热，横扫饥饿，一颗提神醒脑，两颗永不疲劳，三颗长生不老～</p>
+        <p>爱吃糖果的小可爱，你的糖果已送达，请注意查收。不需冷藏，无需加热，一颗提神醒脑，两颗永不疲劳，三颗长生不老～</p>
         <div class="ctrls">
           <button class="button" id="firstFocusBtn">巧克力！克力！力！</button>
           <button class="button" id="confirm">吃吃吃</button>
@@ -112,26 +112,26 @@ function closeDialog() {
       <div id="tabs">
         <div id="tab_list" role="tablist" aria-labelledby="tablist">
           <button id="tab_1" role="tab" aria-selected="true" aria-controls="tabpanel_1" tabindex="0">
-            <span>椰蓉酥心糖</span>
+            <span>海棠</span>
           </button>
           <button id="tab_2" role="tab" aria-selected="false" aria-controls="tabpanel_2" tabindex="0">
-            <span>棉花糖</span>
+            <span>梨花</span>
           </button>
           <button id="tab_3" role="tab" aria-selected="false" aria-controls="tabpanel_3" tabindex="0">
-            <span>绿箭口香糖</span>
+            <span>木绣球</span>
           </button>
           <button id="tab_4" role="tab" aria-selected="false" aria-controls="tabpanel_4" tabindex="0">
-            <span>大白兔奶糖</span>
+            <span>月见草</span>
           </button>
           <button id="tab_5" role="tab" aria-selected="false" aria-controls="tabpanel_5" tabindex="0">
-            <span>瑞士糖</span>
+            <span>桃花</span>
           </button>
         </div>
-        <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1">椰蓉酥心糖</div>
-        <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2" class="is-hidden">棉花糖</div>
-        <div id="tabpanel_3" role="tabpanel" aria-labelledby="tab_3" class="is-hidden">绿箭口香糖</div>
-        <div id="tabpanel_4" role="tabpanel" aria-labelledby="tab_4" class="is-hidden">大白兔奶糖</div>
-        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5" class="is-hidden">瑞士糖</div>
+        <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1">海棠</div>
+        <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2" class="is-hidden">梨花</div>
+        <div id="tabpanel_3" role="tabpanel" aria-labelledby="tab_3" class="is-hidden">木绣球</div>
+        <div id="tabpanel_4" role="tabpanel" aria-labelledby="tab_4" class="is-hidden">月见草</div>
+        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5" class="is-hidden">桃花</div>
       </div>
 
       <details>
@@ -184,7 +184,9 @@ function onFocus({ prev, cur, prevI, curI }) {
 
       <h2>播放列表</h2>
 
-      <p>这个“播放列表”是一个真实例子，是 Spotify 的专辑界面，Spotify 网页有很好的键盘体验。如果有一类元素组成了列表，这类元素的每一个内部又包含很多可聚焦的子元素，这时使用 <kbd>Tab</kbd> 从头到尾的访问体验是崩溃的，因为元素太多花费时间太长了。Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点进入单曲，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素，回过头如果要访问每一首单曲，只要当焦点在专辑列表的时候使用 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 就可以了。</p>
+      <p>这个“播放列表”是一个真实例子，是 Spotify 的专辑界面，Spotify 网页有很好的键盘体验。如果有一类元素组成了列表，这类元素的每一个内部又包含很多可聚焦的子元素，这时使用 <kbd>Tab</kbd> 从头到尾的访问体验是崩溃的，因为元素太多、花费时间太长了。</p>
+      
+      <p>Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点进入（正在播放的）单曲，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素；回过头如果想要播放某一首歌，只要让焦点回到专辑列表，然后通过 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 来选中；听到动听的歌曲，我们会把这首歌曲收藏起来，我们只要让焦点回到那首歌曲，按下 <kbd>Left Arrow</kbd> 或者 <kbd>Right Arrow</kbd> 找到“收藏”按钮，就能进行后续的操作了。</p>
 
       <div class="player">
         <div class="head">
@@ -216,7 +218,7 @@ function onFocus({ prev, cur, prevI, curI }) {
                 <div class="table_head_inner" role="row" aria-rowindex="1">
                   <div role="columnheader" aria-colindex="1">#</div>
                   <div role="columnheader" aria-colindex="2">标题</div>
-                  <div role="columnheader" aria-colindex="3">播放量</div>
+                  <div role="columnheader" aria-colindex="3" class="listeners_head">播放量</div>
                   <div role="columnheader" aria-colindex="4" aria-label="时长" class="time">
                     <svg role="img" height="16" width="16" aria-hidden="true" viewBox="0 0 16 16" data-encore-id="icon" class="time"><path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"></path><path d="M8 3.25a.75.75 0 0 1 .75.75v3.25H11a.75.75 0 0 1 0 1.5H7.25V4A.75.75 0 0 1 8 3.25z"></path></svg>
                   </div>
@@ -224,73 +226,122 @@ function onFocus({ prev, cur, prevI, curI }) {
               </div>
               <div class="cells_wrapper" role="presentation">
                 <div id="song_1" role="row" aria-rowindex="2" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">1</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">1</span>
+                    <button id="s1_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s1_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s1_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s1_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_2" role="row" aria-rowindex="3" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">2</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">2</span>
+                    <button id="s2_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s2_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s2_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s2_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_3" role="row" aria-rowindex="4" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">3</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">3</span>
+                    <button id="s3_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s3_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s3_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s3_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_4" role="row" aria-rowindex="5" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">4</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">4</span>
+                    <button id="s4_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s4_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s4_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s4_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_5" role="row" aria-rowindex="6" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">5</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">5</span>
+                    <button id="s5_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s5_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s5_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s5_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_6" role="row" aria-rowindex="7" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">6</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">6</span>
+                    <button id="s6_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">オレがナルトだってばよ!</div>
-                    <div>Toshio Masuda</div>
+                    <a id="s6_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">Toshio Masuda</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">654,962</div>
-                  <div role="gridcell" aria-colindex="4" class="last">1:38</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">654,962</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s6_like" class="song_like"></button>
+                    <div>1:38</div>
+                    <button id="s6_more" class="song_more"></button>
+                  </div>
                 </div>
 
                 <div id="song_7" role="row" aria-rowindex="8" aria-selected="false" class="song" tabindex="0">
-                  <div role="gridcell" aria-colindex="1">...</div>
+                  <div role="gridcell" aria-colindex="1">
+                    <span class="song_idx">...</span>
+                    <button id="s7_play" class="song_play">▶️</button>
+                  </div>
                   <div role="gridcell" aria-colindex="2">
                     <div class="title">...</div>
-                    <div>...</div>
+                    <a id="s7_a" href="https://open.spotify.com/artist/78JmbZfna6DOfhSoxccZZw">...</a>
                   </div>
-                  <div role="gridcell" aria-colindex="3">...</div>
-                  <div role="gridcell" aria-colindex="4" class="last">...</div>
+                  <div role="gridcell" aria-colindex="3" class="listeners_cell">...</div>
+                  <div role="gridcell" aria-colindex="4" class="last">
+                    <button id="s7_like" class="song_like"></button>
+                    <div>...</div>
+                    <button id="s7_more" class="song_more"></button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -313,12 +364,14 @@ function onFocus({ prev, cur, prevI, curI }) {
         <pre>
 <code>const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 
-const focusPlayer = focusBagel("#list_wrapper", songs, {
+let lastSong = null;
+
+const playerBagel = focusBagel("#grid_wrapper", songs, {
   cover: {
     enterKey: e => (e.key === "Tab" && !e.shiftKey) || e.key === "ArrowDown" || e.key === "ArrowUp",
   },
-  forward: e => e.key === "ArrowDown",
-  backward: e => e.key === "ArrowUp",
+  next: e => e.key === "ArrowDown",
+  prev: e => e.key === "ArrowUp",
   exit: [{
     key: e => e.key === "Tab" && !e.shiftKey,
     target: "#more_from",
@@ -329,8 +382,36 @@ const focusPlayer = focusBagel("#list_wrapper", songs, {
     node: "#more_from",
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
-  }
-});</code>
+    target: ({ last }) => last,
+  },
+  onMove({ cur, prev, curI }) {
+    prev?.classList.remove("focused");
+    cur?.classList.add("focused");
+
+    lastSong?.removeListeners();
+    if (curI > -1) initSongBagel(curI);
+  },
+});
+
+
+function initSongBagel(curI) {
+  const idx = curI + 1;
+  const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
+  lastSong = focusBagel(`#song_${idx}`, list, {
+    enter: {
+      node: `#song_${idx}`,
+      key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
+      type: "keydown",
+    },
+    next: e => e.key === "ArrowRight",
+    prev: e => e.key === "ArrowLeft",
+    exit: {
+      type: "outlist",
+      target: false,
+    },
+    disableListFocusCorrection: true,
+  });
+}</code>
       </pre>
       </details>
 
