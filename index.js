@@ -380,7 +380,7 @@ const focusBagel = (...props) => {
         }
       }
     },
-    /** 移出所有的监听事件 */
+    /** 移除所有的监听事件 */
     removeListeners() {
       listListeners.forEach(l => l.node?.removeEventListener(l.type, l.handler));
       entryListeners.forEach(l => l.node?.removeEventListener(l.type, l.handler));
@@ -488,6 +488,7 @@ const focusBagel = (...props) => {
       if (!disableListFocusCorrection && _manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
         tickFocus(_subNodes[activeIndex]);
+        onMove?.({ e, prev: null, cur: _subNodes[activeIndex], prevI: -1, curI: activeIndex });
         trappedList = true;
       }
     }
