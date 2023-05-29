@@ -174,23 +174,24 @@ const getDelayType = function(delay, target) {
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
   const commonDelay = (target == null || delay === true) && !promiseDelay && callbackDelay;
-  const isDelay = promiseDelay || callbackDelay || commonDelay;
   return {
     promiseDelay,
     callbackDelay,
     commonDelay,
-    isDelay,
   };
 };
 
 /** 延迟执行某些操作 */
-const delayToProcess = async function(promiseDelay, callbackDelay, commonDelay, delay, processor) {
+const delayToProcess = async function(delay, target, processor) {
+
+  const { promiseDelay, callbackDelay, commonDelay } = !!delay ? getDelayType(delay, target) : {};
   if (promiseDelay) {
     await delay(() => {});
     processor();
   }
   else if (callbackDelay) delay(processor);
   else if (commonDelay) processor();
+  else return true;
 };
 
 /** 获取入口目标 */
@@ -413,16 +414,13 @@ const focusBagel = (...props) => {
     await onEnter?.(e);
 
     delay = delay ?? delayToFocus;
-    const {
-      promiseDelay, callbackDelay, commonDelay, isDelay,
-    } = !!delay
-      ? getDelayType(delay, getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover, activeIndex))
-      : {};
-
-
-    if (isDelay)
-      delayToProcess(promiseDelay, callbackDelay, commonDelay, delay, findNodesToLoadListenersAndFocus);
-    else {
+    const isImmediate = !!delay
+      ? await delayToProcess(
+        delay,
+        getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover, activeIndex),
+        findNodesToLoadListenersAndFocus)
+      : true;
+    if (isImmediate) {
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
       focusTarget(_coverNode, _subNodes, _rootNode);
     }
@@ -704,17 +702,11 @@ const focusBagel = (...props) => {
 
       e.preventDefault(); // 阻止 tab 等其它按键的默认行为
 
-      delay = delay ?? delayToBlur;
-      const {
-        promiseDelay, callbackDelay, commonDelay, isDelay,
-      } = !!delay ? getDelayType(delay, target) : {};
-
       await on?.(e);
 
-      if (isDelay)
-        delayToProcess(promiseDelay, callbackDelay, commonDelay, delay, focusThenRemoveListeners);
-      else focusThenRemoveListeners();
-
+      delay = delay ?? delayToBlur;
+      const isImmediate = await delayToProcess(delay, target, focusThenRemoveListeners);
+      if (isImmediate) focusThenRemoveListeners();
 
       function focusThenRemoveListeners() {
         focus(target);
@@ -747,10 +739,9 @@ const focusBagel = (...props) => {
       } else {
         await on?.(e);
 
-        const { promiseDelay, callbackDelay, commonDelay, isDelay } = getDelayType(delay, target);
-        if (isDelay)
-          delayToProcess(promiseDelay, callbackDelay, commonDelay, delay, focusThenRemoveListeners);
-        else focusThenRemoveListeners();
+        delay = delay ?? delayToBlur;
+        const isImmediate = await delayToProcess(delay, target, focusThenRemoveListeners);
+        if (isImmediate) focusThenRemoveListeners();
 
         function focusThenRemoveListeners() {
           _trigger && focus(_trigger);

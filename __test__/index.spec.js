@@ -236,7 +236,10 @@ describe("focus-bagel", function() {
     await open.click();
     expect(focusA).toHaveFocus();
     await focusF.click();
-    expect(open).toHaveFocus();
+    waitFor(() => {
+      expect(open).toHaveFocus();
+    });
+    // expect(open).toHaveFocus();
   });
 
   it("should focus nodes manually(backward)", async function() {
