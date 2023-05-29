@@ -8,7 +8,7 @@ const focus = function(e) {
   return true;
 };
 
-/** 尝试聚焦，如果聚焦失效，则下个事件循环再次聚焦 */
+/** 尝试聚焦，如果聚焦失效，则下个 setTimeout 再次聚焦 */
 const tickFocus = async function(e) {
   return new Promise(resolve => {
     if (e == null) tick(() => resolve(e && focus(e)));
@@ -17,7 +17,7 @@ const tickFocus = async function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
+const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
   if (e.target === coverNode) return;
   if (!trappedList()) return;
 
@@ -52,7 +52,7 @@ const focusSubNodesManually = (subNodes, useActiveIndex, usePrevActive, isClamp,
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
+const focusNextListItemByRange = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
   const current = e.target;
   if (current === coverNode) return;
   if (!trappedList()) return;
@@ -84,19 +84,19 @@ const focusSubNodes = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode,
 };
 
 /** 获取关键节点 */
-const getNodes = function(rootNode, subNodes, coverNode) {
-  const _subNodes = subNodes.map(item => element(item)).filter(item => item != null);
-  const head = _subNodes[0];
-  const tail = _subNodes.slice(-1)[0];
-  const _rootNode = element(rootNode) ?? findLowestCommonAncestorNode(head, tail);
-  const _coverNode = coverNode === true ? _rootNode : element(coverNode);
+const getKeyNodes = function(root, list, cover) {
+  const _list = list.map(item => element(item)).filter(item => item != null);
+  const head = _list[0];
+  const tail = _list.slice(-1)[0];
+  const _root = element(root) ?? findLowestCommonAncestorNode(head, tail);
+  const _cover = cover === true ? _root : element(cover);
 
   return {
-    rootNode: _rootNode,
-    subNodes: _subNodes,
+    rootNode: _root,
+    subNodes: _list,
     head,
     tail,
-    coverNode: _coverNode,
+    coverNode: _cover,
   };
 };
 
@@ -140,16 +140,17 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
   
     const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
       let [key, click, focus, key_wild, click_wild, focus_wild, outList] = acc;
+      const includeType = type => e.type?.includes(type);
       if (isInnerRoot(e.node)) {
-        if (e.type?.includes("keydown")) key = key.concat(e);
-        if (e.type?.includes("click")) click = click.concat(e);
-        if (e.type?.includes("focus")) focus = focus.concat(e);
-        if (e.type?.includes("outlist")) outList = outList.concat(e);
+        if (includeType("keydown")) key = key.concat(e);
+        if (includeType("click")) click = click.concat(e);
+        if (includeType("focus")) focus = focus.concat(e);
+        if (includeType("outlist")) outList = outList.concat(e);
       } else {
-        if (e.type?.includes("keydown")) key_wild = key_wild.concat(e);
-        if (e.type?.includes("click")) click_wild = click_wild.concat(e);
-        if (e.type?.includes("focus")) focus_wild = focus_wild.concat(e);
-        if (e.type?.includes("outlist")) outList = outList.concat(e);
+        if (includeType("keydown")) key_wild = key_wild.concat(e);
+        if (includeType("click")) click_wild = click_wild.concat(e);
+        if (includeType("focus")) focus_wild = focus_wild.concat(e);
+        if (includeType("outlist")) outList = outList.concat(e);
       }
       return [key, click, focus, key_wild, click_wild, focus_wild, outList];
     }, new Array(7).fill([]));
@@ -199,10 +200,10 @@ const getEntryTarget = function(target, cover, list, rootNode, enabledCover, act
     if (enabledCover) return cover;
     else return list[activeIndex === -1 ? 0 : activeIndex];
   }
-  // 函数 target 则执行
+  // 函数 target 则传入节点执行
   else if (isFun(target))
     return target({ list, cover, root: rootNode, last: list[activeIndex], lastI: activeIndex });
-  // 选择器字符串或者节点
+  // 选择器字符串或者节点，则直接获取
   else return element(target);
 }
 
@@ -238,7 +239,7 @@ const focusBagel = (...props) => {
   const options  = props[2 + offset] ?? {};
   const {
     /** move: 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
-    manual,
+    manual: sequence,
     /** move: 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
     /** move: 自定义前进焦点函数 */
@@ -286,13 +287,13 @@ const focusBagel = (...props) => {
   const enabledCover = !!coverNode;
 
   /** 入口们 */
-  const enters = [].concat(enter).filter(o => o != null).map(enter => ({
-    ...enter,
-    type: enter.type === undefined ? [enter.key == null ? '' : "keydown", enter.node == null ? '' : "click"].filter(t => t != '') : [].concat(enter.type),
+  const entries = [].concat(enter).filter(o => o != null).map(entry => ({
+    ...entry,
+    type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
   })).reduce(nodesReducer, []);
 
   /** 默认入口 */
-  let _trigger = element(trigger || enters[0]?.node);
+  let _trigger = element(trigger || entries[0]?.node);
 
   /** 退出封面，封面的出口们 */
   const exitsCover = [].concat(exitCover).filter(e => e != null).map(e => ({
@@ -320,13 +321,13 @@ const focusBagel = (...props) => {
     rootNode: _rootNode,
     subNodes: _subNodes, head, tail,
     coverNode: _coverNode,
-  } = getNodes(rootNode, subNodes, coverNode);
+  } = getKeyNodes(rootNode, subNodes, coverNode);
 
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
 
   // 自定义前进或后退焦点函数，则设置 manual 为 true
-  const _manual = !!(isNext || isPrev || manual);
+  const enabledTabSequence = !!(isNext || isPrev || sequence);
 
   /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
   let activeIndex = -1;
@@ -350,7 +351,7 @@ const focusBagel = (...props) => {
   let exits_outer = null;
 
   // 遍历入口，如果有入口不需要延迟，则立即加载列表的监听事件
-  for (let { target, delay } of (enters.length > 0 ? enters : [{}])) {
+  for (let { target, delay } of (entries.length > 0 ? entries : [{}])) {
     delay = delay ?? delayToFocus;
     const { isDelay } = getDelayType(delay, getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover));
     if (!isDelay) {
@@ -366,17 +367,17 @@ const focusBagel = (...props) => {
 
       let invokedByEntry = false;
 
-      for (let enter of enters) {
-        const { on, type, node, target, delay } = enter;
+      for (let entry of entries) {
+        const { on, type, node, target, delay } = entry;
         const invokeType = "invoke";
 
         if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
-          enterTriggerHandler({ fromInvoke: true }, on, target, delay);
+          entryHandler({ fromInvoke: true }, on, target, delay);
           invokedByEntry = true;
         }
       }
 
-      if (!invokedByEntry) enterTriggerHandler({ fromInvoke: true });
+      if (!invokedByEntry) entryHandler({ fromInvoke: true });
     },
     /** 调用形式的出口 */
     exit() {
@@ -402,7 +403,7 @@ const focusBagel = (...props) => {
     i: () => activeIndex,
   };
 
-  async function enterTriggerHandler(e, onEnter, target, delay) {
+  async function entryHandler(e, onEnter, target, delay) {
 
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
@@ -432,7 +433,7 @@ const focusBagel = (...props) => {
         rootNode: _rootNode,
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
-      } = getNodes(rootNode, subNodes, coverNode);
+      } = getKeyNodes(rootNode, subNodes, coverNode);
 
       loadEventListeners(_rootNode, _subNodes, head, tail, _coverNode);
       focusTarget(_coverNode, _subNodes, _rootNode);
@@ -463,9 +464,9 @@ const focusBagel = (...props) => {
     const usePrevActive = () => [, prev => prevActive = prev];
 
     // 在焦点循环中触发聚焦
-    const keyListMoveHandler = _manual ?
-      focusSubNodesManually(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, () => trappedList) :
-      focusSubNodes(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
+    const keyListMoveHandler = enabledTabSequence ?
+      focusNextListItemBySequence(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, () => trappedList) :
+      focusNextListItemByRange(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
   
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
@@ -496,7 +497,7 @@ const focusBagel = (...props) => {
       if (focusTarget === _coverNode) return;
 
       // 纠正外部聚焦进来的焦点
-      if (!disableListFocusCorrection && _manual && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (!disableListFocusCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
         if (activeIndex === -1) activeIndex = 0; // 从非入口进入，并且之前没有通过入口，设置为聚焦第一个元素
         tickFocus(_subNodes[activeIndex]);
@@ -557,7 +558,7 @@ const focusBagel = (...props) => {
         prevFocus === _coverNode ||
         _rootNode.contains(prevFocus) ||
         isMouseDown ||
-        enters.some(some))) {
+        entries.some(some))) {
         focus(_coverNode) // 如果从列表以外的区域进入，则聚焦封面
       }
     }
@@ -603,7 +604,10 @@ const focusBagel = (...props) => {
       }
     }
 
-    /**************** E **** X **** I ***** T ***************/
+    /*
+     * 出口相关 =======================================
+     * ===============================================
+     */
 
     function outListExitHandler(e) {
       for (const exit of outListExits) {
@@ -773,7 +777,10 @@ const focusBagel = (...props) => {
       }
     }
 
-    /********************************************************/
+    /*
+     * ===============================================
+     * ======================================= 出口相关
+     */
 
     /** 添加焦点需要的事件监听器 */
     function addListListeners() {
@@ -792,30 +799,30 @@ const focusBagel = (...props) => {
       // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
       listListeners.push(_rootNode, "keydown", keyListMoveHandler);
 
-      if (_manual) {
-        /** 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex */
+      if (enabledTabSequence) {
+        // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
         listListeners.push(_rootNode, "click", clickListItemHandler);
 
-        /** 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位 */
+        // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
         listListeners.push(_rootNode, "mousedown", mousedownListItemHandler);
       }
 
       if (hasClickExits) {
-        /** 列表点击出口 */
+        // 列表点击出口
         listListeners.push(_rootNode, "click", clickListExitHandler);
       }
 
       if (hasFocusExits) {
-        /** 列表聚焦出口 */
+        // 列表聚焦出口
         listListeners.push(_rootNode, "focusin", focusListExitHandler);
       }
 
       if (hasKeyExits) {
-        /** 列表键盘出口 */
+        // 列表键盘出口
         listListeners.push(_rootNode, "keydown", keyListExitHandler);
       }
 
-      /** 非列表内的出口 */
+      // 非列表内的出口
       focusListExitHandlers_wild.forEach(([node, handler]) => {
         listListeners.push(node, "focus", handler);
       });
@@ -826,15 +833,16 @@ const focusBagel = (...props) => {
         listListeners.push(node, "keydown", handler);
       });
 
-      /** 封面的事件 */
+      // 封面的事件
       listListeners.push(_coverNode, "keydown", keyCoverHandler);
 
       if (isDefaultExitCover) {
 
-        /** 尾部元素聚焦后的事件，用于返回封面 */
+        // 尾部元素聚焦后的事件，用于返回封面
         listListeners.push(_tail, "focus", focusListTailHandler);
       }
 
+      // flush
       listListeners.addListeners();
     };
 
@@ -855,8 +863,8 @@ const focusBagel = (...props) => {
 
     if (!entryListeners.isEmpty) return;
 
-    for (let enter of enters) {
-      const { node: origin, on, key, type, target, delay } = enter;
+    for (let entry of entries) {
+      const { node: origin, on, key, type, target, delay } = entry;
       const types = [].concat(type);
       const allTypes = ["keydown", "focus", "click"];
       const node = element(origin);
@@ -874,13 +882,13 @@ const focusBagel = (...props) => {
       function entryKeyHandler(e) {
         if (key?.(e)) {
           e.preventDefault();
-          enterTriggerHandler(e, on, target, delay);
+          entryHandler(e, on, target, delay);
           removeEntryListeners();
         }
       }
     
       function entryNotKeyHandler(e) {
-        enterTriggerHandler(e, on, target, delay);
+        entryHandler(e, on, target, delay);
         removeEntryListeners();
       }
     }
