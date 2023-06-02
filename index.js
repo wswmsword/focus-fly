@@ -271,6 +271,8 @@ const focusBagel = (...props) => {
     removeListenersEachEnter,
     /** 矫正焦点，矫正从非入口进入列表的焦点 */
     disableListFocusCorrection = false,
+    /** 手动添加监听事件，入口、列表、出口的监听事件 */
+    manual,
     /** 用于内部调试 */
     demo = false,
   } = options;
@@ -342,23 +344,24 @@ const focusBagel = (...props) => {
 
   /** 是否已添加入口的监听事件 */
   let entryListeners = new ListenersCache();
-  // 入口点击事件
-  addEntryListeners();
-  /** 是否已添加入口的监听事件 */
 
   // 用于 return.exit
   let exitListWithTarget_outer = null;
   let exitListWithoutTarget_outer = null;
   let exits_outer = null;
 
-  // 遍历入口，如果有入口不需要延迟，则立即加载列表的监听事件
-  for (let { target, delay } of (entries.length > 0 ? entries : [{}])) {
-    delay = delay ?? delayToFocus;
-    const { isDelay } = getDelayType(delay, getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover));
-    if (!isDelay) {
-      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
-      break;
-    }
+  if (!manual) { // 如果不是手动添加事件，则注册入口、列表相关（封面、列表、出口）的事件
+    // 入口点击事件
+    addEntryListeners();
+
+    // 如果有入口不需要延迟，则立即加载列表的监听事件
+    const hasImmediateEntry = (entries.length > 0 ? entries : [{}]).some(({ target, delay }) => {
+      delay = delay ?? delayToFocus;
+      const { isDelay } = getDelayType(delay, getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover));
+      return !isDelay;
+    });
+
+    if (hasImmediateEntry) loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
   }
 
   return {
@@ -401,6 +404,15 @@ const focusBagel = (...props) => {
       listListeners.removeListeners();
       entryListeners.removeListeners();
     },
+    /** 添加入口的监听事件 */
+    addEntryListeners() {
+      addEntryListeners();
+    },
+    /** 添加列表相关（封面、列表、出口）的监听事件 */
+    addListRelatedListeners() {
+      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+    },
+    /** 当前聚焦的列表单项序号 */
     i: () => activeIndex,
   };
 
