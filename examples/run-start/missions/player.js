@@ -46,6 +46,6 @@ function initSongBagel(curI) {
       type: "outlist",
       target: false,
     },
-    disableListFocusCorrection: true,
+    disableListCorrection: true,
   });
 }

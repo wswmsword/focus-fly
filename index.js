@@ -270,7 +270,7 @@ const focusBagel = (...props) => {
     /** 每次进入列表是否移除入口事件 */
     removeListenersEachEnter,
     /** 矫正焦点，矫正从非入口进入列表的焦点 */
-    disableListFocusCorrection = false,
+    disableListCorrection = false,
     /** 手动添加监听事件，入口、列表、出口的监听事件 */
     manual,
     /** 用于内部调试 */
@@ -511,7 +511,7 @@ const focusBagel = (...props) => {
       if (focusTarget === _coverNode) return;
 
       // 纠正外部聚焦进来的焦点
-      if (!disableListFocusCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (!disableListCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
         if (activeIndex === -1) activeIndex = 0; // 从非入口进入，并且之前没有通过入口，设置为聚焦第一个元素
         tickFocus(_subNodes[activeIndex]);
