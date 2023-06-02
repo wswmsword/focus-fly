@@ -119,7 +119,7 @@ describe("focus-bagel", function() {
     })
   });
 
-  it("should not change activeIndex when disable manual option", async function() {
+  it("should not change activeIndex when disable sequence option", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
     const bagel = initBagel_4(container, dialog, first, last, open, close);
 
@@ -137,7 +137,7 @@ describe("focus-bagel", function() {
     expect(i3).toBe(0);
   });
 
-  // // TODO: should change activeIndex when enable manual option
+  // // TODO: should change activeIndex when enable sequence option
 
   it("should not focus trigger when invoke returned exit if no trigger", async function() {
     const { container, dialog, first, last, open, close } = getModalDom();
@@ -210,7 +210,7 @@ describe("focus-bagel", function() {
 
   // // TODO: should handle delaied rootContainer and subItems
 
-  it("should focus nodes manually", async function() {
+  it("should focus nodes by sequence", async function() {
     const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
@@ -242,7 +242,7 @@ describe("focus-bagel", function() {
     // expect(open).toHaveFocus();
   });
 
-  it("should focus nodes manually(backward)", async function() {
+  it("should focus nodes whithin sequence(backward)", async function() {
     const s = { shift: true };
     const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
@@ -270,7 +270,7 @@ describe("focus-bagel", function() {
     expect(focusA).toHaveFocus();
   });
 
-  it("should clampe to focus nodes manually", async function() {
+  it("should clampe to focus nodes whthin sequence", async function() {
     const s = { shift: true };
     const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
     initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
@@ -410,7 +410,7 @@ function initBagel_3(container, dialog, first, last, open, close) {
 }
 
 function initBagel_4(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, [first, last], { manual: false, enter: { type: "invoke" } });
+  const bagel = focusBagel(dialog, [first, last], { sequence: false, enter: { type: "invoke" } });
 
   open.addEventListener('click', () => {
     bagel.enter();
@@ -496,7 +496,7 @@ function initBagel_11(container, dialog, first, last, open, close) {
 
 function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
-    manual: true,
+    sequence: true,
     onEscape: true,
     enter: {
       node: open,
@@ -511,7 +511,7 @@ function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, f
 
 function initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
-    manual: true,
+    sequence: true,
     loop: false,
     enter: {
       node: open,

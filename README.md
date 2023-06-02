@@ -98,7 +98,7 @@ npm run start
 
 这个参数表示*列表*，默认情况下，数组 `subNodes` 只需要两个元素，一个元素是用于聚焦的头元素，一个元素是用于聚焦的尾元素，如果传入的数组长度大于 2，focus-no-jutsu 将取头和尾两个元素。这两个元素被用于确定按下 <kbd>Tab</kbd> 后的聚焦元素，识别到尾元素将跳转到头元素，按下 <kbd>Shift-Tab</kbd>，识别到头元素将跳转到尾元素。
 
-设置 `options.manual` 为 true 后，`subNodes` 必须手动指定，这时按下 <kbd>Tab</kbd> 后，聚焦规则将不是浏览器的默认行为，而是以 `subNodes` 中元素的顺序进行聚焦。当设置 `options.next` 或 `options.prev` 后，`options.manual` 默认为 true。
+设置 `options.sequence` 为 true 后，`subNodes` 必须手动指定，这时按下 <kbd>Tab</kbd> 后，聚焦规则将不是浏览器的默认行为，而是以 `subNodes` 中元素的顺序进行聚焦。当设置 `options.next` 或 `options.prev` 后，`options.sequence` 默认为 true。
 
 ### options
 
@@ -106,10 +106,10 @@ npm run start
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| manual | boolean | N | false | 是否指定聚焦的元素，设置 true 则按顺序聚焦*列表*内每项元素 |
+| sequence | boolean | N | false | 是否指定聚焦的元素，设置 true 则按顺序聚焦*列表*内每项元素 |
 | loop | boolean | N | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
-| next | isKey \| subNodesForward | N | null | 自定义*前进*焦点函数，设置后，`manual` 将默认为 true |
-| prev | isKey \| subNodesForward | N | null | 自定义*后退*焦点函数，设置后，`manual` 将默认为 true |
+| next | isKey \| subNodesForward | N | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
+| prev | isKey \| subNodesForward | N | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
 | trigger | element | N | null | *入口*元素，用于退出*列表*时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.node` 后，不用设置 `trigger` |
 | enter | enterSubNodes \| enterSubNodes[] | N | {} | *入口*相关配置，进入*列表* |
 | exit | exitSubNodes \| exitSubNodes[] | N | {} | *出口*相关配置，退出*列表* |

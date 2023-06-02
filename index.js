@@ -240,7 +240,7 @@ const focusBagel = (...props) => {
   const options  = props[2 + offset] ?? {};
   const {
     /** move: 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
-    manual: sequence,
+    sequence,
     /** move: 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
     /** move: 自定义前进焦点函数 */
@@ -327,10 +327,10 @@ const focusBagel = (...props) => {
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
 
-  // 自定义前进或后退焦点函数，则设置 manual 为 true
+  // 自定义前进或后退焦点函数，则设置 sequence 为 true
   const enabledTabSequence = !!(isNext || isPrev || sequence);
 
-  /** 活动元素在 subNodes 中的编号，打开 manual 生效 */
+  /** 活动元素在 subNodes 中的编号，打开 sequence 生效 */
   let activeIndex = -1;
   let prevActive = -1;
 
