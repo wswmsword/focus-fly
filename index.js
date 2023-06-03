@@ -812,8 +812,12 @@ const focusBagel = (...props) => {
         listListeners.push(_coverNode, "blur", blurTrapCoverHandler);
       }
 
-      // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
-      listListeners.push(_rootNode, "keydown", keyListMoveHandler);
+      listListeners.push(_rootNode, "keydown", e => {
+        // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
+        keyListMoveHandler(e);
+        // 列表键盘出口
+        if (hasKeyExits) keyListExitHandler(e);
+      });
 
       if (enabledTabSequence) {
         // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
@@ -831,11 +835,6 @@ const focusBagel = (...props) => {
       if (hasFocusExits) {
         // 列表聚焦出口
         listListeners.push(_rootNode, "focusin", focusListExitHandler);
-      }
-
-      if (hasKeyExits) {
-        // 列表键盘出口
-        listListeners.push(_rootNode, "keydown", keyListExitHandler);
       }
 
       // 非列表内的出口
