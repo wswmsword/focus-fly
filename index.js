@@ -427,8 +427,6 @@ const focusBagel = (...props) => {
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
 
-    trappedList = true
-
     await onEnter?.(e);
 
     const isImmediate = !(delay ?? delayToFocus);
@@ -453,7 +451,9 @@ const focusBagel = (...props) => {
       if (targetIdx > -1) {
         activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
         onMove?.({ e, prev: null, cur: gotTarget, prevI: -1, curI: activeIndex });
+        trappedList = true;
       }
+      if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
       tickFocus(gotTarget);
     }
   }
@@ -530,30 +530,38 @@ const focusBagel = (...props) => {
 
     function blurTrapListHandler(e) {
 
-      if (e.target === _coverNode) return;
-
       setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
 
         const active = getActiveElement();
         const isOutRootNode = !_rootNode.contains(active);
         const isActiveCover = active === _coverNode;
+
+        // 从封面退出
+        if (e.target === _coverNode && isOutRootNode) {
+          trappedCover = false; // 退出封面
+          return;
+        }
         if (isOutRootNode && !isActiveCover) // 聚焦在 rootNode 之外，并且没有聚焦在封面上
           outListExitHandler(e);
         if (isActiveCover || isOutRootNode) { // 聚焦在 rootNode 之外，或者聚焦在封面上
           onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           trappedList = false;
+          if (!isActiveCover) trappedCover = false; // 退出封面
         }
-
-        // 退出封面
-        if (enabledCover && isOutRootNode) trappedCover = false;
       });
     }
 
-    function mousedownListItemHandler() {
+    function mousedownListItemHandler(e) {
       isMouseDown = true;
       setTimeout(() => {
         isMouseDown = false; // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
       });
+
+      if (!enabledTabSequence ||
+        (enabledTabSequence && _subNodes.some(item => item.contains(e.target)))) {
+        trappedList = true;
+        if (enabledCover) trappedCover = true;
+      }
     }
 
     /** 点击聚焦列表某一单项 */
@@ -567,7 +575,6 @@ const focusBagel = (...props) => {
         onClick?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
         if (prevActive !== activeIndex || trappedList === false)
           onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
-        trappedList = true;
       }
     }
 
@@ -811,10 +818,10 @@ const focusBagel = (...props) => {
       if (enabledTabSequence) {
         // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
         listListeners.push(_rootNode, "click", clickListItemHandler);
-
-        // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
-        listListeners.push(_rootNode, "mousedown", mousedownListItemHandler);
       }
+
+      // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
+      listListeners.push(_rootNode, "mousedown", mousedownListItemHandler);
 
       if (hasClickExits) {
         // 列表点击出口
