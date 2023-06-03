@@ -168,12 +168,12 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
 };
 
 /** 获取聚焦或失焦时延迟的类型 */
-const getDelayType = function(delay, target) {
+const getDelayType = function(delay) {
   const isFunctionDelay = isFun(delay);
   const delayRes = isFunctionDelay && delay(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = (target == null || delay === true) && !promiseDelay && !callbackDelay;
+  const commonDelay = (delay === true) && !promiseDelay && !callbackDelay;
   return {
     promiseDelay,
     callbackDelay,
@@ -182,9 +182,9 @@ const getDelayType = function(delay, target) {
 };
 
 /** 延迟执行某些操作 */
-const delayToProcess = async function(delay, target, processor) {
+const delayToProcess = async function(delay, processor) {
 
-  const { promiseDelay, callbackDelay, commonDelay } = !!delay ? getDelayType(delay, target) : {};
+  const { promiseDelay, callbackDelay, commonDelay } = !!delay ? getDelayType(delay) : {};
   if (promiseDelay) {
     await delay(() => {});
     processor();
@@ -320,12 +320,6 @@ const focusBagel = (...props) => {
     on: onPrev,
   } = isObj(prev) ? prev : { key: prev };
 
-  const {
-    rootNode: _rootNode,
-    subNodes: _subNodes, head, tail,
-    coverNode: _coverNode,
-  } = getKeyNodes(rootNode, subNodes, coverNode);
-
   /** 取消循环则设置头和尾焦点 */
   const isClamp = !(loop ?? true);
 
@@ -355,13 +349,18 @@ const focusBagel = (...props) => {
     addEntryListeners();
 
     // 如果有入口不需要延迟，则立即加载列表的监听事件
-    const hasImmediateEntry = (entries.length > 0 ? entries : [{}]).some(({ target, delay }) => {
-      delay = delay ?? delayToFocus;
-      const { isDelay } = getDelayType(delay, getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover));
-      return !isDelay;
-    });
+    const hasImmediateEntry = (entries.length > 0 ? entries : [{}]).some(({ delay }) => !(delay ?? delayToFocus));
 
-    if (hasImmediateEntry) loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+    if (hasImmediateEntry) {
+
+      const {
+        rootNode: _rootNode,
+        subNodes: _subNodes, head, tail,
+        coverNode: _coverNode,
+      } = getKeyNodes(rootNode, subNodes, coverNode);
+
+      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+    }
   }
 
   return {
@@ -410,6 +409,13 @@ const focusBagel = (...props) => {
     },
     /** 添加列表相关（封面、列表、出口）的监听事件 */
     addListRelatedListeners() {
+
+      const {
+        rootNode: _rootNode,
+        subNodes: _subNodes, head, tail,
+        coverNode: _coverNode,
+      } = getKeyNodes(rootNode, subNodes, coverNode);
+
       loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
     },
     /** 当前聚焦的列表单项序号 */
@@ -425,17 +431,9 @@ const focusBagel = (...props) => {
 
     await onEnter?.(e);
 
-    delay = delay ?? delayToFocus;
-    const isImmediate = !!delay
-      ? await delayToProcess(
-        delay,
-        getEntryTarget(target, _coverNode, _subNodes, _rootNode, enabledCover, activeIndex),
-        findNodesToLoadListenersAndFocus)
-      : true;
-    if (isImmediate) {
-      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
-      focusTarget(_coverNode, _subNodes, _rootNode);
-    }
+    const isImmediate = !(delay ?? delayToFocus);
+    if (isImmediate) findNodesToLoadListenersAndFocus();
+    else delayToProcess(delay, findNodesToLoadListenersAndFocus);
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
     function findNodesToLoadListenersAndFocus() {
@@ -725,7 +723,7 @@ const focusBagel = (...props) => {
       await on?.(e);
 
       delay = delay ?? delayToBlur;
-      const isImmediate = await delayToProcess(delay, target, focusThenRemoveListeners);
+      const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
       if (isImmediate) focusThenRemoveListeners();
 
       function focusThenRemoveListeners() {
@@ -760,7 +758,7 @@ const focusBagel = (...props) => {
         await on?.(e);
 
         delay = delay ?? delayToBlur;
-        const isImmediate = await delayToProcess(delay, target, focusThenRemoveListeners);
+        const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
         if (isImmediate) focusThenRemoveListeners();
 
         function focusThenRemoveListeners() {
