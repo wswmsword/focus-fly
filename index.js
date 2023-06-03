@@ -173,7 +173,7 @@ const getDelayType = function(delay, target) {
   const delayRes = isFunctionDelay && delay(() => {});
   const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
   const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = (target == null || delay === true) && !promiseDelay && callbackDelay;
+  const commonDelay = (target == null || delay === true) && !promiseDelay && !callbackDelay;
   return {
     promiseDelay,
     callbackDelay,
