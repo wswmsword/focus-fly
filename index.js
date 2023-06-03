@@ -239,7 +239,7 @@ const focusBagel = (...props) => {
   const subNodes = props[1 + offset];
   const options  = props[2 + offset] ?? {};
   const {
-    /** move: 指定可以聚焦的元素，聚焦 subNodes 内的元素 */
+    /** move: tab 序列，指定可以聚焦的元素，聚焦 list 内的元素 */
     sequence,
     /** move: 是否循环，设置后，尾元素的下个焦点是头元素，头元素的上个焦点是尾元素 */
     loop,
@@ -255,7 +255,7 @@ const focusBagel = (...props) => {
     exit,
     /** blur: 按下 esc 的行为，如果未设置，则取 exit.on */
     onEscape,
-    /** 列表单项聚焦之后的行为 */
+    /** 点击列表单项的响应，行为 */
     onClick,
     /** 移动的时候触发 */
     onMove,
@@ -506,7 +506,17 @@ const focusBagel = (...props) => {
 
       const focusTarget = e.target;
 
-      if (focusTarget === _coverNode) return;
+      // 进入封面（封面在列表中）
+      if (enabledCover && focusTarget === _coverNode) {
+        trappedCover = true;
+        return ;
+      }
+
+      // 纠正进入封面，从外部进入列表，如果没有通过封面，则重新聚焦封面
+      if (enabledCover && isMouseDown === false && trappedCover === false) {
+        tickFocus(_coverNode);
+        return ;
+      }
 
       // 纠正外部聚焦进来的焦点
       if (!disableListCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
@@ -533,6 +543,9 @@ const focusBagel = (...props) => {
           onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           trappedList = false;
         }
+
+        // 退出封面
+        if (enabledCover && isOutRootNode) trappedCover = false;
       });
     }
 
@@ -555,19 +568,6 @@ const focusBagel = (...props) => {
         if (prevActive !== activeIndex || trappedList === false)
           onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
         trappedList = true;
-      }
-    }
-
-    /** subNodes 最后一个元素的聚焦事件 */
-    function focusListTailHandler(e) {
-      const prevFocus = e.relatedTarget; // 理想情况只在 tail 后面一个元素 shift-tab 时触发，可是还存在点击触发的情况，所以需要在点击时调整
-      const some = e => element(e.node) === prevFocus;
-      if (!(
-        prevFocus === _coverNode ||
-        _rootNode.contains(prevFocus) ||
-        isMouseDown ||
-        entries.some(some))) {
-        focus(_coverNode) // 如果从列表以外的区域进入，则聚焦封面
       }
     }
 
@@ -621,7 +621,7 @@ const focusBagel = (...props) => {
     }
 
     /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-     |              START              |
+     |            + START +            |
      |          EXIT HANDLERS          |
      +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
@@ -787,7 +787,7 @@ const focusBagel = (...props) => {
     }
 
     /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-     |               END               |
+     |             - END -             |
      |          EXIT HANDLERS          |
      +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
@@ -798,7 +798,7 @@ const focusBagel = (...props) => {
 
       listListeners.push(_rootNode, "focusout", blurTrapListHandler);
 
-      if (_rootNode !== _coverNode && _coverNode != null) {
+      if (!_rootNode.contains(_coverNode) && _coverNode != null) {
 
         listListeners.push(_coverNode, "focus", focusTrapCoverHandler);
 
@@ -844,12 +844,6 @@ const focusBagel = (...props) => {
 
       // 封面的事件
       listListeners.push(_coverNode, "keydown", keyCoverHandler);
-
-      if (isDefaultExitCover) {
-
-        // 尾部元素聚焦后的事件，用于返回封面
-        listListeners.push(_tail, "focus", focusListTailHandler);
-      }
 
       // flush
       listListeners.addListeners();
