@@ -6,7 +6,9 @@ type handleExit = handleEnter;
 
 type handleClick = (obj: { e: MouseEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
 
-type handleNextOrPrev = (obj: { e: MouseEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
+type handleNextOrPrev = (obj: { e: KeyboardEvent, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
+
+type handleMoveListItem = (obj: { e: Event | { fromInvoke: boolean }, prev: HTMLElement, cur: HTMLElement, prevI: number, curI: number }) => any;
 
 type element = string | Element | HTMLElement;
 
@@ -22,7 +24,7 @@ type entryTargetOpts = {
 
 type getTarget = (opts: entryTargetOpts) => element;
 
-type subNodesForward = {
+type listForward = {
   /** 自定义前进 subNodes 的组合键 */
   key?: isKey;
 
@@ -30,7 +32,7 @@ type subNodesForward = {
   on?: handleNextOrPrev;
 };
 
-type subNodesBackward = {
+type listBackward = {
   /** 自定义后退 subNodes 的组合键 */
   key?: isKey;
 
@@ -41,7 +43,7 @@ type subNodesBackward = {
 type enterType = "keydown" | "focus" | "click" | "invoke";
 type exitType = enterType | "outlist";
 
-type enterSubNodes = {
+type entry = {
   /** 触发器，将用于监听点击事件，用于退出焦点循环时聚焦使用 */
   node?: element;
 
@@ -61,7 +63,7 @@ type enterSubNodes = {
   delay?: false | promiseDelay | callbackDelay;
 }
 
-type exitSubNodes = {
+type exit = {
 
   /** 退出循环焦点的触发器，用于监听点击事件 */
   node?: element;
@@ -131,32 +133,35 @@ type callbackDelay = (fn: () => any) => any;
 
 interface Options {
 
-  /** 是否指定聚焦的元素，设置 true 则按顺序聚焦 `subNodes` */
-  manual?: boolean;
+  /** tab 序列，指定之后焦点的路径就是列表，否则列表是一个范围 */
+  sequence?: boolean;
 
   /** 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 */
   loop?: boolean;
 
-  /** 自定义*前进*焦点函数，设置后，`manual` 将默认为 true */
-  next?: isKey | subNodesForward;
+  /** 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true */
+  next?: isKey | listForward;
 
-  /** 自定义*后退*焦点函数，设置后，`manual` 将默认为 true */
-  prev?: isKey | subNodesBackward;
+  /** 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true */
+  prev?: isKey | listBackward;
 
-  /** 显式设置入口，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.selector` 后，不用设置 `trigger` */
+  /** 显式设置入口，用于退出焦点循环时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `entry.node` 后，不用设置 `trigger` */
   trigger?: element;
 
-  /** 入口，进入 subNodes */
-  enter?: enterSubNodes | enterSubNodes[];
+  /** 入口，进入 list */
+  entry?: entry | entry[];
 
-  /** 出口，退出 subNodes */
-  exit?: exitSubNodes | exitSubNodes[];
+  /** 出口，退出 list */
+  exit?: exit | exit[];
 
   /** 按下 `esc` 的行为，如果未设置，默认取 `exit.on` */
   onEscape?: boolean | handleKeydown;
 
   /** 点击列表单项的响应，行为 */
   onClick?: handleClick;
+
+  /** 移动的时候触发 */
+  onMove?: handleMoveListItem;
 
   /** 封面相关 */
   cover?: boolean | cover;
@@ -165,7 +170,7 @@ interface Options {
   // forward?: forward;
 
   /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦，延迟聚焦的目的是确认被聚焦的元素已被渲染 */
-  delayToFocus?: true | promiseDelay | callbackDelay;
+  delayToFocus?: boolean | promiseDelay | callbackDelay;
 
   /** 延迟失焦，触发出口后等待执行 delayToBlur 完成后失焦，延迟失焦的目的是等待失焦后再次被聚焦的元素已被渲染 */
   delayToBlur?: promiseDelay | callbackDelay;
@@ -175,6 +180,12 @@ interface Options {
 
   /** 每次进入列表是否移除入口事件 */
   removeListenersEachEnter?: boolean;
+
+  /** 矫正焦点，矫正从非入口进入列表的焦点 */
+  disableListCorrection?: boolean;
+
+  /** 手动添加监听事件，入口、列表、出口的监听事件 */
+  manual?: boolean;
 }
 
 interface Return {
@@ -185,11 +196,20 @@ interface Return {
   /** 退出循环，聚焦触发元素 */
   exit(): void;
 
+  /** 移除所有的监听事件 */
+  removeListeners(): void;
+
+  /** 添加入口的监听事件 */
+  addEntryListeners(): void;
+
+  /** 添加列表相关（封面、列表、出口）的监听事件 */
+  addListRelatedListeners(): void;
+
   /** 当前焦点的编号 */
   i(): number;
 }
 
-declare function focusBagel(rootNode: element, subNodes: element[], options?: Options): Return;
-declare function focusBagel(subNodes: element[], options?: Options): Return;
+declare function focusBagel(root: element, list: element[], options?: Options): Return;
+declare function focusBagel(list: element[], options?: Options): Return;
 
 export default focusBagel;
