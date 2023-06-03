@@ -5,7 +5,7 @@ const open3 = document.getElementById("open_3");
 const close3 = document.getElementById("close_3");
 
 const bagel_3 = focusBagel(dialog3, [first3, last3], {
-  enter: {
+  entry: {
     node: open3,
     on() {
       dialog3.style.display = "block";

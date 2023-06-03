@@ -54,7 +54,7 @@ import focusNoJutsu from "focus-no-jutsu"; // esm 方式引入
 /** 循环焦点的根元素，对话框 */
 const dialog = document.getElementById("dialog");
 focusNoJutsu(dialog, ["#head", "#tail"], {
-  enter: {
+  entry: {
     /** 入口的选择器字符串，例如“打开”按钮 */
     node: "#open",
     /** 点击 #open 后的行为 */
@@ -88,7 +88,7 @@ npm run start
 
 **rootNode**，`string | Element | HTMLElement`，可以是一个 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是一个 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 <kbd>tab</kbd> 来控制焦点聚焦。如果需要监听 <kbd>Esc</kbd>，希望按下 <kbd>Esc</kbd> 后聚焦*入口*元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.enter`，`options.exit` 和 `options.onEscape` 被用来执行按下 <kbd>Esc</kbd> 后的行为，`trigger` 和 `options.enter` 用来聚焦*入口*（元素）。
+`rootNode` 将被用于监听键盘（keydown）事件，默认会监听按键 <kbd>tab</kbd> 来控制焦点聚焦。如果需要监听 <kbd>Esc</kbd>，希望按下 <kbd>Esc</kbd> 后聚焦*入口*元素，请设置 `options.exit` 或者 `options.onEscape`，同时设置 `trigger` 或者 `options.entry`，`options.exit` 和 `options.onEscape` 被用来执行按下 <kbd>Esc</kbd> 后的行为，`trigger` 和 `options.entry` 用来聚焦*入口*（元素）。
 
 如果不提供这个参数，focus-no-jutsu 会取得 `subNodes` 的最小公共祖先作为 `rootNode`。
 
@@ -102,7 +102,7 @@ npm run start
 
 ### options
 
-下面的选项，除了选项 `trigger`、`enter`、`exit` 和 `cover`，其它选项都和*列表*相关。
+下面的选项，除了选项 `trigger`、`entry`、`exit` 和 `cover`，其它选项都和*列表*相关。
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
@@ -110,13 +110,13 @@ npm run start
 | loop | boolean | N | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
 | next | isKey \| subNodesForward | N | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
 | prev | isKey \| subNodesForward | N | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
-| trigger | element | N | null | *入口*元素，用于退出*列表*时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `enter.node` 后，不用设置 `trigger` |
-| enter | enterSubNodes \| enterSubNodes[] | N | {} | *入口*相关配置，进入*列表* |
+| trigger | element | N | null | *入口*元素，用于退出*列表*时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `entry.node` 后，不用设置 `trigger` |
+| entry | enterSubNodes \| enterSubNodes[] | N | {} | *入口*相关配置，进入*列表* |
 | exit | exitSubNodes \| exitSubNodes[] | N | {} | *出口*相关配置，退出*列表* |
 | onEscape | false \| handleKeydown | N | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取 `options.exit.on` |
 | onClick | handleKeydown | N null | 点击列表里的某一项后的行为 |
 | cover | cover | N | false | *封面*相关配置 |
-| delayToFocus | promiseDelay \| callbackDelay | N | null | 延迟聚焦，执行完 `options.enter.on` 后，等待执行 delayToFocus 完成后聚焦 |
+| delayToFocus | promiseDelay \| callbackDelay | N | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦 |
 | delayToBlur | promiseDelay \| callbackDelay | N | null | 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur |
 | removeListenersEachExit | boolean | N | true | 每次退出*列表*回到*入口*是否移除*列表*事件 |
 | removeListenersEachEnter | boolean | N | true | 每次进入*列表*后是否移除入口事件 |
@@ -135,7 +135,7 @@ npm run start
 | key | isKey | N | null | 自定义在*列表*后退的组合键 |
 | on | handleKeydown | N | null | 后退时被执行，后退时的行为 |
 
-### options.enter
+### options.entry
 
 这些选项和*入口*相关，描述了如何通过*入口*进入*封面*或*列表*。
 
@@ -170,7 +170,7 @@ const isBackward = e => (
   e.key === "ArrowLeft");
 
 focusNoJutsu(dialog, ["#head", "#second", "#tail"], {
-  enter: {
+  entry: {
     node: "#open",
     on() {
       dialog.classList.add("openedDialog");

@@ -26,7 +26,7 @@ let addedTransitionListener = false;
 let exitTransition5 = false;
 
 const bagel_5 = focusBagel("#dialog_5", ["#firstFocusA_5", "#lastFocusBtn_5"], {
-  enter: {
+  entry: {
     node: "#open_5",
     on() {
       exitTransition5 = false;

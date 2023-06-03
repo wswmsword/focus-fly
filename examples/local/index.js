@@ -21,7 +21,7 @@ const dialog = document.getElementById("dialog");
 
 const bagel = focusBagel(dialog, ["#firstFocusA", "#lastFocusBtn"], {
   loop: false,
-  enter: {
+  entry: {
     node: "#open",
     on() {
       dialog.classList.add("openedDialog");

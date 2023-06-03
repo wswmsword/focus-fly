@@ -247,10 +247,10 @@ const focusBagel = (...props) => {
     next,
     /** move: 自定义后退焦点函数 */
     prev,
-    /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 enter.selector 则不用设置 */
+    /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 entry.selector 则不用设置 */
     trigger,
     /** focus: 触发触发器的配置 */
-    enter,
+    entry,
     /** blur: 触发退出触发器的配置 */
     exit,
     /** blur: 按下 esc 的行为，如果未设置，则取 exit.on */
@@ -259,7 +259,7 @@ const focusBagel = (...props) => {
     onClick,
     /** 移动的时候触发 */
     onMove,
-    /** cover: 封面，触发触发器后首先聚焦封面，而不是子元素，可以在封面按下 enter 进入子元素 */
+    /** cover: 封面，默认情况，触发入口后首先聚焦封面，而不是子元素 */
     cover = false,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
     delayToFocus,
@@ -290,7 +290,7 @@ const focusBagel = (...props) => {
   const enabledCover = !!coverNode;
 
   /** 入口们 */
-  const entries = [].concat(enter).filter(o => o != null).map(entry => ({
+  const entries = [].concat(entry).filter(o => o != null).map(entry => ({
     ...entry,
     type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
   })).reduce(nodesReducer, []);
@@ -742,7 +742,7 @@ const focusBagel = (...props) => {
 
       trappedList = false;
 
-      e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，例如 enter button 触发 click 事件
+      e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         await on?.(e);
         onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });

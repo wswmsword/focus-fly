@@ -382,7 +382,7 @@ function getModalDom() {
 function initBagel(container, dialog, first, last, open, close) {
 
   focusBagel(dialog, [first, last], {
-    enter: {
+    entry: {
       node: open,
       on() {},
     },
@@ -394,7 +394,7 @@ function initBagel(container, dialog, first, last, open, close) {
 }
 
 function initBagel_2(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, [first, last], { enter: { type: "invoke" } });
+  const bagel = focusBagel(dialog, [first, last], { entry: { type: "invoke" } });
 
   return bagel
 }
@@ -410,7 +410,7 @@ function initBagel_3(container, dialog, first, last, open, close) {
 }
 
 function initBagel_4(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, [first, last], { sequence: false, enter: { type: "invoke" } });
+  const bagel = focusBagel(dialog, [first, last], { sequence: false, entry: { type: "invoke" } });
 
   open.addEventListener('click', () => {
     bagel.enter();
@@ -423,7 +423,7 @@ function initBagel_5(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last]);
 
   open.addEventListener('click', () => {
-    first.focus(); // there's no trigger mark, e.g. bagel.enter(), opt.trigger, opt.enter.selector
+    first.focus(); // there's no trigger mark, e.g. bagel.enter(), opt.trigger, opt.entry.selector
   })
   close.addEventListener("click", function() {
     bagel.exit(); // this will console warn
@@ -441,7 +441,7 @@ function initBagel_6(container, dialog, first, last, open, close) {
   });
 
   open.addEventListener('click', () => {
-    first.focus(); // there's no trigger mark, e.g. bagel.enter(), opt.trigger, opt.enter.selector
+    first.focus(); // there's no trigger mark, e.g. bagel.enter(), opt.trigger, opt.entry.selector
   })
 
   return bagel
@@ -458,7 +458,7 @@ function initBagel_8(container, dialog, first, last, open, close) {
 function initBagel_9(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     onEscape: true,
-    enter: {
+    entry: {
       node: open,
     },
     exit: {
@@ -469,7 +469,7 @@ function initBagel_9(container, dialog, first, last, open, close) {
 
 function initBagel_10(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
-    enter: {
+    entry: {
       node: open,
       on: () => {}
     },
@@ -498,7 +498,7 @@ function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, f
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
     onEscape: true,
-    enter: {
+    entry: {
       node: open,
       on() {},
     },
@@ -513,7 +513,7 @@ function initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, f
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
     loop: false,
-    enter: {
+    entry: {
       node: open,
       on() {},
     },
@@ -527,7 +527,7 @@ function initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, f
 function initBagel_14(container, dialog, first, last, open, close) {
 
   focusBagel("#dialog", ["#firstFocusA", "#lastFocusBtn"], {
-    enter: {
+    entry: {
       node: "#open",
       on() {},
     },

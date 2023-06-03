@@ -7,7 +7,7 @@ const close4 = document.getElementById("close_4");
 let exitTransition = false;
 
 const bagel_4 = focusBagel(dialog4, [first4, last4], {
-  enter: {
+  entry: {
     node: open4,
     on() {
       exitTransition = false;

@@ -5,7 +5,7 @@ const entry = document.getElementById("open");
 
 const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
   loop: false,
-  enter: {
+  entry: {
     node: entry,
     on: openDialog,
   },

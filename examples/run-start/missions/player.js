@@ -15,7 +15,7 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
   }],
-  enter: {
+  entry: {
     node: "#more_from",
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
@@ -35,7 +35,7 @@ function initSongBagel(curI) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
   lastSong = focusBagel(`#song_${idx}`, list, {
-    enter: {
+    entry: {
       node: `#song_${idx}`,
       key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
       type: "keydown",
