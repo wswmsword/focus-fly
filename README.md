@@ -1,5 +1,7 @@
 # Focus-no-Jutsu
 
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+
 Focus-no-Jutsu（Focus の術），是一个 B 级[幻术](https://naruto.fandom.com/wiki/Genjutsu)。
 
 您可以脱离鼠标、完全使用键盘来访问这个[使用 *Focus-no-Jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
@@ -10,6 +12,8 @@ Focus-no-Jutsu（Focus の術），是一个 B 级[幻术](https://naruto.fandom
 
 <details>
 <summary>查看一个常规聚焦流程。</summary>
+
+![焦点从入口进入列表，从列表到出口，从出口回到入口，如果有封面，焦点则会从入口进入封面，再从封面进入列表。](./images/flow.png)
 
 一个常规流程是这样的，开始焦点在*入口*，焦点通过*入口*到达*列表*，在*列表*中焦点可以自由移动，前进或者后退聚焦*列表*的每一个单项，*列表*中有一个特殊项是*出口*，通过*出口*，焦点会从*列表*回到*入口*。也有一些情况，在从*入口*到*列表*之前首先到达*封面*，从*出口*回到*入口*前首先回到*封面*。还有一些情况不用指定*入口*和*出口*，*封面*独自担当这两个角色。
 </details>
