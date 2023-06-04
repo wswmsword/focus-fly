@@ -261,6 +261,8 @@ const focusBagel = (...props) => {
     onMove,
     /** cover: 封面，默认情况，触发入口后首先聚焦封面，而不是子元素 */
     cover = false,
+    /** 初始的 activeIndex */
+    initialActive,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
     delayToFocus,
     /** 延迟失焦，触发出口后等待执行 delayToBlur 完成后失焦 */
@@ -326,8 +328,8 @@ const focusBagel = (...props) => {
   // 自定义前进或后退焦点函数，则设置 sequence 为 true
   const enabledTabSequence = !!(isNext || isPrev || sequence);
 
-  /** 活动元素在 subNodes 中的编号，打开 sequence 生效 */
-  let activeIndex = -1;
+  /** 活动元素在列表中的编号，打开 sequence 生效 */
+  let activeIndex = initialActive ?? -1;
   let prevActive = -1;
 
   /** 是否已添加监听事件 */
@@ -449,8 +451,9 @@ const focusBagel = (...props) => {
       const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
       const targetIdx = list.indexOf(gotTarget);
       if (targetIdx > -1) {
+        prevActive = activeIndex;
         activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-        onMove?.({ e, prev: null, cur: gotTarget, prevI: -1, curI: activeIndex });
+        onMove?.({ e, prev: list[prevActive], cur: gotTarget, prevI: prevActive, curI: activeIndex });
         trappedList = true;
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
@@ -523,7 +526,7 @@ const focusBagel = (...props) => {
       {
         if (activeIndex === -1) activeIndex = 0; // 从非入口进入，并且之前没有通过入口，设置为聚焦第一个元素
         tickFocus(_subNodes[activeIndex]);
-        onMove?.({ e, prev: null, cur: _subNodes[activeIndex], prevI: -1, curI: activeIndex });
+        onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
         trappedList = true;
       }
     }
@@ -883,7 +886,6 @@ const focusBagel = (...props) => {
           const handler = type === "keydown"
             ? entryKeyHandler
             : entryNotKeyHandler;
-          node.addEventListener(type, handler);
           entryListeners.push(node, type, handler); // 保存事件信息
         }
       });
@@ -903,6 +905,9 @@ const focusBagel = (...props) => {
           entryListeners.removeListeners();
       }
     }
+
+    // flush
+    entryListeners.addListeners();
   }
 };
 
