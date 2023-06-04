@@ -273,8 +273,6 @@ const focusBagel = (...props) => {
     removeListenersEachExit = true,
     /** 每次进入列表是否移除入口事件 */
     removeListenersEachEnter,
-    /** 矫正焦点，矫正从非入口进入列表的焦点 */
-    disableListCorrection = false,
     /** 手动添加监听事件，入口、列表、出口的监听事件 */
     manual,
     /** 用于内部调试 */
@@ -524,7 +522,7 @@ const focusBagel = (...props) => {
       }
 
       // 纠正外部聚焦进来的焦点
-      if (!disableListCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+      if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
         const gotCorrectionTarget = correctionTarget?.({ list: _subNodes, cover: _coverNode, root: _rootNode, last: _subNodes[activeIndex], lastI: activeIndex }) ?? activeIndex === -1 ? _subNodes[0] : _subNodes[activeIndex];
         const targetIndex = _subNodes.findIndex(item => item === gotCorrectionTarget);
