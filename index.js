@@ -233,6 +233,29 @@ class ListenersCache {
   }
 }
 
+/** 按键转发的缓存 */
+class keyForwardCache {
+  cache = new Map();
+  has(id) {
+    return this.cache.has(id);
+  }
+  push(id, node, handler) {
+    if (this.cache.has(id)) return;
+    node.addEventListener("keydown", handler);
+    this.cache.set(id, {
+      node,
+      handler,
+    })
+  }
+  clean() {
+    this.cache = new Map();
+  }
+  remove(id) {
+    const ids = [].concat(id);
+    ids.forEach(id => node.removeEventListener("keydown", this.cache.get(id).handler));
+  }
+}
+
 const focusBagel = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
@@ -341,6 +364,9 @@ const focusBagel = (...props) => {
   /** 是否已添加入口的监听事件 */
   const entryListeners = new ListenersCache();
 
+  /** 按键转发 */
+  const keyForwards = new keyForwardCache();
+
   // 用于 return.exit
   let exitListWithTarget_outer = null;
   let exitListWithoutTarget_outer = null;
@@ -419,6 +445,35 @@ const focusBagel = (...props) => {
       } = getKeyNodes(rootNode, subNodes, coverNode);
 
       loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+    },
+    /** 添加转发 */
+    addForward(id, forward) {
+      let opts = null;
+      if (isFun(forward)) {
+        const {
+          rootNode: root,
+          subNodes: list, head, tail,
+          coverNode: cover,
+        } = getKeyNodes(rootNode, subNodes, coverNode);
+
+        opts = forward({ root, list, head, tail, cover, curI: activeIndex, prevI: prevActive });
+      }
+      else opts = forward;
+
+      const { node: origin_node, on, key, target: origin_target } = opts;
+      const node = element(origin_node);
+      const target = element(origin_target);
+      keyForwards.push(id, node, e => {
+        if (key?.(e, activeIndex)) {
+          e.preventDefault();
+          on?.();
+          tickFocus(target);
+        }
+      });
+    },
+    /** 移除转发 */
+    removeForward(id) {
+      keyForwards.remove(id);
     },
     /** 当前聚焦的列表单项序号 */
     i: () => activeIndex,
