@@ -613,7 +613,7 @@ const focusBagel = (...props) => {
       for (let exit of exitsCover) {
         const { key, on, target: origin } = exit;
         const target = element(origin);
-        if (key?.(e)) {
+        if (key?.(e, activeIndex)) {
           exitCoverHandler(e, on, target);
           return;
         }
@@ -698,17 +698,11 @@ const focusBagel = (...props) => {
       const node = element(origin_node);
       const target = element(origin_target);
       if (node != null && e.target !== node) return false;
-      if (key?.(e)) {
-        if (target) {
-          const exited = exitListWithTarget(e, on, target, delay);
-          exited && e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
-          return exited;
-
-        } else {
-          const exited = exitListWithoutTarget(e, on, target, delay);
-          exited && e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
-          return exited;
-        }
+      if (key?.(e, activeIndex)) {
+        if (target) exitListWithTarget(e, on, target, delay);
+        else exitListWithoutTarget(e, on, target, delay);
+        e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
+        return true;
       }
     }
 
@@ -894,7 +888,7 @@ const focusBagel = (...props) => {
       });
 
       function entryKeyHandler(e) {
-        if (key?.(e)) {
+        if (key?.(e, activeIndex)) {
           e.preventDefault();
           entryHandler(e, on, target, delay);
           if (removeListenersEachEnter)
