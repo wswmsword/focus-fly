@@ -263,6 +263,8 @@ const focusBagel = (...props) => {
     cover = false,
     /** 初始的 activeIndex */
     initialActive,
+    /** 矫正列表的焦点 */
+    correctionTarget,
     /** 延迟挂载非触发器元素的事件，可以是一个返回 promise 的函数，可以是一个接收回调函数的函数 */
     delayToFocus,
     /** 延迟失焦，触发出口后等待执行 delayToBlur 完成后失焦 */
@@ -524,10 +526,15 @@ const focusBagel = (...props) => {
       // 纠正外部聚焦进来的焦点
       if (!disableListCorrection && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
-        if (activeIndex === -1) activeIndex = 0; // 从非入口进入，并且之前没有通过入口，设置为聚焦第一个元素
-        tickFocus(_subNodes[activeIndex]);
-        onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
-        trappedList = true;
+        const gotCorrectionTarget = correctionTarget?.({ list: _subNodes, cover: _coverNode, root: _rootNode, last: _subNodes[activeIndex], lastI: activeIndex }) ?? activeIndex === -1 ? _subNodes[0] : _subNodes[activeIndex];
+        const targetIndex = _subNodes.findIndex(item => item === gotCorrectionTarget);
+        if (targetIndex > -1) {
+          prevActive = activeIndex;
+          activeIndex = targetIndex;
+          onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
+          trappedList = true;
+        }
+        tickFocus(gotCorrectionTarget);
       }
     }
 
