@@ -333,13 +333,13 @@ const focusBagel = (...props) => {
   let prevActive = -1;
 
   /** 是否已添加监听事件 */
-  let listListeners = new ListenersCache();
+  const listListeners = new ListenersCache();
 
   let trappedList = false;
   let trappedCover = false;
 
   /** 是否已添加入口的监听事件 */
-  let entryListeners = new ListenersCache();
+  const entryListeners = new ListenersCache();
 
   // 用于 return.exit
   let exitListWithTarget_outer = null;
