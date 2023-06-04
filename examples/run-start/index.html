@@ -111,7 +111,7 @@ function closeDialog() {
 
       <div id="tabs">
         <div id="tab_list" role="tablist" aria-labelledby="tablist">
-          <button id="tab_1" role="tab" aria-selected="true" aria-controls="tabpanel_1" tabindex="0">
+          <button id="tab_1" role="tab" aria-selected="false" aria-controls="tabpanel_1" tabindex="0">
             <span>海棠</span>
           </button>
           <button id="tab_2" role="tab" aria-selected="false" aria-controls="tabpanel_2" tabindex="0">
@@ -123,15 +123,15 @@ function closeDialog() {
           <button id="tab_4" role="tab" aria-selected="false" aria-controls="tabpanel_4" tabindex="0">
             <span>月见草</span>
           </button>
-          <button id="tab_5" role="tab" aria-selected="false" aria-controls="tabpanel_5" tabindex="0">
+          <button id="tab_5" role="tab" aria-selected="true" aria-controls="tabpanel_5" tabindex="0">
             <span>桃花</span>
           </button>
         </div>
-        <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1">海棠</div>
+        <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1" class="is-hidden">海棠</div>
         <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2" class="is-hidden">梨花</div>
         <div id="tabpanel_3" role="tabpanel" aria-labelledby="tab_3" class="is-hidden">木绣球</div>
         <div id="tabpanel_4" role="tabpanel" aria-labelledby="tab_4" class="is-hidden">月见草</div>
-        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5" class="is-hidden">桃花</div>
+        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5">桃花</div>
       </div>
 
       <details>
@@ -186,7 +186,7 @@ function onFocus({ prev, cur, prevI, curI }) {
 
       <p>这个“播放列表”是一个真实例子，是 Spotify 的专辑界面，Spotify 网页有很好的键盘体验。如果有一类元素组成了列表，这类元素的每一个内部又包含很多可聚焦的子元素，这时使用 <kbd>Tab</kbd> 从头到尾的访问体验是崩溃的，因为元素太多、花费时间太长了。</p>
       
-      <p>Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点进入（正在播放的）单曲，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素；回过头如果想要播放某一首歌，只要让焦点回到专辑列表，然后通过 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 来选中；听到动听的歌曲，我们会把这首歌曲收藏起来，我们只要让焦点回到那首歌曲，按下 <kbd>Left Arrow</kbd> 或者 <kbd>Right Arrow</kbd> 找到“收藏”按钮，就能进行后续的操作了。</p>
+      <p>Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素；如果正在播放专辑中的某一首歌曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点不会退出专辑，而是会聚焦歌曲；退出专辑之后，回过头如果想要播放某一首歌，只要让焦点回到专辑列表，然后通过 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 来选中；听到动听的歌曲，我们会把这首歌曲收藏起来，我们只要让焦点回到那首歌曲，按下 <kbd>Left Arrow</kbd> 或者 <kbd>Right Arrow</kbd> 找到“收藏”按钮，就能进行后续的操作了。</p>
 
       <div class="player">
         <div class="head">
@@ -224,7 +224,7 @@ function onFocus({ prev, cur, prevI, curI }) {
                   </div>
                 </div>
               </div>
-              <div class="cells_wrapper" role="presentation">
+              <div id="songs_wrapper" class="cells_wrapper" role="presentation">
                 <div id="song_1" role="row" aria-rowindex="2" aria-selected="false" class="song" tabindex="0">
                   <div role="gridcell" aria-colindex="1">
                     <span class="song_idx">1</span>
@@ -366,10 +366,7 @@ function onFocus({ prev, cur, prevI, curI }) {
 
 let lastSong = null;
 
-const playerBagel = focusBagel("#grid_wrapper", songs, {
-  cover: {
-    enterKey: e => (e.key === "Tab" && !e.shiftKey) || e.key === "ArrowDown" || e.key === "ArrowUp",
-  },
+const playerBagel = focusBagel("#songs_wrapper", songs, {
   next: e => e.key === "ArrowDown",
   prev: e => e.key === "ArrowUp",
   exit: [{
@@ -377,12 +374,12 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
     target: "#more_from",
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
+    target: "#grid_wrapper",
   }],
   entry: {
-    node: "#more_from",
-    key: e => e.key === "Tab" && e.shiftKey,
+    node: "#grid_wrapper",
+    key: (e, active) => (e.key === "Tab" && !e.shiftKey && active > -1) || e.key === "ArrowDown" || e.key === "ArrowUp",
     type: "keydown",
-    target: ({ last }) => last,
   },
   onMove({ cur, prev, curI }) {
     prev?.classList.remove("focused");
@@ -391,8 +388,19 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
     lastSong?.removeListeners();
     if (curI > -1) initSongBagel(curI);
   },
+  correctionTarget({ lastI, last }) {
+    if (lastI === -1)
+      return "#grid_wrapper";
+    return last;
+  },
+  removeListenersEachExit: false,
 });
 
+playerBagel.addForward("grid", {
+  node: "#grid_wrapper",
+  key: (e, active) => (e.key === "Tab" && !e.shiftKey && active === -1),
+  target: "#more_from",
+});
 
 function initSongBagel(curI) {
   const idx = curI + 1;

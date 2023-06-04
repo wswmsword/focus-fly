@@ -3,10 +3,7 @@ const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6",
 
 let lastSong = null;
 
-const playerBagel = focusBagel("#grid_wrapper", songs, {
-  cover: {
-    enterKey: e => (e.key === "Tab" && !e.shiftKey) || e.key === "ArrowDown" || e.key === "ArrowUp",
-  },
+const playerBagel = focusBagel("#songs_wrapper", songs, {
   next: e => e.key === "ArrowDown",
   prev: e => e.key === "ArrowUp",
   exit: [{
@@ -14,12 +11,12 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
     target: "#more_from",
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
+    target: "#grid_wrapper",
   }],
   entry: {
-    node: "#more_from",
-    key: e => e.key === "Tab" && e.shiftKey,
+    node: "#grid_wrapper",
+    key: (e, active) => (e.key === "Tab" && !e.shiftKey && active > -1) || e.key === "ArrowDown" || e.key === "ArrowUp",
     type: "keydown",
-    target: ({ last }) => last,
   },
   onMove({ cur, prev, curI }) {
     prev?.classList.remove("focused");
@@ -28,8 +25,19 @@ const playerBagel = focusBagel("#grid_wrapper", songs, {
     lastSong?.removeListeners();
     if (curI > -1) initSongBagel(curI);
   },
+  correctionTarget({ lastI, last }) {
+    if (lastI === -1)
+      return "#grid_wrapper";
+    return last;
+  },
+  removeListenersEachExit: false,
 });
 
+playerBagel.addForward("grid", {
+  node: "#grid_wrapper",
+  key: (e, active) => (e.key === "Tab" && !e.shiftKey && active === -1),
+  target: "#more_from",
+});
 
 function initSongBagel(curI) {
   const idx = curI + 1;
