@@ -524,7 +524,8 @@ const focusBagel = (...props) => {
       // 纠正外部聚焦进来的焦点
       if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
       {
-        const gotCorrectionTarget = correctionTarget?.({ list: _subNodes, cover: _coverNode, root: _rootNode, last: _subNodes[activeIndex], lastI: activeIndex }) ?? activeIndex === -1 ? _subNodes[0] : _subNodes[activeIndex];
+        const originGotCorrectionTarget = correctionTarget?.({ list: _subNodes, cover: _coverNode, root: _rootNode, last: _subNodes[activeIndex], lastI: activeIndex }) ?? (activeIndex === -1 ? _subNodes[0] : _subNodes[activeIndex]);
+        const gotCorrectionTarget = element(originGotCorrectionTarget);
         const targetIndex = _subNodes.findIndex(item => item === gotCorrectionTarget);
         if (targetIndex > -1) {
           prevActive = activeIndex;
