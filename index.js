@@ -252,7 +252,7 @@ class keyForwardCache {
   }
   remove(id) {
     const ids = [].concat(id);
-    ids.forEach(id => node.removeEventListener("keydown", this.cache.get(id).handler));
+    ids.forEach(id => this.cache.get(id).node.removeEventListener("keydown", this.cache.get(id).handler));
   }
 }
 
