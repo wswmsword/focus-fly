@@ -17,9 +17,9 @@
         <h1><code>Focus-no-Jutsu</code> 范例</h1>
       </header>
 
-      <p><code>Focus-no-Jutsu</code>（Focus の術），一个 B 级<a href="https://naruto.fandom.com/wiki/Genjutsu">幻术</a>。</p>
+      <p>该范例页面使用 <code>Focus-no-Jutsu</code> 控制和管理焦点，是一个<a href="https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/">键盘可访问的界面</a>，您可以任意选择鼠标和键盘访问该页面。</p>
       
-      <p>网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。</p>
+      <p>网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。</p>
 
       <p>现在开始我们用 <code>Focus-no-Jutsu</code> 完成和焦点控制有关的一系列任务！🥷</p>
 
@@ -186,7 +186,7 @@ function onFocus({ prev, cur, prevI, curI }) {
 
       <p>这个“播放列表”是一个真实例子，是 Spotify 的专辑界面，Spotify 网页有很好的键盘体验。如果有一类元素组成了列表，这类元素的每一个内部又包含很多可聚焦的子元素，这时使用 <kbd>Tab</kbd> 从头到尾的访问体验是崩溃的，因为元素太多、花费时间太长了。</p>
       
-      <p>Spotify 是这样做的，一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素；如果正在播放专辑中的某一首歌曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点不会退出专辑，而是会聚焦歌曲；退出专辑之后，回过头如果想要播放某一首歌，只要让焦点回到专辑列表，然后通过 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 来选中；听到动听的歌曲，我们会把这首歌曲收藏起来，我们只要让焦点回到那首歌曲，按下 <kbd>Left Arrow</kbd> 或者 <kbd>Right Arrow</kbd> 找到“收藏”按钮，就能进行后续的操作了。</p>
+      <p>Spotify 是这样做的。一首专辑有多首单曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点将退出整个专辑列表，聚焦专辑列表的后一个元素；如果正在播放专辑中的某一首歌曲，首先 <kbd>Tab</kbd> 会聚焦整个专辑列表，继续 <kbd>Tab</kbd>，焦点不会退出专辑，而是会聚焦歌曲；退出专辑之后，回过头如果想要播放某一首歌，只要让焦点回到专辑列表，然后通过 <kbd>Up Arrow</kbd> 和 <kbd>Down Arrow</kbd> 来选中；听到动听的歌曲，我们会把这首歌曲收藏起来，当焦点回到歌曲，按下 <kbd>Left Arrow</kbd> 或者 <kbd>Right Arrow</kbd> 找到“收藏”按钮，就能进行后续的操作了。</p>
 
       <div class="player">
         <div class="head">
