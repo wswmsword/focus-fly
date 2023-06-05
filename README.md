@@ -1,12 +1,12 @@
-# Focus-no-Jutsu
+# Focus-no-Jutsu（Focus の術）
 
-[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu) [![B level Genjutsu](https://img.shields.io/badge/Genjutsu-B-%23fbadcc)](https://naruto.fandom.com/wiki/Genjutsu)
 
-Focus-no-Jutsu（Focus の術），是一个 B 级[幻术](https://naruto.fandom.com/wiki/Genjutsu)。
+您可以任意选择鼠标和键盘来访问这个[使用 *Focus-no-Jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
-您可以脱离鼠标、完全使用键盘来访问这个[使用 *Focus-no-Jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
+网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。
 
-网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡面板、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。
+使用 Focus-no-Jutsu 控制和管理焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述如何进入焦点，进入后如何移动焦点，以及如何退出焦点。
 
