@@ -52,7 +52,9 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, is
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusNextListItemByRange = (head, tail, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
+const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
+  const head = list[0];
+  const tail = list.at(-1);
   const current = e.target;
   if (current === coverNode) return;
   if (!trappedList()) return;
@@ -234,7 +236,7 @@ class ListenersCache {
 }
 
 /** 按键转发的缓存 */
-class keyForwardCache {
+class KeyForwardCache {
   cache = new Map();
   has(id) {
     return this.cache.has(id);
@@ -254,6 +256,15 @@ class keyForwardCache {
     const ids = [].concat(id);
     ids.forEach(id => this.cache.get(id).node.removeEventListener("keydown", this.cache.get(id).handler));
   }
+}
+
+/** 保存列表数据 */
+class TabList {
+  data = [];
+  update(list) {
+    this.data.splice(0, this.data.length);
+    Array.prototype.push.apply(this.data, list);
+  };
 }
 
 const focusBagel = (...props) => {
@@ -314,6 +325,9 @@ const focusBagel = (...props) => {
   /** 是否已经打开封面选项 */
   const enabledCover = !!coverNode;
 
+  /** 列表 */
+  const list = new TabList();
+
   /** 入口们 */
   const entries = [].concat(entry).filter(o => o != null).map(entry => ({
     ...entry,
@@ -365,7 +379,7 @@ const focusBagel = (...props) => {
   const entryListeners = new ListenersCache();
 
   /** 按键转发 */
-  const keyForwards = new keyForwardCache();
+  const keyForwards = new KeyForwardCache();
 
   // 用于 return.exit
   let exitListWithTarget_outer = null;
@@ -386,8 +400,9 @@ const focusBagel = (...props) => {
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
       } = getKeyNodes(rootNode, subNodes, coverNode);
+      list.update(_subNodes);
 
-      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+      loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
     }
   }
 
@@ -443,8 +458,9 @@ const focusBagel = (...props) => {
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
       } = getKeyNodes(rootNode, subNodes, coverNode);
+      list.update(_subNodes);
 
-      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+      loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
     },
     /** 添加转发 */
     addForward(id, forward) {
@@ -475,6 +491,11 @@ const focusBagel = (...props) => {
     removeForward(id) {
       keyForwards.remove(id);
     },
+    /** 更新列表 */
+    updateList(newList) {
+      const _newList = newList.map(item => element(item)).filter(item => item != null);
+      list.update(_newList);
+    },
     /** 当前聚焦的列表单项序号 */
     i: () => activeIndex,
   };
@@ -497,8 +518,9 @@ const focusBagel = (...props) => {
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
       } = getKeyNodes(rootNode, subNodes, coverNode);
+      list.update(_subNodes);
 
-      loadListRelatedListeners(_rootNode, _subNodes, head, tail, _coverNode);
+      loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
       focusTarget(_coverNode, _subNodes, _rootNode);
     }
     
@@ -532,8 +554,8 @@ const focusBagel = (...props) => {
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = enabledTabSequence ?
       focusNextListItemBySequence(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, () => trappedList) :
-      focusNextListItemByRange(_head, _tail, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
-  
+      focusNextListItemByRange(_subNodes, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
+
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
       exits, keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
@@ -762,7 +784,7 @@ const focusBagel = (...props) => {
       }
     }
 
-    /** 触发键盘退出列表，退出 subNodes 焦点 */
+    /** 触发键盘退出列表，退出列表焦点 */
     function keyListExitHandler(e) {
       if (e.target === _coverNode) return; // 被封面触发直接返回
 
