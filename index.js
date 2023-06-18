@@ -333,6 +333,8 @@ const focusBagel = (...props) => {
     ...entry,
     type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
   })).reduce(nodesReducer, []);
+  /** 是否是空入口 */
+  const hasNoEntry = entries.length === 0;
 
   /** 默认入口 */
   let _trigger = element(trigger || entries[0]?.node);
@@ -391,7 +393,7 @@ const focusBagel = (...props) => {
     addEntryListeners();
 
     // 如果有入口不需要延迟，则立即加载列表的监听事件
-    const hasImmediateEntry = (entries.length > 0 ? entries : [{}]).some(({ delay }) => !(delay ?? delayToFocus));
+    const hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(({ delay }) => !(delay ?? delayToFocus));
 
     if (hasImmediateEntry) {
 
@@ -551,10 +553,12 @@ const focusBagel = (...props) => {
     const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
     const usePrevActive = () => [, prev => prevActive = prev];
 
+    const isTrappedList = () => hasNoEntry ? true : trappedList;
+
     // 在焦点循环中触发聚焦
     const keyListMoveHandler = enabledTabSequence ?
-      focusNextListItemBySequence(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, () => trappedList) :
-      focusNextListItemByRange(_subNodes, isClamp, onNext, onPrev, _rootNode, _coverNode, () => trappedList);
+      focusNextListItemBySequence(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, isTrappedList) :
+      focusNextListItemByRange(_subNodes, isClamp, onNext, onPrev, _rootNode, _coverNode, isTrappedList);
 
     /** 出口们，列表的出口们，subNodes 的出口们 */
     const {
