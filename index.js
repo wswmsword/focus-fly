@@ -830,8 +830,7 @@ const focusBagel = (...props) => {
       if (!trappedList) return;
 
       trappedList = false;
-
-      e.preventDefault(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
+      e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
       if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         await on?.(e);
         onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
