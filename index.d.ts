@@ -69,7 +69,7 @@ type exit = {
   node?: element;
 
   /** 自定义退出 subNodes 组合键 */
-  key?: iskey;
+  key?: isKey;
 
   /** 点击退出循环焦点的触发器后的行为 */
   on?: handleExit;
