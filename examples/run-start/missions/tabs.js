@@ -28,7 +28,7 @@ const tabsBagel = focusBagel(tabs, tabList, {
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
   }],
-  initialActive: 4,
+  initialActive: 1,
   removeListenersEachExit: false,
 });
 

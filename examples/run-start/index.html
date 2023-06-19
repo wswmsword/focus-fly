@@ -114,7 +114,7 @@ function closeDialog() {
           <button id="tab_1" role="tab" aria-selected="false" aria-controls="tabpanel_1" tabindex="0">
             <span>海棠</span>
           </button>
-          <button id="tab_2" role="tab" aria-selected="false" aria-controls="tabpanel_2" tabindex="0">
+          <button id="tab_2" role="tab" aria-selected="true" aria-controls="tabpanel_2" tabindex="0">
             <span>梨花</span>
           </button>
           <button id="tab_3" role="tab" aria-selected="false" aria-controls="tabpanel_3" tabindex="0">
@@ -123,15 +123,15 @@ function closeDialog() {
           <button id="tab_4" role="tab" aria-selected="false" aria-controls="tabpanel_4" tabindex="0">
             <span>月见草</span>
           </button>
-          <button id="tab_5" role="tab" aria-selected="true" aria-controls="tabpanel_5" tabindex="0">
+          <button id="tab_5" role="tab" aria-selected="false" aria-controls="tabpanel_5" tabindex="0">
             <span>桃花</span>
           </button>
         </div>
         <div id="tabpanel_1" role="tabpanel" aria-labelledby="tab_1" class="is-hidden">海棠</div>
-        <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2" class="is-hidden">梨花</div>
+        <div id="tabpanel_2" role="tabpanel" aria-labelledby="tab_2">梨花</div>
         <div id="tabpanel_3" role="tabpanel" aria-labelledby="tab_3" class="is-hidden">木绣球</div>
         <div id="tabpanel_4" role="tabpanel" aria-labelledby="tab_4" class="is-hidden">月见草</div>
-        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5">桃花</div>
+        <div id="tabpanel_5" role="tabpanel" aria-labelledby="tab_5" class="is-hidden">桃花</div>
       </div>
 
       <details>
@@ -167,7 +167,7 @@ const tabsBagel = focusBagel(tabs, tabList, {
     key: e => e.key === "Tab" && e.shiftKey,
     type: "keydown",
   }],
-  initialActive: 4,
+  initialActive: 1,
   removeListenersEachExit: false,
 });
 
