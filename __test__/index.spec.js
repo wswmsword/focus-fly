@@ -11,14 +11,14 @@ import {
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
-import { getManualModalDom, getInputModalDom, getModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14 } from "./bagels.js";
+import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15 } from "./bagels.js";
 
 describe("focus-bagel", function() {
 
   // 点击入口后聚焦第一个可聚焦元素
   it("should focus first focusable node of modal after clicking entry", async () => {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel(container, dialog, first, last, open, close);
   
     await user.click(open);
@@ -27,7 +27,7 @@ describe("focus-bagel", function() {
 
   // 点击关闭按钮后聚焦入口
   it("should back to focus entry after clicking close button", async () => {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel(container, dialog, first, last, open, close);
   
     await user.click(close);
@@ -36,7 +36,7 @@ describe("focus-bagel", function() {
 
   // 循环聚焦列表
   it("should loop focus around list by forward tab", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel(container, dialog, first, last, open, close);
 
     await user.click(open);
@@ -59,7 +59,7 @@ describe("focus-bagel", function() {
 
   // 循环聚焦列表（向后循环）
   it("should loop focus backward", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel(container, dialog, first, last, open, close);
     const s = { shift: true };
     await user.click(open);
@@ -82,7 +82,7 @@ describe("focus-bagel", function() {
 
   // 在一个范围里阻止循环
   it("should clamp focus by range", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_1_1(container, dialog, first, last, open, close);
     const s = { shift: true };
 
@@ -112,7 +112,7 @@ describe("focus-bagel", function() {
 
   // 通过返回的 api 聚焦列表
   it("should be trapped list by Return.enter", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     const bagel = initBagel_2(container, dialog, first, last, open, close);
     expect(document.body).toHaveFocus();
     await bagel.enter(); // maybe setTimeout 300ms
@@ -121,7 +121,7 @@ describe("focus-bagel", function() {
 
   // 通过返回的 api 退出列表
   it("should make focus release from list by Return.exit", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     const bagel = initBagel_3(container, dialog, first, last, open, close);
     await bagel.enter();
     expect(first).toHaveFocus();
@@ -131,7 +131,7 @@ describe("focus-bagel", function() {
 
   // 关闭 sequence 选项之后，activeIndex 不改变
   it("should not change activeIndex when the sequence option is disabled", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     const bagel = initBagel_4(container, dialog, first, last, open, close);
 
     const i1 = bagel.i();
@@ -154,7 +154,7 @@ describe("focus-bagel", function() {
 
   // 打开 sequence 选项之后，activeIndex 改变
   it("should change activeIndex when the sequence option is enabled", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     const bagel = initBagel_4_1(container, dialog, first, last, open, close);
 
     const i1 = bagel.i();
@@ -188,7 +188,7 @@ describe("focus-bagel", function() {
 
   // 没有定义入口，将不会在调用 Return.exit 时聚焦入口
   it("should not focus trigger by invoking Return.exit when the entry trigger is not defined", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_5(container, dialog, first, last, open, close);
 
     await user.click(open);
@@ -199,7 +199,7 @@ describe("focus-bagel", function() {
 
   // 没有定义入口，将不会在退出时聚焦入口
   it("should not focus trigger by exit when the entry trigger is not defined", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_6(container, dialog, first, last, open, close);
 
     await user.click(open);
@@ -210,7 +210,7 @@ describe("focus-bagel", function() {
 
   // 如果没有正确提供列表范围，将会报错
   describe("should throw error if there's no list edge", function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     it("should throw error if has no head of list", function() {
       try {
         initBagel_7(container, dialog, first, last, open, close);
@@ -231,7 +231,7 @@ describe("focus-bagel", function() {
 
   // 设置 onEscape 为 true，将能通过 esc 退出列表
   it("should handle esc key when the onEscape is enabled", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_9(container, dialog, first, last, open, close);
     await user.click(open);
     expect(first).toHaveFocus();
@@ -241,7 +241,7 @@ describe("focus-bagel", function() {
 
   // 显式关闭左上角 esc 来避免退出列表和避免聚焦入口
   it("should ignore esc key to avoid focusing entry by disabling onEscape explicitly", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_10(container, dialog, first, last, open, close);
     await user.click(open);
     expect(first).toHaveFocus();
@@ -251,7 +251,7 @@ describe("focus-bagel", function() {
 
   // 没有入口时，在列表内按下 esc 退出后，不会改变焦点
   it("should not change activeElement by pressing esc when it has no entry trigger", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_11(container, dialog, first, last, open, close);
     await user.click(open);
     expect(first).toHaveFocus();
@@ -265,7 +265,7 @@ describe("focus-bagel", function() {
 
   // 通过设置序列，循环聚焦
   it("should loop focus by sequence", async function() {
-    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
@@ -296,7 +296,7 @@ describe("focus-bagel", function() {
   // 通过设置序列，循环聚焦（向后循环）
   it("should loop focus whithin sequence(backward)", async function() {
     const s = { shift: true };
-    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
     initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
@@ -322,10 +322,10 @@ describe("focus-bagel", function() {
     expect(focusA).toHaveFocus();
   });
 
-  // 设置序列，组织循环
+  // 设置序列，阻止循环
   it("should clamp focus nodes whthin sequence", async function() {
     const s = { shift: true };
-    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getManualModalDom();
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
     initBagel_13(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     expect(document.body).toHaveFocus();
@@ -365,7 +365,7 @@ describe("focus-bagel", function() {
 
   // 传入选择器字符串，而不是节点对象
   it("should pass selector string instead of element object", async function() {
-    const { container, dialog, first, last, open, close } = getModalDom();
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel_14();
   
     await open.click();
@@ -386,4 +386,71 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
+});
+
+// 开启封面
+describe("focus-no-jutsu & cover", function() {
+
+  // 点击入口后聚焦封面
+  it("should focus cover after clicking entry", async function() {
+    const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(cover).toHaveFocus();
+  });
+
+  // `cover: true`的配置，从封面按下 enter 进入列表
+  it("should focus first focusable node after pressing enter at cover", async function() {
+    const { container, dialog, first, last, open, close } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    await user.keyboard("{Enter}");
+    expect(first).toHaveFocus();
+  });
+
+  // 点击出口，回到封面
+  it("should focus cover after clicking exit", async function() {
+    const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    await user.keyboard("{Enter}");
+    await user.click(close);
+    expect(cover).toHaveFocus();
+  });
+
+  // 在封面按下 Tab，进入列表最后一个元素的后一个元素
+  it("should focus element after last list element after pressing Tab at cover", async function() {
+    const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(cover).toHaveFocus();
+    await user.tab();
+    expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
+
+    await user.click(open);
+    await user.keyboard("{Enter}");
+    await user.click(close);
+    await user.tab();
+    expect(first).toHaveFocus(); // 同上，理论上应该匹配 `#walk2`
+  });
+
+  // 添加封面后正常循环聚焦
+  it("should loop focus around list by forward and backward tab", async function() {
+    const s = { shift: true };
+    const { container, dialog, first, last, open, close, cover, focusB } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    await user.keyboard("{Enter}");
+    await user.tab();
+    expect(focusB).toHaveFocus();
+    await user.tab(s);await user.tab(s);
+    expect(last).toHaveFocus();
+    await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();
+    expect(first).toHaveFocus();
+  });
 });

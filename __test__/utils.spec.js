@@ -1,4 +1,6 @@
-import { objToStr } from "../utils.js";
+import { objToStr, findLowestCommonAncestorNode } from "../utils.js";
+import render from "./helper/render.js";
+import { childs, descendants, nestedDescendants } from "./template-html/utils-html.js";
 
 
 describe("objToStr", function() {
@@ -56,7 +58,7 @@ describe("objToStr", function() {
     expect("[object Function]").toBe(funType);
   });
 
-  it("should return object type when passsing an object", function() {
+  it("should return object type when passing an object", function() {
     var objType = objToStr({});
     expect("[object Object]").toBe(objType);
 
@@ -78,3 +80,43 @@ describe("objToStr", function() {
   });
 });
 
+describe("findLowestCommonAncestorNode", function() {
+
+  it("should find parent by childs", function() {
+    var { container } = render(childs);
+    var child1 = container.querySelector("#child1");
+    var child2 = container.querySelector("#child2");
+    var parent = container.querySelector("#parent");
+    var res = findLowestCommonAncestorNode(child1, child2);
+    expect(res).toBe(parent);
+  });
+
+  it("should find common ancestor by descendants", function() {
+    var { container } = render(descendants);
+    var child1 = container.querySelector("#child1");
+    var child2 = container.querySelector("#child2");
+    var parent = container.querySelector("#parent");
+    var res = findLowestCommonAncestorNode(child1, child2);
+    expect(res).toBe(parent);
+  });
+
+  it("should find parent by nested descendants", function() {
+    var { container } = render(nestedDescendants);
+    var child1 = container.querySelector("#child1");
+    var child2 = container.querySelector("#child2");
+    var parent = child1;
+    var res = findLowestCommonAncestorNode(child1, child2);
+    expect(res).toBe(parent);
+  });
+
+  it("should not find parent by passing null", function() {
+    var res = findLowestCommonAncestorNode(null, null);
+    expect(res).toBe(null);
+
+    res = findLowestCommonAncestorNode(null);
+    expect(res).toBe(null);
+
+    res = findLowestCommonAncestorNode();
+    expect(res).toBe(null);
+  });
+});

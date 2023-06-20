@@ -164,3 +164,16 @@ export function initBagel_14(container, dialog, first, last, open, close) {
     }
   });
 }
+
+export function initBagel_15(container, dialog, first, last, open, close) {
+
+  focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close,
+    },
+    cover: true,
+  });
+}
