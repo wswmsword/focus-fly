@@ -539,7 +539,8 @@ const focusBagel = (...props) => {
       list.update(_subNodes);
 
       loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
-      focusTarget(_coverNode, _subNodes, _rootNode);
+      if (target !== false)
+        focusTarget(_coverNode, _subNodes, _rootNode);
     }
     
     function focusTarget(cover, list, rootNode) {
