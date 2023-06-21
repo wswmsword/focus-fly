@@ -17,8 +17,10 @@ export function getSequenceModalDom() {
   const focusE = container.querySelector("#focusE");
   const focusF = container.querySelector("#focusF");
   const focusG = container.querySelector("#focusG");
+  const walk1 = container.querySelector("#walk1");
+  const walk2 = container.querySelector("#walk2");
 
-  return { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG };
+  return { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1, walk2 };
 }
 
 export function getInputModalDom() {
@@ -44,8 +46,10 @@ export function getRangeModalDom() {
   const last = container.querySelector("#lastFocusBtn");
   const open = container.querySelector("#open");
   const close = container.querySelector("#close");
+  const walk1 = container.querySelector("#walk1");
+  const walk2 = container.querySelector("#walk2");
 
-  return { container, dialog, first, last, open, close };
+  return { container, dialog, first, last, open, close, walk1, walk2 };
 }
 
 export function getCoverModalDom() {

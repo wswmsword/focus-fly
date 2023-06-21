@@ -2,7 +2,7 @@ import focusBagel from '../index.js';
 
 export function initBagel(container, dialog, first, last, open, close) {
 
-  focusBagel(dialog, [first, last], {
+  return focusBagel(dialog, [first, last], {
     entry: {
       node: open,
     },
@@ -175,5 +175,72 @@ export function initBagel_15(container, dialog, first, last, open, close) {
       node: close,
     },
     cover: true,
+  });
+}
+
+export function initBagel_16(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+      target: ({ list }) => list[1],
+    },
+    exit: {
+      node: focusF,
+    }
+  });
+}
+
+export function initBagel_17(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+      target: "#focusB",
+    },
+    exit: {
+      node: focusF,
+    }
+  });
+}
+
+export function initBagel_18(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+      type: "keydown",
+      key: e => e.key === "Space",
+    },
+    exit: {
+      node: focusF,
+    }
+  });
+}
+
+export function initBagel_19(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: focusF,
+      type: "focus",
+    }
+  });
+}
+
+export function initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: focusF,
+    },
+    correctionTarget: ({ list }) => list[3],
+    removeListenersEachExit: false,
   });
 }

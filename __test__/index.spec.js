@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20 } from "./bagels.js";
 
 describe("focus-bagel", function() {
 
@@ -386,6 +386,52 @@ describe("focus-bagel", function() {
     expect(first).toHaveFocus();
   });
 
+  // 通过 Return.addForward 添加转发，可以转发焦点
+  it("should forward focus by Return.addForward", async function() {
+    const { container, dialog, first, last, open, close, walk2, walk1 } = getRangeModalDom();
+    const bagel = initBagel(container, dialog, first, last, open, close);
+    bagel.addForward("f.f", {
+      node: dialog,
+      key: e => e.key === "Tab",
+      target: walk2,
+    });
+
+    await user.tab();
+    expect(open).toHaveFocus();
+    await user.tab();
+    expect(walk1).toHaveFocus();
+    await user.tab();
+    expect(dialog).toHaveFocus();
+    await user.tab();
+    expect(walk2).toHaveFocus();
+  });
+
+  // 移除转发
+  it("should remove forward by Return.removeForward", async function() {
+    const { container, dialog, first, last, open, close, walk2, walk1 } = getRangeModalDom();
+    const bagel = initBagel(container, dialog, first, last, open, close);
+    bagel.addForward("f.f", {
+      node: dialog,
+      key: e => e.key === "Tab",
+      target: walk2,
+    });
+    await user.tab();await user.tab();await user.tab();
+    bagel.removeForward("f.f");
+    await user.tab();
+    expect(first).toHaveFocus();
+  });
+
+  // 通过 correctionTarget 矫正从非入口进入列表的焦点
+  it("should correct focus by correctionTarget", async function() {
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+    initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(walk2);
+    expect(walk2).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(focusD).toHaveFocus();
+  });
+
 });
 
 // 开启封面
@@ -452,5 +498,69 @@ describe("focus-no-jutsu & cover", function() {
     expect(last).toHaveFocus();
     await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();
     expect(first).toHaveFocus();
+  });
+});
+
+describe("options", function() {
+  describe("entry", function() {
+    // 入口的目标是一个函数
+    it("function target", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_16(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      expect(focusB).toHaveFocus();
+    });
+
+    // 入口的目标是选择器字符串
+    it("selector string target", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_17(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      expect(focusB).toHaveFocus();
+    });
+
+    // 通过按下按键作为入口，进入列表
+    it("keydown type", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_18(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.tab();
+      expect(open).toHaveFocus();
+      await user.keyboard("{Space}");
+      expect(focusA).toHaveFocus();
+    });
+  });
+
+  describe("exit", function() {
+    // 通过聚焦作为出口，退出列表
+    it("focus type", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_19(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      await user.tab();await user.tab();await user.tab();await user.tab();
+      expect(focusE).toHaveFocus();
+      await user.tab();
+      expect(open).toHaveFocus();
+    });
+  });
+
+  describe("Return.addForward", function() {
+    // 使用函数作为转发的入参
+    it("function", async function() {
+      const { container, dialog, first, last, open, close } = getRangeModalDom();
+      const bagel = initBagel(container, dialog, first, last, open, close);
+      bagel.addForward("f.f", ({tail}) => {
+        return {
+          node: dialog,
+          key: e => e.key === "Tab",
+          target: tail,
+        }
+      });
+      await user.tab();await user.tab();await user.tab();await user.tab();
+      expect(last).toHaveFocus();
+    });
   });
 });
