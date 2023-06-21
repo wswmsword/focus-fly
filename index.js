@@ -410,36 +410,50 @@ const focusBagel = (...props) => {
 
   const Return = {
     /** 调用形式的入口 */
-    enter() {
+    enter(entry) {
       _trigger = _trigger || getActiveElement();
 
-      let invokedByEntry = false;
+      if (entry) {
+        const { on, target, delay } = entry;
+        entryHandler({ fromInvoke: true }, on, target, delay);
+      } else {
+        let invokedByEntry = false;
+        for (const entry of entries) {
+          const { on, type, node, target, delay } = entry;
+          const invokeType = "invoke";
 
-      for (let entry of entries) {
-        const { on, type, node, target, delay } = entry;
-        const invokeType = "invoke";
-
-        if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
-          entryHandler({ fromInvoke: true }, on, target, delay);
-          invokedByEntry = true;
+          if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
+            entryHandler({ fromInvoke: true }, on, target, delay);
+            break;
+          }
+        }
+        if (!invokedByEntry) entryHandler({ fromInvoke: true });
+      }
+    },
+    /** 调用形式的出口 */
+    exit(exit) {
+      if (exit) {
+        const { on, target: originTarget } = exit;
+        const target = element(originTarget);
+        toExit(target, on);
+      } else {
+        for (const exit of exits_outer) {
+          const { on, type, target: originTarget } = exit;
+          const target = element(originTarget);
+          const invokeType = "invoke";
+  
+          if (type?.some(type => type == null || type === false || type === invokeType)) {
+            toExit(target, on);
+            break;
+          }
         }
       }
 
-      if (!invokedByEntry) entryHandler({ fromInvoke: true });
-    },
-    /** 调用形式的出口 */
-    exit() {
-      for (const exit of exits_outer) {
-        let { on, type, target } = exit;
-        target = element(target);
-        const invokeType = "invoke";
-
-        if (type?.some(type => type == null || type === false || type === invokeType)) {
-          if (target) {
-            return exitListWithTarget_outer?.({ fromInvoke: true }, on, target);
-          } else {
-            return exitListWithoutTarget_outer?.({ fromInvoke: true }, on, target);
-          }
+      function toExit(target, on) {
+        if (target) {
+          return exitListWithTarget_outer?.({ fromInvoke: true }, on, target);
+        } else {
+          return exitListWithoutTarget_outer?.({ fromInvoke: true }, on, target);
         }
       }
     },
