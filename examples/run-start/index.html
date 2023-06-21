@@ -77,30 +77,36 @@
 const mask = document.getElementById("dialog_mask");
 const entry = document.getElementById("open");
 
-const bagel = focusBagel(dialog, ["#firstFocusBtn", "#close"], {
+// 6～18 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内移动的范围
+focusBagel(dialog, ["#firstFocusBtn", "#close"], { // L:6
   loop: false,
   entry: {
     node: entry,
     on: openDialog,
   },
   exit: {
-    node: ["#close", "#firstFocusBtn", "#confirm", "#dialog_mask"],
+    node: ["#close", "#firstFocusBtn", "#confirm"],
     on: closeDialog,
+    type: ["click", "outlist"]
   },
   onEscape: true,
-});
+}); // L:18
 
+// 下面的两个函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
+
+/** 打开弹窗，设置打开样式，设置 ARIA */
 function openDialog() {
   dialog.classList.add("openedDialog");
   dialog.classList.remove("closedDialog");
-  dialog_mask.classList.remove("closed_mask");
+  mask.classList.remove("closed_mask");
   entry.ariaExpanded = true;
 }
 
+/** 关闭弹窗，设置关闭样式，设置 ARIA */
 function closeDialog() {
   dialog.classList.remove("openedDialog");
   dialog.classList.add("closedDialog");
-  dialog_mask.classList.add("closed_mask");
+  mask.classList.add("closed_mask");
   entry.ariaExpanded = false;
 }</code>
         </pre>
@@ -139,19 +145,12 @@ function closeDialog() {
         <summary id="tags_code">查看源码。</summary>
 
         <pre>          
-<code>const tabs = document.getElementById("tab_list");
+<code>const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
 
-const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
-const tabsBagel = focusBagel(tabs, tabList, {
-  onClick: onFocus,
-  forward: {
-    key: e => e.key === "ArrowRight",
-    on: onFocus
-  },
-  backward: {
-    key: e => e.key === "ArrowLeft",
-    on: onFocus
-  },
+// 4～26 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+focusBagel("#tab_list", tabList, { // L:4
+  next: e => e.key === "ArrowRight",
+  prev: e => e.key === "ArrowLeft",
   exit: [{
     key: e => e.key === "Tab" && !e.shiftKey,
     target: "#tags_code",
@@ -170,13 +169,17 @@ const tabsBagel = focusBagel(tabs, tabList, {
   }],
   initialActive: 1,
   removeListenersEachExit: false,
-});
+  onMove,
+}); // L:26
 
-function onFocus({ prev, cur, prevI, curI }) {
-  if (curI === prevI) return;
-  prev.setAttribute("aria-selected", "false");
+// 下面的函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
+
+/** 进行样式修改，当焦点移动时，本次聚焦添加样式，上一次聚焦移除样式，更新 ARIA */
+function onMove({ prev, cur, prevI, curI }) {
+  if (curI === prevI || curI === -1) return;
+  (prev ?? document.getElementById("tab_1")).setAttribute("aria-selected", "false");
   cur.setAttribute("aria-selected", "true");
-  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1));
+  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1)) || document.getElementById("tabpanel_1");
   const curPanel = document.getElementById("tabpanel_" + (curI + 1));
   prevPanel.classList.add('is-hidden');
   curPanel.classList.remove('is-hidden');
@@ -365,10 +368,8 @@ function onFocus({ prev, cur, prevI, curI }) {
         <summary>查看源码。</summary>
         <pre>
 <code>const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
-
-let lastSong = null;
-
-const playerBagel = focusBagel("#songs_wrapper", songs, {
+// 3～31 行为播放列表的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+const playerBagel = focusBagel("#songs_wrapper", songs, { // L:3
   next: e => e.key === "ArrowDown",
   prev: e => e.key === "ArrowUp",
   exit: [{
@@ -383,13 +384,7 @@ const playerBagel = focusBagel("#songs_wrapper", songs, {
     key: (e, active) => (e.key === "Tab" && !e.shiftKey && active > -1) || e.key === "ArrowDown" || e.key === "ArrowUp",
     type: "keydown",
   },
-  onMove({ cur, prev, curI }) {
-    prev?.classList.remove("focused");
-    cur?.classList.add("focused");
-
-    lastSong?.removeListeners();
-    if (curI > -1) initSongBagel(curI);
-  },
+  onMove: onMovePlayer,
   correctionTarget({ lastI, last }) {
     if (lastI === -1)
       return "#grid_wrapper";
@@ -402,25 +397,54 @@ playerBagel.addForward("grid", {
   node: "#grid_wrapper",
   key: (e, active) => (e.key === "Tab" && !e.shiftKey && active === -1),
   target: "#more_from",
-});
+}); // L:31
 
-function initSongBagel(curI) {
+/** 一首歌曲最后的聚焦焦点的序号 */
+let songLastActiveIdx = 0;
+/** 管理第 curI + 1 首歌曲的焦点 */
+function initSongBagel(curI, lastActive) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
-  lastSong = focusBagel(`#song_${idx}`, list, {
-    entry: {
+  // 40～62 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+  return focusBagel(`#song_${idx}`, list, { // L: 40
+    entry: [{
+      node: `#song_${idx}`,
+      type: "focus",
+      target: ({ list }) => list[lastActive],
+    }, {
       node: `#song_${idx}`,
       key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
       type: "keydown",
-    },
+    }, {
+      node: `#song_${idx}`,
+      type: "click",
+      target: false,
+    }],
     next: e => e.key === "ArrowRight",
     prev: e => e.key === "ArrowLeft",
     exit: {
       type: "outlist",
       target: false,
     },
+    initialActive: songLastActiveIdx,
     correctionTarget: false,
-  });
+  }); // L:62
+}
+
+let lastSong = null;
+
+/** 焦点在播放列表内移动时的样式变化 */
+function onMovePlayer({ cur, prev, curI }) {
+  prev?.classList.remove("focused");
+  cur?.classList.add("focused");
+
+  if (lastSong != null) {
+    songLastActiveIdx = lastSong.i() === -1 ? 0 : lastSong.i();
+  }
+  lastSong?.removeListeners(); // 移除这首歌曲和焦点有关的事件
+  if (curI > -1) {
+    lastSong = initSongBagel(curI, songLastActiveIdx); // 对这首歌的焦点进行管理
+  }
 }</code>
       </pre>
       </details>
@@ -443,6 +467,8 @@ function initSongBagel(curI) {
     // focusBagel(["#l1", "#l9"], {
     //   cover: true,
     //   onEscape: true,
+    //   entry: { node: "#t1" },
+    //   exit: {node: "#l9"}
     // })
 
   </script>
