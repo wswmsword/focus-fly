@@ -408,7 +408,7 @@ const focusBagel = (...props) => {
     }
   }
 
-  return {
+  const Return = {
     /** 调用形式的入口 */
     enter() {
       _trigger = _trigger || getActiveElement();
@@ -501,6 +501,8 @@ const focusBagel = (...props) => {
     /** 当前聚焦的列表单项序号 */
     i: () => activeIndex,
   };
+
+  return Return;
 
   async function entryHandler(e, onEnter, target, delay) {
 
