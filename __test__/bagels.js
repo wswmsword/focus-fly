@@ -244,3 +244,50 @@ export function initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focus
     removeListenersEachExit: false,
   });
 }
+
+export function initBagel_21(container, dialog, first, last, open, close, walk2) {
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: walk2,
+    }
+  });
+}
+
+export function initBagel_22(container, dialog, first, last, open, close) {
+  return focusBagel(dialog, [first, last], {
+    manual: true,
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close
+    }
+  });
+}
+
+export function initBagel_23(dialog, open, focusA, focusB, focusC) {
+  return focusBagel(dialog, [focusA, focusB, focusC], {
+    sequence: true,
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: focusC,
+    },
+  });
+}
+
+export function initBagel_24(container, dialog, first, last, open, close) {
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close,
+      target: false,
+    }
+  });
+}

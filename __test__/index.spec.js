@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24 } from "./bagels.js";
 
 describe("focus-bagel", function() {
 
@@ -432,10 +432,59 @@ describe("focus-bagel", function() {
     expect(focusD).toHaveFocus();
   });
 
+  // 手动添加入口
+  it("should add entry manually", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    const bagel = initBagel_22(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(open).toHaveFocus();
+    bagel.addEntryListeners();
+    await user.click(open);
+    expect(first).toHaveFocus();
+  });
+
+  // 手动添加列表相关监听事件
+  it("should add list manually", async function() {
+    const { container, dialog, first, last, open, close, walk1 } = getRangeModalDom();
+    const bagel = initBagel_22(container, dialog, first, last, open, close);
+
+    bagel.addEntryListeners();
+    await user.click(open);
+    expect(first).toHaveFocus();
+    await user.tab({ shift: true });await user.tab({ shift: true });
+    expect(walk1).toHaveFocus();
+
+    await bagel.exit({});
+    expect(open).toHaveFocus();
+    await user.click(open);
+    expect(first).toHaveFocus();
+
+    bagel.addListRelatedListeners();
+    await user.tab({ shift: true });await user.tab({ shift: true });
+    expect(close).toHaveFocus();
+  });
+
+  it("should updateList dynamically", async function() {
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+    const bagel = initBagel_23(dialog, open, focusA, focusB, focusC);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(focusC).toHaveFocus();
+
+    bagel.updateList([focusA, focusB, focusC, focusD, focusE, focusF, focusG]);
+    await user.tab();
+    expect(focusD).toHaveFocus();
+    await user.tab();await user.tab();await user.tab();await user.tab();
+    expect(focusA).toHaveFocus();
+  });
+
 });
 
 // 开启封面
-describe("focus-no-jutsu & cover", function() {
+describe("cover", function() {
 
   // 点击入口后聚焦封面
   it("should focus cover after clicking entry", async function() {
@@ -501,6 +550,7 @@ describe("focus-no-jutsu & cover", function() {
   });
 });
 
+// 选项参数
 describe("options", function() {
   describe("entry", function() {
     // 入口的目标是一个函数
@@ -545,9 +595,53 @@ describe("options", function() {
       await user.tab();
       expect(open).toHaveFocus();
     });
+
+    // 设置列表外的出口
+    it("wild node that out of list", async function() {
+      const { container, dialog, first, last, open, close, walk2 } = getRangeModalDom();
+      initBagel_21(container, dialog, first, last, open, close, walk2);
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      await user.click(walk2);
+      expect(open).toHaveFocus();
+    });
+
+    // target 显式设为 false，焦点则不回到入口，不改变焦点
+    it("should not change focus when the target is false", async function() {
+      const { container, dialog, first, last, open, close, walk2 } = getRangeModalDom();
+      initBagel_24(container, dialog, first, last, open, close);
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      await user.click(close);
+      expect(close).toHaveFocus();
+      await user.tab();await user.tab();
+      expect(walk2).toHaveFocus();
+    });
   });
 
-  describe("Return.addForward", function() {
+});
+
+// 函数返回值
+describe("Returns", function() {
+
+  // 进入列表
+  describe("enter", function() {
+
+    it("passing a value", async function() {
+      const { container, dialog, first, last, open, close } = getRangeModalDom();
+      const bagel = initBagel_2(container, dialog, first, last, open, close);
+      expect(document.body).toHaveFocus();
+
+      await bagel.enter({});
+      expect(first).toHaveFocus();
+    });
+  });
+
+  // 添加转发
+  describe("addForward", function() {
+
     // 使用函数作为转发的入参
     it("function", async function() {
       const { container, dialog, first, last, open, close } = getRangeModalDom();
