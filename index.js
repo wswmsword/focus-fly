@@ -304,7 +304,7 @@ const focusBagel = (...props) => {
     removeListenersEachExit = true,
     /** 每次进入列表是否移除入口事件 */
     removeListenersEachEnter,
-    /** 手动添加监听事件，入口、列表、出口的监听事件 */
+    /** 手动添加和移除监听事件，入口、列表、出口的监听事件，`removeListenersEachExit` 和 `removeListenersEachEnter` 将失效 */
     manual,
     /** 用于内部调试 */
     demo = false,
@@ -457,6 +457,14 @@ const focusBagel = (...props) => {
     /** 移除所有的监听事件 */
     removeListeners() {
       listListeners.removeListeners();
+      entryListeners.removeListeners();
+    },
+    /** 移除列表相关的事件 */
+    removeListRelatedListeners() {
+      listListeners.removeListeners();
+    },
+    /** 移除入口事件 */
+    removeEntryListeners() {
       entryListeners.removeListeners();
     },
     /** 添加入口的监听事件 */
@@ -956,7 +964,7 @@ const focusBagel = (...props) => {
       // 如果是默认的，没有定义出口的封面，则不移除事件
       if (isDefaultExitCover) return;
 
-      if (removeListenersEachExit) {
+      if (removeListenersEachExit && !manual) {
         listListeners.removeListeners();
       }
     }
@@ -986,14 +994,14 @@ const focusBagel = (...props) => {
         if (key?.(e, activeIndex)) {
           e.preventDefault();
           entryHandler(e, on, target, delay);
-          if (removeListenersEachEnter)
+          if (removeListenersEachEnter && !manual)
             entryListeners.removeListeners();
         }
       }
     
       function entryNotKeyHandler(e) {
         entryHandler(e, on, target, delay);
-        if (removeListenersEachEnter)
+        if (removeListenersEachEnter && !manual)
           entryListeners.removeListeners();
       }
     }
