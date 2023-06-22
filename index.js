@@ -242,15 +242,12 @@ class KeyForwardCache {
     return this.cache.has(id);
   }
   push(id, node, handler) {
-    if (this.cache.has(id)) return;
+    if (this.has(id)) return;
     node.addEventListener("keydown", handler);
     this.cache.set(id, {
       node,
       handler,
     })
-  }
-  clean() {
-    this.cache = new Map();
   }
   remove(id) {
     const ids = [].concat(id);
