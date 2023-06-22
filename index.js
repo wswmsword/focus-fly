@@ -86,12 +86,12 @@ const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, cover
 };
 
 /** 获取关键节点 */
-const getKeyNodes = function(root, list, cover) {
+const getKeyNodes = function(root, list, cover, coverIsRoot) {
   const _list = list.map(item => element(item)).filter(item => item != null);
   const head = _list[0];
   const tail = _list.slice(-1)[0];
   const _root = element(root) ?? findLowestCommonAncestorNode(head, tail);
-  const _cover = cover === true ? _root : element(cover);
+  const _cover = coverIsRoot ? _root : element(cover);
 
   return {
     rootNode: _root,
@@ -112,8 +112,41 @@ const nodesReducer = function(acc, cur) {
   return acc.concat(nodes);
 };
 
+/** 获取分割的出口 */
+const splitExits = function(exits, root) {
+  /** 生效的节点是否在根元素内部（列表中） */
+  const isInnerRoot = node => (node != null && root.contains(element(node))) || node == null;
+
+  const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
+    let [key, click, focus, key_wild, click_wild, focus_wild, outList] = acc;
+    const includeType = type => e.type?.includes(type);
+    if (isInnerRoot(e.node)) {
+      if (includeType("keydown")) key = key.concat(e);
+      if (includeType("click")) click = click.concat(e);
+      if (includeType("focus")) focus = focus.concat(e);
+      if (includeType("outlist")) outList = outList.concat(e);
+    } else {
+      if (includeType("keydown")) key_wild = key_wild.concat(e);
+      if (includeType("click")) click_wild = click_wild.concat(e);
+      if (includeType("focus")) focus_wild = focus_wild.concat(e);
+      if (includeType("outlist")) outList = outList.concat(e);
+    }
+    return [key, click, focus, key_wild, click_wild, focus_wild, outList];
+  }, new Array(7).fill([]));
+
+  const hasClickExits = clickExits.length > 0;
+  const hasFocusExits = focusExits.length > 0;
+  const hasKeyExits = keyExits.length > 0;
+  
+  return {
+    keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
+    keyExits_wild, clickExits_wild, focusExits_wild,
+    outListExits,
+  };
+}
+
 /** 获取（生成）出口 */
-const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
+const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
 
   let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
     ...e,
@@ -131,42 +164,7 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, root) {
   } : null;
   const exits = [escapeExit].concat(tempExits).filter(e => e != null);
 
-  return {
-    exits,
-    ...splitExits(),
-  }
-
-  function splitExits() {
-    /** 生效的节点是否在根元素内部（列表中） */
-    const isInnerRoot = node => (node != null && root.contains(element(node))) || node == null;
-  
-    const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
-      let [key, click, focus, key_wild, click_wild, focus_wild, outList] = acc;
-      const includeType = type => e.type?.includes(type);
-      if (isInnerRoot(e.node)) {
-        if (includeType("keydown")) key = key.concat(e);
-        if (includeType("click")) click = click.concat(e);
-        if (includeType("focus")) focus = focus.concat(e);
-        if (includeType("outlist")) outList = outList.concat(e);
-      } else {
-        if (includeType("keydown")) key_wild = key_wild.concat(e);
-        if (includeType("click")) click_wild = click_wild.concat(e);
-        if (includeType("focus")) focus_wild = focus_wild.concat(e);
-        if (includeType("outlist")) outList = outList.concat(e);
-      }
-      return [key, click, focus, key_wild, click_wild, focus_wild, outList];
-    }, new Array(7).fill([]));
-
-    const hasClickExits = clickExits.length > 0;
-    const hasFocusExits = focusExits.length > 0;
-    const hasKeyExits = keyExits.length > 0;
-    
-    return {
-      keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
-      keyExits_wild, clickExits_wild, focusExits_wild,
-      outListExits,
-    };
-  }
+  return exits;
 };
 
 /** 获取聚焦或失焦时延迟的类型 */
@@ -258,10 +256,17 @@ class KeyForwardCache {
 /** 保存列表数据 */
 class TabList {
   data = [];
+  head = null;
+  tail = null;
   update(list) {
     this.data.splice(0, this.data.length);
     Array.prototype.push.apply(this.data, list);
+    this.head = list[0];
+    this.tail = list.at(-1);
   };
+  isEmpty() {
+    return this.data.length === 0;
+  }
 }
 
 const focusBagel = (...props) => {
@@ -313,14 +318,17 @@ const focusBagel = (...props) => {
 
   const {
     /** 封面节点 */
-    node: coverNode = rootNode || true,
+    node: coverNode,
     enterKey: coverEnterKey,
     onEnter: onEnterCover,
     exit: exitCover,
-  } = isObj(cover) ? cover : cover === true ? {} : { node: !!cover ? rootNode : null };
+  } = isObj(cover) ? cover : {};
+
+  /** 封面即根元素 */
+  const coverIsRoot = cover === true || coverNode === true;
 
   /** 是否已经打开封面选项 */
-  const enabledCover = !!coverNode;
+  const enabledCover = coverIsRoot || !!coverNode;
 
   /** 列表 */
   const list = new TabList();
@@ -380,11 +388,6 @@ const focusBagel = (...props) => {
   /** 按键转发 */
   const keyForwards = new KeyForwardCache();
 
-  // 用于 return.exit
-  let exitListWithTarget_outer = null;
-  let exitListWithoutTarget_outer = null;
-  let exits_outer = null;
-
   if (!manual) { // 如果不是手动添加事件，则注册入口、列表相关（封面、列表、出口）的事件
     // 入口点击事件
     addEntryListeners();
@@ -398,7 +401,7 @@ const focusBagel = (...props) => {
         rootNode: _rootNode,
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
-      } = getKeyNodes(rootNode, subNodes, coverNode);
+      } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       list.update(_subNodes);
 
       loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
@@ -428,30 +431,36 @@ const focusBagel = (...props) => {
       }
     },
     /** 调用形式的出口 */
-    exit(exit) {
-      if (exit) {
-        const { on, target: originTarget } = exit;
+    async exit(tempExit) {
+
+      const {
+        subNodes: _list,
+        coverNode: cover,
+      } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
+
+      if (tempExit) {
+        const { on, target: originTarget } = tempExit;
         const target = element(originTarget);
-        toExit(target, on);
+        await toExit(target, on);
       } else {
-        for (const exit of exits_outer) {
+        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
+        for (const exit of exits) {
           const { on, type, target: originTarget } = exit;
           const target = element(originTarget);
           const invokeType = "invoke";
   
           if (type?.some(type => type == null || type === false || type === invokeType)) {
-            toExit(target, on);
+            await toExit(target, on);
             break;
           }
         }
       }
 
-      function toExit(target, on) {
-        if (target) {
-          return exitListWithTarget_outer?.({ fromInvoke: true }, on, target);
-        } else {
-          return exitListWithoutTarget_outer?.({ fromInvoke: true }, on, target);
-        }
+      async function toExit(target, on) {
+
+        if (list.isEmpty()) list.update(_list);
+
+        exitHandler({ fromInvoke: true }, on, target, false, cover, list.data);
       }
     },
     /** 移除所有的监听事件 */
@@ -476,12 +485,12 @@ const focusBagel = (...props) => {
 
       const {
         rootNode: _rootNode,
-        subNodes: _subNodes, head, tail,
+        subNodes: _subNodes,
         coverNode: _coverNode,
-      } = getKeyNodes(rootNode, subNodes, coverNode);
-      list.update(_subNodes);
+      } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
+      if (list.isEmpty()) list.update(_subNodes);
 
-      loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
+      loadListRelatedListeners(_rootNode, list.data, list.head, list.tail, _coverNode);
     },
     /** 添加转发 */
     addForward(id, forward) {
@@ -491,7 +500,7 @@ const focusBagel = (...props) => {
           rootNode: root,
           subNodes: list, head, tail,
           coverNode: cover,
-        } = getKeyNodes(rootNode, subNodes, coverNode);
+        } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
 
         opts = forward({ root, list, head, tail, cover, curI: activeIndex, prevI: prevActive });
       }
@@ -523,6 +532,7 @@ const focusBagel = (...props) => {
 
   return Return;
 
+  /** 入口 handler */
   async function entryHandler(e, onEnter, target, delay) {
 
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
@@ -540,10 +550,11 @@ const focusBagel = (...props) => {
         rootNode: _rootNode,
         subNodes: _subNodes, head, tail,
         coverNode: _coverNode,
-      } = getKeyNodes(rootNode, subNodes, coverNode);
+      } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       list.update(_subNodes);
 
-      loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
+      if (!manual)
+        loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
       if (target !== false)
         focusTarget(_coverNode, _subNodes, _rootNode);
     }
@@ -559,6 +570,77 @@ const focusBagel = (...props) => {
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
       tickFocus(gotTarget);
+    }
+  }
+
+  /** 出口 handler */
+  async function exitHandler(e, on, target, delay, cover, list) {
+
+    if (target) return exitListWithTarget();
+    else return exitListWithoutTarget();
+
+    /** 退出列表，有 target */
+    async function exitListWithTarget() {
+
+      if (!trappedList) return;
+
+      trappedList = false;
+
+      e.preventDefault(); // 阻止 tab 等其它按键的默认行为
+
+      await on?.(e);
+
+      delay = delay ?? delayToBlur;
+      const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
+      if (isImmediate) focusThenRemoveListeners();
+
+      function focusThenRemoveListeners() {
+        focus(target);
+        onMove?.({ e, prev: list[activeIndex], cur: target, prevI: activeIndex, curI: -1 });
+        if (!manual) {
+          if (target !== cover)
+            removeListRelatedListeners();
+          addEntryListeners();
+        }
+      }
+    }
+
+    /** 退出列表，无 target */
+    async function exitListWithoutTarget() {
+
+      if (!trappedList) return;
+
+      trappedList = false;
+      e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
+      if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+        await on?.(e);
+        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+        if (!manual) {
+          removeListRelatedListeners();
+          addEntryListeners();
+        }
+        return ;
+      }
+      if (enabledCover) {
+        await on?.(e);
+        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+        focus(cover);
+      } else {
+        await on?.(e);
+
+        delay = delay ?? delayToBlur;
+        const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
+        if (isImmediate) focusThenRemoveListeners();
+
+        function focusThenRemoveListeners() {
+          _trigger && focus(_trigger);
+          onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+          if (!manual) {
+            removeListRelatedListeners();
+            addEntryListeners();
+          }
+        }
+      }
     }
   }
 
@@ -583,11 +665,12 @@ const focusBagel = (...props) => {
       focusNextListItemByRange(_subNodes, isClamp, onNext, onPrev, _rootNode, _coverNode, isTrappedList);
 
     /** 出口们，列表的出口们，subNodes 的出口们 */
+    const exits = getExits(exit, onEscape, enabledCover, _coverNode, _trigger);
     const {
-      exits, keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
+      keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
       keyExits_wild, clickExits_wild, focusExits_wild,
       outListExits,
-    } = getExits(exit, onEscape, enabledCover, _coverNode, _trigger, _rootNode);
+    } = splitExits(exits, _rootNode);
 
     /** 非跟节点内的，是跟节点之外的出口 */
     const keyListExitHandlers_wild = keyExits_wild.map(exit => [element(exit?.node), keyListExitHandler_wild(exit)]);
@@ -596,11 +679,6 @@ const focusBagel = (...props) => {
 
     // 添加除 trigger 以外其它和焦点相关的事件监听器
     addListRelatedListeners();
-
-    // 用以 return.exit
-    exitListWithTarget_outer = exitListWithTarget;
-    exitListWithoutTarget_outer = exitListWithoutTarget;
-    exits_outer = exits;
 
     let isMouseDown = false;
 
@@ -748,8 +826,7 @@ const focusBagel = (...props) => {
       for (const exit of outListExits) {
         const { on, target: origin_target, delay } = exit;
         const target = element(origin_target);
-        if (target) exitListWithTarget(e, on, target, delay);
-        else exitListWithoutTarget(e, on, target, delay);
+        exitHandler(e, on, target, delay, _coverNode, _subNodes);
         break;
       }
     }
@@ -762,8 +839,7 @@ const focusBagel = (...props) => {
       if (
         (node != null && !node.contains(e.target)) ||
         node == null) return false;
-      if (target) exitListWithTarget(e, on, target, delay);
-      else exitListWithoutTarget(e, on, target, delay);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes);
       return true;
     }
 
@@ -783,8 +859,7 @@ const focusBagel = (...props) => {
       if (
         (node != null && e.target !== node) ||
         node == null) return false;
-      if (target) exitListWithTarget(e, on, target, delay);
-      else exitListWithoutTarget(e, on, target, delay);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes);
       return true;
     }
 
@@ -803,8 +878,7 @@ const focusBagel = (...props) => {
       const target = element(origin_target);
       if (node != null && e.target !== node) return false;
       if (key?.(e, activeIndex)) {
-        if (target) exitListWithTarget(e, on, target, delay);
-        else exitListWithoutTarget(e, on, target, delay);
+        exitHandler(e, on, target, delay, _coverNode, _subNodes);
         e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
         return true;
       }
@@ -819,64 +893,6 @@ const focusBagel = (...props) => {
       for (const exit of keyExits) {
         const isOK = keyExitHandler(e, exit);
         if (isOK) break;
-      }
-    }
-
-    /** 退出列表，有 target */
-    async function exitListWithTarget(e, on, target, delay) {
-
-      if (!trappedList) return;
-
-      trappedList = false;
-
-      e.preventDefault(); // 阻止 tab 等其它按键的默认行为
-
-      await on?.(e);
-
-      delay = delay ?? delayToBlur;
-      const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
-      if (isImmediate) focusThenRemoveListeners();
-
-      function focusThenRemoveListeners() {
-        focus(target);
-        onMove?.({ e, prev: _subNodes[activeIndex], cur: target, prevI: activeIndex, curI: -1 });
-        if (target !== _coverNode)
-          removeListRelatedListeners();
-        addEntryListeners();
-      }
-    }
-
-    /** 退出列表，无 target */
-    async function exitListWithoutTarget(e, on, target, delay) {
-
-      if (!trappedList) return;
-
-      trappedList = false;
-      e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
-      if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-        await on?.(e);
-        onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
-        removeListRelatedListeners();
-        addEntryListeners();
-        return ;
-      }
-      if (enabledCover) {
-        await on?.(e);
-        onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
-        focus(_coverNode);
-      } else {
-        await on?.(e);
-
-        delay = delay ?? delayToBlur;
-        const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
-        if (isImmediate) focusThenRemoveListeners();
-
-        function focusThenRemoveListeners() {
-          _trigger && focus(_trigger);
-          onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
-          removeListRelatedListeners();
-          addEntryListeners();
-        }
       }
     }
 
@@ -957,17 +973,6 @@ const focusBagel = (...props) => {
       // flush
       listListeners.addListeners();
     };
-
-    /** 移除监听事件 */
-    function removeListRelatedListeners() {
-
-      // 如果是默认的，没有定义出口的封面，则不移除事件
-      if (isDefaultExitCover) return;
-
-      if (removeListenersEachExit && !manual) {
-        listListeners.removeListeners();
-      }
-    }
   }
 
   /** 添加入口事件 */
@@ -1008,6 +1013,17 @@ const focusBagel = (...props) => {
 
     // flush
     entryListeners.addListeners();
+  }
+
+  /** 移除监听事件 */
+  function removeListRelatedListeners() {
+
+    // 如果是默认的，没有定义出口的封面，则不移除事件
+    if (isDefaultExitCover) return;
+
+    if (removeListenersEachExit && !manual) {
+      listListeners.removeListeners();
+    }
   }
 };
 
