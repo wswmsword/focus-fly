@@ -676,6 +676,8 @@ const focusBagel = (...props) => {
     addListRelatedListeners();
 
     let isMouseDown = false;
+    /** 标记是否从封面进入列表，用于防止纠正列表焦点的误判，用于野生封面 */
+    let isEnterFromCover = false;
 
     /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
      |          LIST HANDLERS          |
@@ -769,7 +771,13 @@ const focusBagel = (...props) => {
 
     function focusTrapCoverHandler() { trappedCover = true; }
 
-    function blurTrapCoverHandler() { trappedCover = false; }
+    function blurTrapCoverHandler() {
+      if (isEnterFromCover) { // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
+        isEnterFromCover = false;
+        return;
+      }
+      trappedCover = false;
+    }
 
     /** 封面的键盘事件响应 */
     function keyCoverHandler(e) {
@@ -778,6 +786,7 @@ const focusBagel = (...props) => {
       // 入口
       if((coverEnterKey ?? isEnterEvent)(e) && !trappedList) {
         e.preventDefault();
+        isEnterFromCover = true;
         trappedList = true
         onEnterCover?.(e);
         activeIndex = activeIndex === -1 ? 0 : activeIndex;
