@@ -1,5 +1,6 @@
-import { objToStr, findLowestCommonAncestorNode } from "../utils.js";
+import { objToStr, findLowestCommonAncestorNode, tick } from "../utils.js";
 import render from "./helper/render.js";
+import { wait } from "./helper/utils.js";
 import { childs, descendants, nestedDescendants } from "./template-html/utils-html.js";
 
 
@@ -89,6 +90,9 @@ describe("findLowestCommonAncestorNode", function() {
     var parent = container.querySelector("#parent");
     var res = findLowestCommonAncestorNode(child1, child2);
     expect(res).toBe(parent);
+
+    res = findLowestCommonAncestorNode(child2, child1);
+    expect(res).toBe(parent);
   });
 
   it("should find common ancestor by descendants", function() {
@@ -107,6 +111,9 @@ describe("findLowestCommonAncestorNode", function() {
     var parent = child1;
     var res = findLowestCommonAncestorNode(child1, child2);
     expect(res).toBe(parent);
+
+    res = findLowestCommonAncestorNode(child2, child1);
+    expect(res).toBe(parent);
   });
 
   it("should not find parent by passing null", function() {
@@ -118,5 +125,16 @@ describe("findLowestCommonAncestorNode", function() {
 
     res = findLowestCommonAncestorNode();
     expect(res).toBe(null);
+  });
+
+});
+
+describe("tick", function() {
+  it("should invoke function in next tick", async function() {
+    var cur = 0;
+    tick(() => ++cur);
+    expect(cur).toBe(0);
+    await wait(4);
+    expect(cur).toBe(1);
   });
 });
