@@ -117,8 +117,8 @@ const splitExits = function(exits, root) {
   /** 生效的节点是否在根元素内部（列表中） */
   const isInnerRoot = node => (node != null && root.contains(element(node))) || node == null;
 
-  const [keyExits, clickExits, focusExits, keyExits_wild, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
-    let [key, click, focus, key_wild, click_wild, focus_wild, outList] = acc;
+  const [keyExits, clickExits, focusExits, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
+    let [key, click, focus, click_wild, focus_wild, outList] = acc;
     const includeType = type => e.type?.includes(type);
     if (isInnerRoot(e.node)) {
       if (includeType("keydown")) key = key.concat(e);
@@ -126,13 +126,12 @@ const splitExits = function(exits, root) {
       if (includeType("focus")) focus = focus.concat(e);
       if (includeType("outlist")) outList = outList.concat(e);
     } else {
-      if (includeType("keydown")) key_wild = key_wild.concat(e);
       if (includeType("click")) click_wild = click_wild.concat(e);
       if (includeType("focus")) focus_wild = focus_wild.concat(e);
       if (includeType("outlist")) outList = outList.concat(e);
     }
-    return [key, click, focus, key_wild, click_wild, focus_wild, outList];
-  }, new Array(7).fill([]));
+    return [key, click, focus, click_wild, focus_wild, outList];
+  }, new Array(6).fill([]));
 
   const hasClickExits = clickExits.length > 0;
   const hasFocusExits = focusExits.length > 0;
@@ -140,7 +139,7 @@ const splitExits = function(exits, root) {
   
   return {
     keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
-    keyExits_wild, clickExits_wild, focusExits_wild,
+    clickExits_wild, focusExits_wild,
     outListExits,
   };
 }
@@ -664,12 +663,11 @@ const focusBagel = (...props) => {
     const exits = getExits(exit, onEscape, enabledCover, _coverNode, _trigger);
     const {
       keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
-      keyExits_wild, clickExits_wild, focusExits_wild,
+      clickExits_wild, focusExits_wild,
       outListExits,
     } = splitExits(exits, _rootNode);
 
     /** 非跟节点内的，是跟节点之外的出口 */
-    const keyListExitHandlers_wild = keyExits_wild.map(exit => [element(exit?.node), keyListExitHandler_wild(exit)]);
     const clickListExitHandlers_wild = clickExits_wild.map(exit => [element(exit?.node), clickListExitHandler_wild(exit)]);
     const focusListExitHandlers_wild = focusExits_wild.map(exit => [element(exit?.node), focusListExitHandler_wild(exit)]);
 
@@ -900,14 +898,6 @@ const focusBagel = (...props) => {
       return function(e) { focusExitHandler(e, exit); }
     }
 
-    function keyListExitHandler_wild(exit) {
-      return function(e) {
-        if (e.target === _coverNode) return; // 被封面触发直接返回
-        if (disabledEsc && isEscapeEvent(e)) return;
-        keyExitHandler(e, exit);
-      }
-    }
-
     /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
      |             - END -             |
      |          EXIT HANDLERS          |
@@ -958,9 +948,6 @@ const focusBagel = (...props) => {
       });
       clickListExitHandlers_wild.forEach(([node, handler]) => {
         listListeners.push(node, "click", handler);
-      });
-      keyListExitHandlers_wild.forEach(([node, handler]) => {
-        listListeners.push(node, "keydown", handler);
       });
 
       // 封面的事件
