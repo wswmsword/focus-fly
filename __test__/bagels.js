@@ -291,3 +291,90 @@ export function initBagel_24(container, dialog, first, last, open, close) {
     }
   });
 }
+
+export function initBagel_25(container, dialog, first, last, open, close, walk2) {
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: walk2,
+      type: "focus",
+    }
+  });
+}
+
+export function initBagel_26(container, dialog, first, last, open, close) {
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      type: "outlist",
+    }
+  });
+}
+
+export function initBagel_27(container, dialog, first, last, open, close) {
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close,
+    },
+    delayToFocus() {
+      return new Promise(resolve => setTimeout(resolve, 100));
+    }
+  });
+}
+
+export function initBagel_28(container, dialog, first, last, open, close, walk1) {
+
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: [open, walk1],
+    },
+    exit: {
+      node: close,
+    },
+    // removeListenersEachExit: false,
+  });
+}
+
+export function initBagel_29(container, dialog, first, last, open, close) {
+
+  focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close,
+    },
+    onEscape: true,
+    cover: {
+      exit: {
+        key: e => e.key === 'c',
+      }
+    }
+  });
+}
+
+export function initBagel_30(container, dialog, first, last, open, close, walk2) {
+
+  focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+    },
+    exit: {
+      node: close,
+    },
+    onEscape: true,
+    cover: {
+      node: walk2,
+      exit: {
+        key: e => e.key === 'c',
+      }
+    }
+  });
+}

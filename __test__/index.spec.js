@@ -12,7 +12,8 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30 } from "./bagels.js";
+import { wait } from './helper/utils.js';
 
 describe("focus-bagel", function() {
 
@@ -261,8 +262,6 @@ describe("focus-bagel", function() {
     expect(getByText(container, "不二家棒棒糖")).toHaveFocus();
   });
 
-  // TODO: should handle delaied rootContainer and subItems
-
   // 通过设置序列，循环聚焦
   it("should loop focus by sequence", async function() {
     const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
@@ -481,6 +480,61 @@ describe("focus-bagel", function() {
     expect(focusA).toHaveFocus();
   });
 
+  // 延迟聚焦
+  it("should delay to focus list", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    initBagel_27(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(open).toHaveFocus();
+    await wait(30);
+    expect(open).toHaveFocus();
+    await wait(70);
+    expect(first).toHaveFocus();
+  });
+
+  // 移除所有事件
+  it("should remove all listeners by Return.removeListeners", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    const bagel = initBagel_28(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(first).toHaveFocus();
+    await user.click(close);
+    expect(open).toHaveFocus();
+
+    bagel.removeListeners();
+    await user.click(open);
+    expect(open).toHaveFocus();
+  });
+
+  // 移除列表相关事件
+  it("should remove list related listeners by Return.removeListRelatedListeners", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    const bagel = initBagel_28(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(first).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(last).toHaveFocus();
+    await user.tab();
+    expect(first).toHaveFocus();
+
+    bagel.removeListRelatedListeners();
+    await user.tab({ shift: true });
+    expect(dialog).toHaveFocus();
+  });
+
+  it("should remove entry by Return.removeEntryListeners", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    const bagel = initBagel_28(container, dialog, first, last, open, close);
+
+    bagel.removeEntryListeners();
+    await user.click(open);
+    expect(open).toHaveFocus();
+  });
+
 });
 
 // 开启封面
@@ -495,7 +549,7 @@ describe("cover", function() {
     expect(cover).toHaveFocus();
   });
 
-  // `cover: true`的配置，从封面按下 enter 进入列表
+  // `cover: true` 的配置，从封面按下 enter 进入列表
   it("should focus first focusable node after pressing enter at cover", async function() {
     const { container, dialog, first, last, open, close } = getCoverModalDom();
     initBagel_15(container, dialog, first, last, open, close);
@@ -548,10 +602,53 @@ describe("cover", function() {
     await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();
     expect(first).toHaveFocus();
   });
+
+  // 通过 exit 设置退出的方式
+  it("cover.exit", async function() {
+    const { container, dialog, first, last, open, close, cover, focusB } = getCoverModalDom();
+    initBagel_29(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(dialog).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(first).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(dialog).toHaveFocus();
+
+    await user.keyboard("{c}");
+    expect(open).toHaveFocus();
+  });
+
+  // 非列表内的封面
+  it("wild cover", async function() {
+    const { container, dialog, first, last, open, close, walk2 } = getCoverModalDom();
+    initBagel_30(container, dialog, first, last, open, close, walk2);
+
+    await user.click(open);
+    expect(walk2).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(first).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(walk2).toHaveFocus();
+    await user.keyboard("{c}");
+    expect(open).toHaveFocus();
+  });
+
+  // 纠正焦点，重新聚焦封面
+  it("correction", async function() {
+    const { container, dialog, first, last, open, close, walk2 } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    walk2.focus();
+    await user.tab({ shift: true });
+    expect(dialog).toHaveFocus();
+  });
+
 });
 
 // 选项参数
 describe("options", function() {
+
   describe("entry", function() {
     // 入口的目标是一个函数
     it("function target", async function() {
@@ -580,6 +677,22 @@ describe("options", function() {
       expect(open).toHaveFocus();
       await user.keyboard("{Space}");
       expect(focusA).toHaveFocus();
+    });
+
+    // node 数组
+    it("node array", async function() {
+      const { container, dialog, first, last, open, close, walk1 } = getRangeModalDom();
+      initBagel_28(container, dialog, first, last, open, close, walk1)
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      await user.click(close);
+      expect(open).toHaveFocus();
+
+      await user.click(walk1);
+      expect(first).toHaveFocus();
+      await user.click(close);
+      expect(open).toHaveFocus();
     });
   });
 
@@ -616,11 +729,57 @@ describe("options", function() {
       expect(first).toHaveFocus();
       await user.click(close);
       expect(close).toHaveFocus();
-      await user.tab();await user.tab();
+      await user.tab();await user.tab();await user.tab();
       expect(walk2).toHaveFocus();
+    });
+
+    // 聚焦触发野生出口
+    it("focus wild node", async function() {
+      const { container, dialog, first, last, open, close, walk2 } = getRangeModalDom();
+      initBagel_25(container, dialog, first, last, open, close, walk2);
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      walk2.focus();
+      expect(walk2).toHaveFocus();
+      await wait(4);
+      expect(open).toHaveFocus();
+    });
+
+    // 出口的类型是 outlist
+    it("outlist type", async function() {
+      const { container, dialog, first, last, open, close, walk2 } = getRangeModalDom();
+      initBagel_26(container, dialog, first, last, open, close);
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      walk2.focus();
+      await wait(4);
+      expect(open).toHaveFocus();
     });
   });
 
+});
+
+// 列表相关
+describe("list", function() {
+
+  // 焦点在根元素上时，可以通过 tab 聚焦列表子元素
+  it ("should focus range list when activeElement is root", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    initBagel(container, dialog, first, last, open, close)
+
+    await user.click(open);
+    expect(first).toHaveFocus();
+    await user.click(dialog);
+    expect(dialog).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(last).toHaveFocus();
+
+    await user.click(dialog);
+    await user.tab();
+    expect(first).toHaveFocus();
+  });
 });
 
 // 函数返回值
@@ -629,6 +788,7 @@ describe("Returns", function() {
   // 进入列表
   describe("enter", function() {
 
+    // 传入参数作为入口配置
     it("passing a value", async function() {
       const { container, dialog, first, last, open, close } = getRangeModalDom();
       const bagel = initBagel_2(container, dialog, first, last, open, close);

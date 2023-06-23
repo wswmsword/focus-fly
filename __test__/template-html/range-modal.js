@@ -20,6 +20,7 @@ export default `
     <button id="close">Close</button>
     <button id="lastFocusBtn">OK</button>
   </div>
+  <button id="walk3">走两步</button>
 </div>
 <button id="walk2">走两步</button>
 `;

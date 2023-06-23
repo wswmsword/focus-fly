@@ -48,8 +48,9 @@ export function getRangeModalDom() {
   const close = container.querySelector("#close");
   const walk1 = container.querySelector("#walk1");
   const walk2 = container.querySelector("#walk2");
+  const walk3 = container.querySelector("#walk3");
 
-  return { container, dialog, first, last, open, close, walk1, walk2 };
+  return { container, dialog, first, last, open, close, walk1, walk2, walk3 };
 }
 
 export function getCoverModalDom() {
@@ -69,6 +70,8 @@ export function getCoverModalDom() {
   const close = focusF;
   const focusG = container.querySelector("#focusG");
   const last = focusG;
+  const walk2 = container.querySelector("#walk2");
+  const walk1 = container.querySelector("#walk1");
 
-  return { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, cover, first, last, close };
+  return { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, cover, first, last, close, walk2, walk1 };
 }
