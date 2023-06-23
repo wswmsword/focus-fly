@@ -335,6 +335,7 @@ const focusBagel = (...props) => {
   /** 入口们 */
   const entries = [].concat(entry).filter(o => o != null).map(entry => ({
     ...entry,
+    delay: entry.delay ?? delayToFocus,
     type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
   })).reduce(nodesReducer, []);
   /** 是否是空入口 */
@@ -392,7 +393,7 @@ const focusBagel = (...props) => {
     addEntryListeners();
 
     // 如果有入口不需要延迟，则立即加载列表的监听事件
-    const hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(({ delay }) => !(delay ?? delayToFocus));
+    const hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(({ delay }) => !delay);
 
     if (hasImmediateEntry) {
 
@@ -539,7 +540,7 @@ const focusBagel = (...props) => {
 
     await onEnter?.(e);
 
-    const isImmediate = !(delay ?? delayToFocus);
+    const isImmediate = !delay;
     if (isImmediate) findNodesToLoadListenersAndFocus();
     else delayToProcess(delay, findNodesToLoadListenersAndFocus);
 
