@@ -323,11 +323,11 @@ const focusBagel = (...props) => {
     exit: exitCover,
   } = isObj(cover) ? cover : {};
 
-  /** 封面即根元素 */
-  const coverIsRoot = cover === true || coverNode === true;
-
   /** 是否已经打开封面选项 */
-  const enabledCover = coverIsRoot || !!coverNode;
+  const enabledCover = cover != null && cover !== false && coverNode !== false;
+
+  /** 封面即根元素 */
+  const coverIsRoot = enabledCover && (cover === true || coverNode === true || coverNode == null);
 
   /** 列表 */
   const list = new TabList();
