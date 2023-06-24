@@ -415,23 +415,21 @@ const focusBagel = (...props) => {
 
       if (entry) {
         const { on, target, delay } = entry;
-        entryHandler({ fromInvoke: true }, on, target, delay);
+        return entryHandler({ fromInvoke: true }, on, target, delay);
       } else {
-        let invokedByEntry = false;
         for (const entry of entries) {
           const { on, type, node, target, delay } = entry;
           const invokeType = "invoke";
 
           if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
-            entryHandler({ fromInvoke: true }, on, target, delay);
-            break;
+            return entryHandler({ fromInvoke: true }, on, target, delay);
           }
         }
-        if (!invokedByEntry) entryHandler({ fromInvoke: true });
+        return entryHandler({ fromInvoke: true });
       }
     },
     /** 调用形式的出口 */
-    async exit(tempExit) {
+    exit(tempExit) {
 
       const {
         subNodes: _list,
@@ -441,7 +439,7 @@ const focusBagel = (...props) => {
       if (tempExit) {
         const { on, target: originTarget } = tempExit;
         const target = element(originTarget);
-        await toExit(target, on);
+        return toExit(target, on);
       } else {
         const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
         for (const exit of exits) {
@@ -450,17 +448,16 @@ const focusBagel = (...props) => {
           const invokeType = "invoke";
   
           if (type?.some(type => type == null || type === false || type === invokeType)) {
-            await toExit(target, on);
-            break;
+            return toExit(target, on);
           }
         }
       }
 
-      async function toExit(target, on) {
+      function toExit(target, on) {
 
         if (list.isEmpty()) list.update(_list);
 
-        exitHandler({ fromInvoke: true }, on, target, false, cover, list.data);
+        return exitHandler({ fromInvoke: true }, on, target, false, cover, list.data);
       }
     },
     /** 移除所有的监听事件 */
