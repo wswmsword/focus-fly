@@ -147,11 +147,14 @@ const splitExits = function(exits, root) {
 /** 获取（生成）出口 */
 const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
 
-  let tempExits = [].concat(exit).filter(o => o != null).map(e => ({
-    ...e,
-    // undefined 表示用户没有主动设置
-    type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
-  })).reduce(nodesReducer, []);
+  let tempExits = [].concat(exit).filter(o => o != null)
+    .map(ele => isObj(ele) ? ele : { node: ele })
+    .map(e => ({
+      ...e,
+      // undefined 表示用户没有主动设置
+      type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
+    }))
+    .reduce(nodesReducer, []);
   let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
   /** 按下 esc 的出口 */
   const escapeExit = isFun(_onEscape) ? {
@@ -336,11 +339,14 @@ const focusBagel = (...props) => {
   const list = new TabList();
 
   /** 入口们 */
-  const entries = [].concat(entry).filter(o => o != null).map(entry => ({
-    ...entry,
-    delay: entry.delay ?? delayToFocus,
-    type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
-  })).reduce(nodesReducer, []);
+  const entries = [].concat(entry).filter(o => o != null)
+    .map(ele => isObj(ele) ? ele : { node: ele })
+    .map(entry => ({
+      ...entry,
+      delay: entry.delay ?? delayToFocus,
+      type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
+    }))
+    .reduce(nodesReducer, []);
   /** 是否是空入口 */
   const hasNoEntry = entries.length === 0;
 
