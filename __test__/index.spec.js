@@ -817,4 +817,27 @@ describe("Returns", function() {
       expect(last).toHaveFocus();
     });
   });
+
+  // activeIndex 相关，当前聚焦元素序列号相关
+  describe('i', function() {
+
+    it("should change activeIndex", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      const bagel = initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      var curI = bagel.i();
+      expect(curI).toBe(-1);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+      curI = bagel.i();
+      expect(curI).toBe(0);
+
+      bagel.i(3);
+      expect(focusD).toHaveFocus();
+
+      curI = bagel.i();
+      expect(curI).toBe(3);
+    });
+  });
 });

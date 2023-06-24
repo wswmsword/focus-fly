@@ -227,7 +227,7 @@ interface Return {
   updateList(newList: element[]): void;
 
   /** 当前焦点的编号 */
-  i(): number;
+  i(newI?: number): number;
 }
 
 declare function focusBagel(root: element, list: element[], options?: Options): Return;

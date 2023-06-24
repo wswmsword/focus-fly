@@ -265,6 +265,9 @@ class TabList {
   };
   isEmpty() {
     return this.data.length === 0;
+  };
+  has(i) {
+    return !!this.data[i];
   }
 }
 
@@ -524,7 +527,16 @@ const focusBagel = (...props) => {
       list.update(_newList);
     },
     /** 当前聚焦的列表单项序号 */
-    i: () => activeIndex,
+    i(newI) {
+      if (list.has(newI) && trappedList) {
+        prevActive = activeIndex;
+        activeIndex = newI;
+        onMove?.({ e: { fromI: true }, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex });
+        focus(subNodes[activeIndex]);
+        return newI;
+      }
+      else return activeIndex;
+    },
   };
 
   return Return;

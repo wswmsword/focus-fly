@@ -128,7 +128,7 @@ export function initBagel_11(container, dialog, first, last, open, close) {
 }
 
 export function initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
-  const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+  return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
     onEscape: true,
     entry: {
