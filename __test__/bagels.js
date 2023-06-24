@@ -3,12 +3,8 @@ import focusBagel from '../index.js';
 export function initBagel(container, dialog, first, last, open, close) {
 
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close,
-    }
+    entry: open,
+    exit: close,
   });
 }
 
@@ -16,12 +12,8 @@ export function initBagel_1_1(container, dialog, first, last, open, close) {
 
   focusBagel(dialog, [first, last], {
     loop: false,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close,
-    }
+    entry: open,
+    exit: close,
   });
 }
 
@@ -92,23 +84,15 @@ export function initBagel_8(container, dialog, first, last, open, close) {
 export function initBagel_9(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
     onEscape: true,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close,
-    },
+    entry: open,
+    exit: close,
   });
 }
 
 export function initBagel_10(container, dialog, first, last, open, close) {
   const bagel = focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
-    exit: [{
-      node: close,
-    }, {
+    entry: open,
+    exit: [close, {
       key: e => e.key === "Escape",
     }],
     onEscape: false,
@@ -120,9 +104,7 @@ export function initBagel_11(container, dialog, first, last, open, close) {
     first.focus();
   });
   const bagel = focusBagel(dialog, [first, last], {
-    exit: {
-      node: close,
-    },
+    exit: close,
     onEscape: true,
   });
 }
@@ -131,12 +113,8 @@ export function initBagel_12(container, dialog, open, focusA, focusB, focusC, fo
   return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
     onEscape: true,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: focusF,
-    }
+    entry: open,
+    exit: focusF,
   });
 }
 
@@ -144,9 +122,7 @@ export function initBagel_13(container, dialog, open, focusA, focusB, focusC, fo
   const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
     loop: false,
-    entry: {
-      node: open,
-    },
+    entry: open,
     exit: {
       node: focusF,
     }
@@ -156,24 +132,16 @@ export function initBagel_13(container, dialog, open, focusA, focusB, focusC, fo
 export function initBagel_14(container, dialog, first, last, open, close) {
 
   focusBagel("#dialog", ["#firstFocusA", "#lastFocusBtn"], {
-    entry: {
-      node: "#open",
-    },
-    exit: {
-      node: "#close",
-    }
+    entry: "#open",
+    exit: "#close",
   });
 }
 
 export function initBagel_15(container, dialog, first, last, open, close) {
 
   focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close,
-    },
+    entry: open,
+    exit: close,
     cover: true,
   });
 }
@@ -185,9 +153,7 @@ export function initBagel_16(dialog, open, focusA, focusB, focusC, focusD, focus
       node: open,
       target: ({ list }) => list[1],
     },
-    exit: {
-      node: focusF,
-    }
+    exit: focusF,
   });
 }
 
@@ -198,9 +164,7 @@ export function initBagel_17(dialog, open, focusA, focusB, focusC, focusD, focus
       node: open,
       target: "#focusB",
     },
-    exit: {
-      node: focusF,
-    }
+    exit: focusF,
   });
 }
 
@@ -212,18 +176,14 @@ export function initBagel_18(dialog, open, focusA, focusB, focusC, focusD, focus
       type: "keydown",
       key: e => e.key === "Space",
     },
-    exit: {
-      node: focusF,
-    }
+    exit: focusF,
   });
 }
 
 export function initBagel_19(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
-    entry: {
-      node: open,
-    },
+    entry: open,
     exit: {
       node: focusF,
       type: "focus",
@@ -234,12 +194,8 @@ export function initBagel_19(dialog, open, focusA, focusB, focusC, focusD, focus
 export function initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: focusF,
-    },
+    entry: open,
+    exit: focusF,
     correctionTarget: ({ list }) => list[3],
     removeListenersEachExit: false,
   });
@@ -247,44 +203,30 @@ export function initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focus
 
 export function initBagel_21(container, dialog, first, last, open, close, walk2) {
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: walk2,
-    }
+    entry: open,
+    exit: walk2,
   });
 }
 
 export function initBagel_22(container, dialog, first, last, open, close) {
   return focusBagel(dialog, [first, last], {
     manual: true,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close
-    }
+    entry: open,
+    exit: close
   });
 }
 
 export function initBagel_23(dialog, open, focusA, focusB, focusC) {
   return focusBagel(dialog, [focusA, focusB, focusC], {
     sequence: true,
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: focusC,
-    },
+    entry: open,
+    exit: focusC,
   });
 }
 
 export function initBagel_24(container, dialog, first, last, open, close) {
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
+    entry: open,
     exit: {
       node: close,
       target: false,
@@ -306,9 +248,7 @@ export function initBagel_25(container, dialog, first, last, open, close, walk2)
 
 export function initBagel_26(container, dialog, first, last, open, close) {
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
+    entry: open,
     exit: {
       type: "outlist",
     }
@@ -317,12 +257,8 @@ export function initBagel_26(container, dialog, first, last, open, close) {
 
 export function initBagel_27(container, dialog, first, last, open, close) {
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: open,
-    },
-    exit: {
-      node: close,
-    },
+    entry: open,
+    exit: close,
     delayToFocus() {
       return new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -332,12 +268,8 @@ export function initBagel_27(container, dialog, first, last, open, close) {
 export function initBagel_28(container, dialog, first, last, open, close, walk1) {
 
   return focusBagel(dialog, [first, last], {
-    entry: {
-      node: [open, walk1],
-    },
-    exit: {
-      node: close,
-    },
+    entry: { node: [open, walk1] },
+    exit: close,
     // removeListenersEachExit: false,
   });
 }
