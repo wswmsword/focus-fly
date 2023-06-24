@@ -14,7 +14,7 @@ type element = string | Element | HTMLElement;
 
 type isKey = (e: KeyboardEvent) => boolean;
 
-type entryTargetOpts = {
+type listTargetOpts = {
   list: element[],
   cover: element,
   root: element,
@@ -22,7 +22,7 @@ type entryTargetOpts = {
   lastI: number,
 }
 
-type getTarget = (opts: entryTargetOpts) => element;
+type getTarget = (opts: listTargetOpts) => element;
 
 type listForward = {
   /** 自定义前进 subNodes 的组合键 */
@@ -111,21 +111,24 @@ type cover = {
   onEnter?: handleKeydown;
 };
 
-// /** 转发 */
-// type forward = {
+/** 转发 */
+type forward = {
 
-//   /** 中转元素 */
-//   node?: element;
+  /** 中转元素 */
+  node?: element;
 
-//   /** 中转键位 */
-//   key?: isKey;
+  /** 中转键位 */
+  key?: isKey;
 
-//   /** 转发目标 */
-//   target?: element;
+  /** 转发目标 */
+  target?: element;
 
-//   /** 中转时的行为 */
-//   on?: handleKeydown;
-// };
+  /** 中转时的行为 */
+  on?: handleKeydown;
+};
+
+/** 生成转发选项 */
+type getForward = (opt: { root: element, list: element[], head: element, tail: element, cover: element, curI: number, prevI: number }) => forward;
 
 type promiseDelay = () => Promise<unknown>;
 
@@ -166,8 +169,11 @@ interface Options {
   /** 封面相关 */
   cover?: boolean | cover;
 
-  // /** 转发 */
-  // forward?: forward;
+  /** 初始的 activeIndex，默认的初始的焦点位置 */
+  initialActive: number;
+
+  /** 焦点矫正 */
+  correctionTarget: boolean | getTarget;
 
   /** 延迟聚焦，触发 trigger 后等待执行 delayToFocus 完成后聚焦，延迟聚焦的目的是确认被聚焦的元素已被渲染 */
   delayToFocus?: boolean | promiseDelay | callbackDelay;
@@ -191,10 +197,10 @@ interface Options {
 interface Return {
 
   /** 进入循环，聚焦 */
-  enter(): void;
+  enter(): Promise<void>;
 
   /** 退出循环，聚焦触发元素 */
-  exit(): void;
+  exit(): Promise<void>;
 
   /** 移除所有的监听事件 */
   removeListeners(): void;
@@ -202,8 +208,23 @@ interface Return {
   /** 添加入口的监听事件 */
   addEntryListeners(): void;
 
+  /** 移除入口事件 */
+  removeEntryListeners(): void;
+
   /** 添加列表相关（封面、列表、出口）的监听事件 */
   addListRelatedListeners(): void;
+
+  /** 移除列表相关的事件 */
+  removeListRelatedListeners(): void;
+
+  /** 添加转发 */
+  addForward(id: string, forward: forward | getForward): void;
+
+  /** 移除转发 */
+  removeForward(id: string): void;
+
+  /** 更新列表 */
+  updateList(newList: element[]): void;
 
   /** 当前焦点的编号 */
   i(): number;
