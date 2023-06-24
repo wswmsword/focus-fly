@@ -17,7 +17,7 @@
   font-size: 14px;
 }
 
-[role="tab"]:hover, [role="tab"]:focus {
+[role="tab"]:hover {
   background-color: rgba(255, 255, 255, 0.213);
 }
 

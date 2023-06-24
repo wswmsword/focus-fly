@@ -56,7 +56,7 @@ h3 {
   margin: 12px 0;
 }
 
-a:focus, button:focus, .dialog:focus {
+a:focus-visible, button:focus-visible, .dialog:focus-visible {
   outline: 2px dashed var(--orange);
   outline-offset: 3px;
 }
