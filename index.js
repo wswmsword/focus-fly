@@ -295,7 +295,7 @@ const focusBagel = (...props) => {
     /** 移动的时候触发 */
     onMove,
     /** cover: 封面，默认情况，触发入口后首先聚焦封面，而不是子元素 */
-    cover = false,
+    cover,
     /** 初始的 activeIndex */
     initialActive,
     /** 矫正列表的焦点 */
