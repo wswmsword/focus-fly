@@ -2,7 +2,7 @@
   "name": "focus-bagel",
   "version": "1.0.0",
   "description": "🍩 焦点管理。Focus management.",
-  "main": "output/focus-bagel.js",
+  "main": "output/focus-bagel.cjs",
   "module": "output/focus-bagel.esm.js",
   "sideEffects": false,
   "files": [
@@ -12,6 +12,7 @@
     "LICENSE",
     "index.js",
     "index.d.ts",
+    "utils.js",
     "output"
   ],
   "types": "index.d.ts",
@@ -31,10 +32,11 @@
   },
   "keywords": [
     "focus",
+    "focus-management",
     "accessibility",
     "keyboard",
-    "focus-bagel",
-    "focus-lock"
+    "focus-lock",
+    "focus-trap"
   ],
   "author": "",
   "license": "ISC",
