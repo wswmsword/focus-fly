@@ -233,4 +233,6 @@ interface Return {
 declare function focusBagel(root: element, list: element[], options?: Options): Return;
 declare function focusBagel(list: element[], options?: Options): Return;
 
+export = focusBagel;
+
 export default focusBagel;
