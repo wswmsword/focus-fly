@@ -279,6 +279,10 @@ const focusBagel = (...props) => {
   const rootNode = props[0 + offset];
   const subNodes = props[1 + offset];
   const options  = props[2 + offset] ?? {};
+
+  if (!(Array.isArray(subNodes) && subNodes.length > 1))
+    throw new Error("请至少传入一个数组，数组至少包含两个可聚焦元素，用来表示列表的头和尾。");
+
   const {
     /** move: tab 序列，指定可以聚焦的元素，聚焦 list 内的元素 */
     sequence,
