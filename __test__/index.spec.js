@@ -217,7 +217,7 @@ describe("focus-bagel", function() {
         initBagel_7(container, dialog, first, last, open, close);
       } catch(e) {
         const errStr = e.toString();
-        expect(errStr).toBe("Error: 至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
+        expect(errStr).toBe("Error: 请至少传入一个数组，数组至少包含两个可聚焦元素，用来表示列表的头和尾。");
       }
     });
 
@@ -225,7 +225,7 @@ describe("focus-bagel", function() {
       try {
         initBagel_8(container, dialog, first, last, open, close);
       } catch(e) {
-        expect(e).toBe("至少需要包含两个可以聚焦的元素。");
+        expect(e.toString()).toBe("Error: 请至少传入一个数组，数组至少包含两个可聚焦元素，用来表示列表的头和尾。");
       }
     });
   });

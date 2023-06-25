@@ -74,7 +74,7 @@ export function initBagel_6(container, dialog, first, last, open, close) {
 }
 
 export function initBagel_7(container, dialog, first, last, open, close) {
-  const bagel = focusBagel(dialog, []); // no subItems
+  const bagel = focusBagel(dialog); // no subItems
 }
 
 export function initBagel_8(container, dialog, first, last, open, close) {
