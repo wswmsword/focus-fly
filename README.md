@@ -1,19 +1,19 @@
-# Focus-no-Jutsu（Focus の術，聚焦术）
+# Focus-no-Jutsu
 
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu) [![B level Genjutsu](https://img.shields.io/badge/Genjutsu-B-%23fbadcc)](https://naruto.fandom.com/wiki/Genjutsu)
 
-使用 Focus-no-Jutsu（no-Jutsu 的发音为 /ˈnɔˌjutsu/）控制和管理焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)。
+使用 Focus-no-Jutsu 控制和管理焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)。
 
 您可以任意选择鼠标和键盘来访问这个[使用 *Focus-no-Jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
 网页程序里有很多需要焦点控制的场景，例如弹窗、菜单、选项卡、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。
 
-下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述如何进入焦点，进入后如何移动焦点，以及如何退出焦点。
+下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
 
 <details>
 <summary>查看一个常规聚焦流程。</summary>
 
-![焦点从入口进入列表，从列表到出口，从出口回到入口，如果有封面，焦点则会从入口进入封面，再从封面进入列表。](./images/flow.png)
+<!-- ![焦点从入口进入列表，从列表到出口，从出口回到入口，如果有封面，焦点则会从入口进入封面，再从封面进入列表。](./images/flow.png) -->
 
 一个常规流程是这样的，开始焦点在*入口*，焦点通过*入口*到达*列表*，在*列表*中焦点可以自由移动，前进或者后退聚焦*列表*的每一个单项，*列表*中有一个特殊项是*出口*，通过*出口*，焦点会从*列表*回到*入口*。也有一些情况，在从*入口*到*列表*之前首先到达*封面*，从*出口*回到*入口*前首先回到*封面*。还有一些情况不用指定*入口*和*出口*，*封面*独自担当这两个角色。
 </details>
@@ -23,6 +23,10 @@
 
 例如开发一个模态对话框，对话框的背景应该对所有用户隐藏，对于鼠标用户，鼠标不能访问背景元素，对于键盘用户，键盘不能访问背景元素，对于使用辅助设备的用户，辅助设备也不能访问背景元素。这个仓库可以控制键盘焦点在对话框中循环，避免聚焦到背景元素上。
 </details>
+
+> **Note**
+>
+> no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。Focus-no-Jutsu 意为“聚焦术”。
 
 ## 安装
 
