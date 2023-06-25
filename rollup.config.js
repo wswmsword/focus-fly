@@ -50,7 +50,7 @@ const cjs = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-bagel.js",
+      file: "output/focus-bagel.cjs",
       format: "cjs",
       ...commonOutput,
     },
@@ -59,7 +59,7 @@ const cjs = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-bagel.min.js",
+      file: "output/focus-bagel.min.cjs",
       format: "cjs",
       ...commonOutput,
     },
