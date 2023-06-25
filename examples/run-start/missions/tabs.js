@@ -1,7 +1,7 @@
 const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
 
 // 4～26 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内的移动
-focusBagel("#tab_list", tabList, { // L:4
+focusNoJutsu("#tab_list", tabList, { // L:4
   next: e => e.key === "ArrowRight",
   prev: e => e.key === "ArrowLeft",
   exit: [{

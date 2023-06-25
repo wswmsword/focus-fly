@@ -1,9 +1,13 @@
 {
-  "name": "focus-bagel",
+  "name": "focus-no-jutsu",
   "version": "1.0.0",
-  "description": "🍩 焦点管理。Focus management.",
-  "main": "output/focus-bagel.cjs",
-  "module": "output/focus-bagel.esm.js",
+  "type": "module",
+  "description": "焦点管理。Focus management.",
+  "main": "output/focus-no-jutsu.cjs",
+  "exports": {
+    "import": "./output/focus-no-jutsu.esm.js",
+    "require": "./output/focus-no-jutsu.cjs"
+  },
   "sideEffects": false,
   "files": [
     "package.json",
@@ -28,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wswmsword/focus-bagel.git"
+    "url": "git+https://github.com/wswmsword/focus-no-jutsu.git"
   },
   "keywords": [
     "focus",
@@ -41,9 +45,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/wswmsword/focus-bagel/issues"
+    "url": "https://github.com/wswmsword/focus-no-jutsu/issues"
   },
-  "homepage": "https://github.com/wswmsword/focus-bagel#readme",
+  "homepage": "https://github.com/wswmsword/focus-no-jutsu#readme",
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
@@ -60,6 +64,5 @@
     "rollup": "^3.20.2",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^2.0.2"
-  },
-  "type": "module"
+  }
 }

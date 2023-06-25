@@ -1,6 +1,7 @@
+
 const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 // 3～31 行为播放列表的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
-const playerBagel = focusBagel("#songs_wrapper", songs, { // L:3
+const playerBagel = focusNoJutsu("#songs_wrapper", songs, { // L:3
   next: e => e.key === "ArrowDown",
   prev: e => e.key === "ArrowUp",
   exit: [{
@@ -37,7 +38,7 @@ function initSongBagel(curI, lastActive) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
   // 40～62 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
-  return focusBagel(`#song_${idx}`, list, { // L: 40
+  return focusNoJutsu(`#song_${idx}`, list, { // L: 40
     entry: [{
       node: `#song_${idx}`,
       type: "focus",

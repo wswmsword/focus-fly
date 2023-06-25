@@ -274,7 +274,7 @@ class TabList {
   }
 }
 
-const focusBagel = (...props) => {
+const focusNoJutsu = (...props) => {
   const offset = 0 - (props[0] instanceof Array);
   const rootNode = props[0 + offset];
   const subNodes = props[1 + offset];
@@ -292,7 +292,7 @@ const focusBagel = (...props) => {
     next,
     /** move: 自定义后退焦点函数 */
     prev,
-    /** focus/blur: 触发器，如果使用 focusBagel.enter 则不用设置，如果使用 entry.selector 则不用设置 */
+    /** focus/blur: 触发器，如果使用 focusNoJutsu.enter 则不用设置，如果使用 entry.selector 则不用设置 */
     trigger,
     /** focus: 触发触发器的配置 */
     entry,
@@ -1039,4 +1039,4 @@ const focusBagel = (...props) => {
   }
 };
 
-export default focusBagel;
+export default focusNoJutsu;

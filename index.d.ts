@@ -230,9 +230,9 @@ interface Return {
   i(newI?: number): number;
 }
 
-declare function focusBagel(root: element, list: element[], options?: Options): Return;
-declare function focusBagel(list: element[], options?: Options): Return;
+declare function focusNoJutsu(root: element, list: element[], options?: Options): Return;
+declare function focusNoJutsu(list: element[], options?: Options): Return;
 
-export = focusBagel;
+export = focusNoJutsu;
 
-export default focusBagel;
+export default focusNoJutsu;
