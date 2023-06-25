@@ -1,0 +1,127 @@
+.dialog {
+  max-width: 450px;
+  width: calc(100vw - 36px);
+  padding: 25px;
+  box-sizing: border-box;
+  background-color: white;
+  z-index: 1;
+  border-radius: 7px;
+  box-shadow: rgba(14, 18, 22, 0.35) 0px 10px 38px -10px, rgba(14, 18, 22, 0.2) 0px 10px 20px -15px;
+}
+
+.ctrls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.centre {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.openedDialog {
+  display: block;
+}
+.closedDialog {
+  display: none;
+}
+
+.transition-in {
+  opacity: 1;
+  transition: opacity .3s;
+}
+
+.transition-out {
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+
+
+
+
+
+
+.button {
+  display: inline-block;
+  position: relative;
+  padding: 7px 23px;
+  border: none;
+  border-radius: 3px;
+  font-size: 14px;
+  border-radius: 6px;
+  color: #fbefea;
+  background-color: #f05321;
+  box-shadow: 0 1px 2px -1px #b14625;
+  font-weight: bold;
+}
+
+.button:hover {
+  border-color: var(--dark-orange);
+  background-color: #e74b1b;
+  cursor: default;
+}
+
+.button:focus {
+  outline: none;
+}
+
+.button:focus-visible::before {
+  position: absolute;
+
+  /* .button border width - outline width - offset */
+  top: calc(-1px - 2px - 2px);
+  right: calc(-1px - 2px - 2px);
+  bottom: calc(-1px - 2px - 2px);
+  left: calc(-1px - 2px - 2px);
+  border: 2px dashed var(--orange);
+
+  /* .button border radius + outline width + offset */
+  border-radius: calc(2px + 6px + 2px);
+  content: "";
+}
+
+.button:active {
+  border-color: var(--orange);
+  background-color: var(--orange);
+}
+
+#dialog_mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.44);
+  z-index: 1;
+}
+
+.closed_mask {
+  display: none;
+}
+
+#close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#close:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+#close:active {
+  background-color: rgb(211, 211, 211);
+}
