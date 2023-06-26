@@ -187,9 +187,6 @@ interface Options {
   /** 每次进入列表是否移除入口事件 */
   removeListenersEachEnter?: boolean;
 
-  /** 矫正焦点，矫正从非入口进入列表的焦点 */
-  disableListCorrection?: boolean;
-
   /** 手动添加监听事件，入口、列表、出口的监听事件 */
   manual?: boolean;
 
