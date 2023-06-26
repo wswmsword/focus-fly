@@ -763,10 +763,15 @@ const focusNoJutsu = (...props) => {
         isMouseDown = false; // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
       });
 
+      let targetItem;
       if (!enabledTabSequence ||
-        (enabledTabSequence && _subNodes.some(item => item.contains(e.target)))) {
+        (enabledTabSequence && (targetItem = _subNodes.find(item => item.contains(e.target))))) {
         trappedList = true;
         if (enabledCover) trappedCover = true;
+        if (targetItem) { // 兼容 Safari，具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
+          focus(targetItem); // Safari 不会聚焦按钮元素，这里强制使用 api 聚焦
+          e.preventDefault(); // 阻止默认行为可以避免 targetItem 失焦
+        }
       }
     }
 
