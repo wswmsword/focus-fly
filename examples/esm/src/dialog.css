@@ -68,7 +68,7 @@
   outline: none;
 }
 
-.button:focus-visible::before {
+.button:focus::before {
   position: absolute;
 
   /* .button border width - outline width - offset */

@@ -9,6 +9,10 @@
   box-shadow: rgba(14, 18, 22, 0.35) 0px 10px 38px -10px, rgba(14, 18, 22, 0.2) 0px 10px 20px -15px;
 }
 
+.dialog:focus {
+  outline: none;
+}
+
 .ctrls {
   display: flex;
   justify-content: flex-end;
@@ -68,7 +72,7 @@
   outline: none;
 }
 
-.button:focus-visible::before {
+.button:focus::before {
   position: absolute;
 
   /* .button border width - outline width - offset */
