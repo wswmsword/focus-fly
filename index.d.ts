@@ -192,6 +192,9 @@ interface Options {
 
   /** 手动添加监听事件，入口、列表、出口的监听事件 */
   manual?: boolean;
+
+  /** 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题 */
+  allowSafariToFocusAfterMousedown?: boolean;
 }
 
 interface Return {

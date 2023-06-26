@@ -320,6 +320,8 @@ const focusNoJutsu = (...props) => {
     removeListenersEachEnter,
     /** 手动添加和移除监听事件，入口、列表、出口的监听事件，`removeListenersEachExit` 和 `removeListenersEachEnter` 将失效 */
     manual,
+    /** 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题 */
+    allowSafariToFocusAfterMousedown = true,
     /** 用于内部调试 */
     demo = false,
   } = options;
@@ -768,7 +770,7 @@ const focusNoJutsu = (...props) => {
         (enabledTabSequence && (targetItem = _subNodes.find(item => item.contains(e.target))))) {
         trappedList = true;
         if (enabledCover) trappedCover = true;
-        if (targetItem) { // 兼容 Safari，具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
+        if (allowSafariToFocusAfterMousedown && targetItem && window.safari !== undefined) { // 兼容 Safari（桌面端），具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
           focus(targetItem); // Safari 不会聚焦按钮元素，这里强制使用 api 聚焦
           e.preventDefault(); // 阻止默认行为可以避免 targetItem 失焦
         }

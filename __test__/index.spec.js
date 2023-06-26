@@ -15,6 +15,7 @@ import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalD
 import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
+// 基本功能
 describe("focus-bagel", function() {
 
   // 点击入口后聚焦第一个可聚焦元素
@@ -756,6 +757,21 @@ describe("options", function() {
       walk2.focus();
       await wait(4);
       expect(open).toHaveFocus();
+    });
+  });
+
+  describe("allowSafariToFocusAfterMousedown", function() {
+
+    // 模拟 Safari 不聚焦 button 的问题
+    it("should focus button in Safari", async function() {
+      const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_12(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+      window.safari = {}; // 模拟 Safari
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+      await user.click(focusD);
+      expect(focusD).toHaveFocus();
     });
   });
 
