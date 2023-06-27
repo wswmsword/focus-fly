@@ -836,11 +836,10 @@ const focusNoJutsu = (...props) => {
       }
 
       // 默认出口
-      if (isDefaultExitCover) {
-        if (isTabForward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
-          focus(_tail);
-          return;
-        }
+      if (isDefaultExitCover &&
+        isTabForward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
+        focus(_tail);
+        return;
       }
 
       /** 退出封面焦点的行为 */
