@@ -13,7 +13,7 @@
 - 在“关闭”按钮上按下 <kbd>Enter</kbd>，“打开”按钮获得焦点；
 - 按下 <kbd>Esc</kbd>，或者点击弹窗背后的半透明蒙层，“打开”按钮获得焦点。
 
-也许你希望能集中管理这些情况，同时希望能控制焦点导航的路径，还希望能有一个库，也许您就可以试试本项目的 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
+也许你希望能集中管理这些焦点情况，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
 
@@ -37,9 +37,23 @@
 这个项目可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
 </details>
 
+> **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
+>
+> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
+
+
+<!-- <table>
+	<tr>
+		<td>
+
 > **Note**
 >
 > Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
+    
+</td>
+		<td><img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="500"></td>
+	</tr>
+</table> -->
 
 ## 安装
 
@@ -251,7 +265,7 @@ focus(dialog, ["#head", "#second", "#tail"], {
 | Name | Type | Desc |
 |:--|:--|:--|
 | node | element | 封面元素，如果不指定，默认将取根元素 `root` |
-| exit | exitCover \| exitCover[] | 退出封面 |
+| exit | isKey \| exitCover \| exitCover[] | 退出封面 |
 | enterKey | isKey | 自定义进入 subNodes 的组合键 |
 | onEnter | handleKeydown | 进入 subNodes 时的行为 |
 
