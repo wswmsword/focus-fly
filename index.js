@@ -751,9 +751,11 @@ const focusNoJutsu = (...props) => {
           trappedCover = false; // 退出封面
           return;
         }
-        if (isOutRootNode && !isActiveCover) // 聚焦在 rootNode 之外，并且没有聚焦在封面上
+        // 聚焦在 rootNode 之外，并且没有聚焦在封面上
+        if (isOutRootNode && !isActiveCover)
           outListExitHandler(e);
-        if (isActiveCover || isOutRootNode) { // 聚焦在 rootNode 之外，或者聚焦在封面上
+        // 聚焦在 rootNode 之外，或者聚焦在封面上
+        if (isActiveCover || isOutRootNode) {
           onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           trappedList = false;
           if (!isActiveCover) trappedCover = false; // 退出封面
@@ -797,9 +799,9 @@ const focusNoJutsu = (...props) => {
      |         COVER HANDLERS          |
      +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
-    function focusTrapCoverHandler() { trappedCover = true; }
+    function focusTrapCoverHandler() { trappedCover = true; } // 捕获点击封面的情况
 
-    function blurTrapCoverHandler() {
+    function blurTrapCoverHandler() { // 捕获点击空白区域的情况
       if (isEnterFromCover) { // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
         isEnterFromCover = false;
         return;
