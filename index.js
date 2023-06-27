@@ -34,7 +34,6 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, is
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
-    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
   else if ((isPrev ?? isTabBackward)(e)) {
@@ -46,7 +45,6 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, is
     setIndex(nextI);
     setPrev(index);
     focus(subNodes[nextI]);
-    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     e.preventDefault();
   }
 };
@@ -60,7 +58,6 @@ const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, cover
   if (!trappedList()) return;
 
   if (isTabForward(e)) {
-    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onNext?.({ e });
     if (current === tail) {
       e.preventDefault();
@@ -72,7 +69,6 @@ const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, cover
     }
   }
   else if (isTabBackward(e)) {
-    e.stopImmediatePropagation(); // 防止封面响应键盘事件
     onPrev?.({ e });
     if (current === head) {
       e.preventDefault();
@@ -732,10 +728,11 @@ const focusNoJutsu = (...props) => {
           prevActive = activeIndex;
           activeIndex = targetIndex;
           onMove?.({ e, prev: _subNodes[prevActive], cur: _subNodes[activeIndex], prevI: prevActive, curI: activeIndex });
-          trappedList = true;
         }
         tickFocus(gotCorrectionTarget);
       }
+
+      trappedList = true;
     }
 
     function blurTrapListHandler(e) {
@@ -812,6 +809,7 @@ const focusNoJutsu = (...props) => {
     /** 封面的键盘事件响应 */
     function keyCoverHandler(e) {
       if (e.target !== _coverNode) return;
+      if (!(trappedCover && !trappedList)) return; // 继续执行，必须满足焦点在封面上，且不在列表中
 
       // 入口
       if((coverEnterKey ?? isEnterEvent)(e) && !trappedList) {
@@ -912,7 +910,6 @@ const focusNoJutsu = (...props) => {
       if (node != null && e.target !== node) return false;
       if (key?.(e, activeIndex)) {
         exitHandler(e, on, target, delay, _coverNode, _subNodes);
-        e.stopImmediatePropagation(); // 列表和封面可能是同一个元素，避免封面响应键盘事件，这里已经执行成功了
         return true;
       }
     }

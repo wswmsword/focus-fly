@@ -32,6 +32,7 @@ describe("focus-bagel", function() {
     const { container, dialog, first, last, open, close } = getRangeModalDom();
     initBagel(container, dialog, first, last, open, close);
   
+    await user.click(open);
     await user.click(close);
     expect(open).toHaveFocus();
   });
@@ -580,13 +581,19 @@ describe("cover", function() {
     expect(cover).toHaveFocus();
     await user.tab();
     expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
-
-    await user.click(open);
-    await user.keyboard("{Enter}");
-    await user.click(close);
-    await user.tab();
-    expect(first).toHaveFocus(); // 同上，理论上应该匹配 `#walk2`
   });
+
+    // 在封面按下 Tab，进入列表最后一个元素的后一个元素（进入列表，退出至封面）
+    it("should focus element after last list element after pressing Tab at cover", async function() {
+      const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
+      initBagel_15(container, dialog, first, last, open, close);
+  
+      await user.click(open);
+      await user.keyboard("{Enter}");
+      await user.click(close);
+      await user.tab();
+      expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
+    });
 
   // 添加封面后正常循环聚焦
   it("should loop focus around list by forward and backward tab", async function() {
