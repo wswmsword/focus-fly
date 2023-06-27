@@ -102,7 +102,7 @@ type cover = {
   node?: element;
 
   /** 退出封面 */
-  exit?: exitCover | exitCover[];
+  exit?: isKey | exitCover | exitCover[];
 
   /** 自定义进入 subNodes 的组合键 */
   enterKey?: isKey;

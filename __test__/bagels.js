@@ -310,3 +310,14 @@ export function initBagel_30(container, dialog, first, last, open, close, walk2)
     }
   });
 }
+
+export function initBagel_31(container, dialog, first, last, open, close) {
+  focusBagel(dialog, [first, last], {
+    entry: open,
+    exit: close,
+    cover: {
+      exit: e => e.key === 'e',
+    },
+    onEscape: true,
+  });
+}

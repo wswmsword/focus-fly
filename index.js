@@ -360,10 +360,12 @@ const focusNoJutsu = (...props) => {
   let _trigger = element(trigger || entries[0]?.node);
 
   /** 退出封面，封面的出口们 */
-  const exitsCover = [].concat(exitCover).filter(e => e != null).map(e => ({
-    ...e,
-    target: e.target ?? _trigger,
-  }));
+  const exitsCover = [].concat(exitCover).filter(e => e != null)
+    .map(e => isObj(e) ? e : { key: e })
+    .map(e => ({
+      ...e,
+      target: e.target ?? _trigger,
+    }));
 
   /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
   const isDefaultExitCover = enabledCover && exitsCover.length === 0;

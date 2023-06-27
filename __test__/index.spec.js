@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -643,6 +643,22 @@ describe("cover", function() {
     walk2.focus();
     await user.tab({ shift: true });
     expect(dialog).toHaveFocus();
+  });
+
+  it("should pass key to cover.exit directly", async function() {
+    const { container, dialog, first, last, open, close, walk2 } = getCoverModalDom();
+    initBagel_31(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(dialog).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(first).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(dialog).toHaveFocus();
+
+    await user.keyboard("{e}");
+    expect(open).toHaveFocus();
   });
 
 });
