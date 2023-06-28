@@ -986,8 +986,10 @@ const focusNoJutsu = (...props) => {
         listListeners.push(node, "click", handler);
       });
 
-      // 封面的事件
-      listListeners.push(_coverNode, "keydown", keyCoverHandler);
+      if (_coverNode != null) {
+        // 封面的事件
+        listListeners.push(_coverNode, "keydown", keyCoverHandler);
+      }
 
       // flush
       listListeners.addListeners();
