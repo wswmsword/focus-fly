@@ -192,19 +192,25 @@ const delayToProcess = async function(delay, processor) {
   else return true;
 };
 
-/** 获取入口目标 */
-const getEntryTarget = function(target, cover, list, rootNode, enabledCover, activeIndex = 0) {
+/** 获取出口或者入口的目标 */
+const getTarget = function(target, cover, list, root, enabledCover, activeIndex, defaultTarget, e) {
   // 空 target 走默认
-  if (target == null) {
+  if (target == null || target === true) {
     if (enabledCover) return cover;
-    else return list[activeIndex === -1 ? 0 : activeIndex];
+    else return defaultTarget;
   }
   // 函数 target 则传入节点执行
-  else if (isFun(target))
-    return target({ list, cover, root: rootNode, last: list[activeIndex], lastI: activeIndex });
+  else if (isFun(target)) {
+    const gotTarget = target({ e, list, cover, root, last: list[activeIndex], lastI: activeIndex });
+    if (gotTarget == null || gotTarget === true) {
+      if (enabledCover) return cover;
+      else return defaultTarget;
+    }
+    return gotTarget;
+  }
   // 选择器字符串或者节点，则直接获取
   else return element(target);
-}
+};
 
 /** 保存的监听事件信息，方便监听和移除监听 */
 class ListenersCache {
@@ -447,6 +453,7 @@ const focusNoJutsu = (...props) => {
       const {
         subNodes: _list,
         coverNode: cover,
+        rootNode: root,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
 
       if (tempExit) {
@@ -456,8 +463,7 @@ const focusNoJutsu = (...props) => {
       } else {
         const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
         for (const exit of exits) {
-          const { on, type, target: originTarget } = exit;
-          const target = element(originTarget);
+          const { on, type, target } = exit;
           const invokeType = "invoke";
   
           if (type?.some(type => type == null || type === false || type === invokeType)) {
@@ -470,7 +476,7 @@ const focusNoJutsu = (...props) => {
 
         if (list.isEmpty()) list.update(_list);
 
-        return exitHandler({ fromInvoke: true }, on, target, false, cover, list.data);
+        return exitHandler({ fromInvoke: true }, on, target, false, cover, list.data, root);
       }
     },
     /** 移除所有的监听事件 */
@@ -579,7 +585,7 @@ const focusNoJutsu = (...props) => {
     }
     
     function focusTarget(cover, list, rootNode) {
-      const gotTarget = getEntryTarget(target, cover, list, rootNode, enabledCover, activeIndex);
+      const gotTarget = getTarget(target, cover, list, rootNode, enabledCover, activeIndex, list[activeIndex === -1 ? 0 : activeIndex], e);
       const targetIdx = list.indexOf(gotTarget);
       if (targetIdx > -1) {
         prevActive = activeIndex;
@@ -593,7 +599,7 @@ const focusNoJutsu = (...props) => {
   }
 
   /** 出口 handler */
-  async function exitHandler(e, on, target, delay, cover, list) {
+  async function exitHandler(e, on, target, delay, cover, list, root) {
 
     if (!trappedList) return;
 
@@ -601,7 +607,9 @@ const focusNoJutsu = (...props) => {
 
     e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
 
-    if (target) return exitListWithTarget();
+    const gotTarget = getTarget(target, cover, list, root, enabledCover, activeIndex, _trigger, e);
+
+    if (gotTarget) return exitListWithTarget();
     else return exitListWithoutTarget();
 
     /** 退出列表，有 target */
@@ -614,10 +622,10 @@ const focusNoJutsu = (...props) => {
       if (isImmediate) focusThenRemoveListeners();
 
       function focusThenRemoveListeners() {
-        focus(target);
-        onMove?.({ e, prev: list[activeIndex], cur: target, prevI: activeIndex, curI: -1 });
+        focus(gotTarget);
+        onMove?.({ e, prev: list[activeIndex], cur: gotTarget, prevI: activeIndex, curI: -1 });
         if (!manual) {
-          if (target !== cover)
+          if (gotTarget !== cover)
             removeListRelatedListeners();
           addEntryListeners();
         }
@@ -627,7 +635,7 @@ const focusNoJutsu = (...props) => {
     /** 退出列表，无 target */
     async function exitListWithoutTarget() {
 
-      if (target === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+      if (gotTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
         await on?.(e);
         onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
         if (!manual) {
@@ -857,7 +865,7 @@ const focusNoJutsu = (...props) => {
       for (const exit of outListExits) {
         const { on, target: origin_target, delay } = exit;
         const target = element(origin_target);
-        exitHandler(e, on, target, delay, _coverNode, _subNodes);
+        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
         break;
       }
     }
@@ -870,7 +878,7 @@ const focusNoJutsu = (...props) => {
       if (
         (node != null && !node.contains(e.target)) ||
         node == null) return false;
-      exitHandler(e, on, target, delay, _coverNode, _subNodes);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
       return true;
     }
 
@@ -890,7 +898,7 @@ const focusNoJutsu = (...props) => {
       if (
         (node != null && e.target !== node) ||
         node == null) return false;
-      exitHandler(e, on, target, delay, _coverNode, _subNodes);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
       return true;
     }
 
@@ -904,12 +912,11 @@ const focusNoJutsu = (...props) => {
     }
 
     function keyExitHandler(e, exit) {
-      let { key, node: origin_node, target: origin_target, on, delay } = exit;
+      let { key, node: origin_node, target, on, delay } = exit;
       const node = element(origin_node);
-      const target = element(origin_target);
       if (node != null && e.target !== node) return false;
       if (key?.(e, activeIndex)) {
-        exitHandler(e, on, target, delay, _coverNode, _subNodes);
+        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
         return true;
       }
     }

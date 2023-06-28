@@ -14,7 +14,8 @@ type element = string | Element | HTMLElement;
 
 type isKey = (e: KeyboardEvent) => boolean;
 
-type listTargetOpts = {
+type targetOpts = {
+  e: Event,
   list: element[],
   cover: element,
   root: element,
@@ -22,7 +23,7 @@ type listTargetOpts = {
   lastI: number,
 }
 
-type getTarget = (opts: listTargetOpts) => element;
+type getTarget = (opts: targetOpts) => element;
 
 type listForward = {
   /** 自定义前进 subNodes 的组合键 */
@@ -78,7 +79,7 @@ type exit = {
   type?: exitType[];
 
   /** 退出至哪个元素？ */
-  target?: element;
+  target?: boolean | element | getTarget;
 
   /** 延迟失焦，触发 node 后等待执行 delay 完成后失焦 */
   delay?: false | promiseDelay | callbackDelay;
