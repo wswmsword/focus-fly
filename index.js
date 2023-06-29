@@ -605,7 +605,7 @@ const focusNoJutsu = (...props) => {
   function exitHandler(e, on, target, delay, cover, list, root, ef) {
 
     if (!trappedList || 
-      !(isFun(ef) ? ef({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+      !(isFun(ef) ? ef({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex }) : true))
       return false;
 
     trappedList = false;
@@ -1034,12 +1034,12 @@ const focusNoJutsu = (...props) => {
 
       function entryKeyHandler(e) {
         if (key?.(e, activeIndex) && 
-          (isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+          (isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex }) : true))
           toggleEntryAndExit(e, true)
       }
     
       function entryNotKeyHandler(e) {
-        if (!(isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+        if (!(isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex }) : true))
           return;
         toggleEntryAndExit(e)
       }

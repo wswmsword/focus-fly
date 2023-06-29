@@ -41,14 +41,7 @@ type listBackward = {
   on?: handleNextOrPrev;
 };
 
-type ifParams = {
-  e: Event,
-  prev: Element,
-  cur: Element,
-  prevI: number,
-  curI: number,
-  trappedList: boolean,
-}
+type ifParams = targetOpts
 
 type ef = (obj: ifParams) => boolean;
 
