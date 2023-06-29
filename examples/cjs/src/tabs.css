@@ -41,7 +41,7 @@
   background: #f7f7f7;
   min-height: 10em;
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
   box-sizing: border-box;
   position: relative;
 }
@@ -50,8 +50,94 @@
   display: none;
 }
 
-[role="tabpanel"] p {
-  margin: 0;
+.colors {
+  display: flex;
+  gap: 3px;
+}
+
+.colors span {
+  width: 12px;
+  height: 12px;
+}
+
+.begonia .color_a {
+  background-color: rgb(246, 201, 211);
+}
+.begonia .color_b {
+  background-color: rgb(210, 212, 144);
+}
+.begonia .color_c {
+  background-color: rgb(167, 194, 228);
+}
+
+.pear_blossom .color_a {
+  background-color: rgb(246, 224, 151);
+}
+.pear_blossom .color_b {
+  background-color: rgb(197, 203, 147);
+}
+.pear_blossom .color_c {
+  background-color: rgb(165, 193, 229);
+}
+
+.hydrangea .color_a {
+  background-color: rgb(246, 224, 151);
+}
+.hydrangea .color_b {
+  background-color: rgb(197, 203, 147);
+}
+.hydrangea .color_c {
+  background-color: rgb(165, 193, 229);
+}
+
+.evening_primrose .color_a {
+  background-color: rgb(244, 196, 229);
+}
+.evening_primrose .color_b {
+  background-color: rgb(227, 227, 69);
+}
+.evening_primrose .color_c {
+  background-color: rgb(175, 180, 81);
+}
+
+.peach_blossom .color_a {
+  background-color: rgb(82, 107, 239);
+}
+.peach_blossom .color_b {
+  background-color: rgb(154, 169, 247);
+}
+.peach_blossom .color_c {
+  background-color: rgb(219, 224, 251);
+}
+
+.begonia::after, .pear_blossom::after, .hydrangea::after, .evening_primrose::after, .peach_blossom::after {
+  position: absolute;
+  bottom: -9px;
+  right: 3px;
+  color: white;
+  font-weight: bold;
+  font-size: 57px;
+  line-height: 57px;
+}
+
+.begonia::after {
+  content: "BEGONIA";
+}
+
+.pear_blossom::after {
+  content: "PEAR BLOSSOM"
+}
+
+.hydrangea::after {
+  content: "HYDRANGEA"
+}
+
+.evening_primrose::after {
+  content: "EVENING PRIMROSE";
+}
+
+.peach_blossom::after {
+  content: "PEACH BLOSSOM";
 }
 
 #tab_list {

@@ -7,6 +7,10 @@
 body {
   margin: 0;
   font-family: Inter, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  /* background: #F9E9B3 url(./assets/cloud_pattern.webp);
+  background-size: 1280px auto;
+  background-position: top;
+  background-repeat: repeat; */
 }
 
 kbd {

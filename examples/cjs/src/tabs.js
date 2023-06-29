@@ -1,6 +1,7 @@
 const focusNoJutsu = require("focus-no-jutsu");
+const tabList = ["#tab_1", "#tab_2", "#tab_3", "#tab_4", "#tab_5"];
 
-// 4～26 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+// 4～17 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内的移动
 focusNoJutsu("#tab_list", tabList, { // L:4
   next: e => e.key === "ArrowRight",
   prev: e => e.key === "ArrowLeft",
@@ -11,19 +12,10 @@ focusNoJutsu("#tab_list", tabList, { // L:4
     key: e => e.key === "Tab" && e.shiftKey,
     target: "#dialog_code",
   }],
-  entry: [{
-    node: "#dialog_code",
-    key: e => e.key === "Tab" && !e.shiftKey,
-    type: "keydown",
-  }, {
-    node: "#tags_code",
-    key: e => e.key === "Tab" && e.shiftKey,
-    type: "keydown",
-  }],
   initialActive: 1,
   removeListenersEachExit: false,
   onMove,
-}); // L:26
+}); // L:17
 
 // 下面的函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
 

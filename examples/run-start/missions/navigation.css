@@ -1,0 +1,123 @@
+#navigation {
+  max-width: 100%;
+  background-image: linear-gradient(90deg, #fcba21, #f05321);
+  border-radius: 8px;
+  padding: 4px;
+  display: inline-block;
+  position: sticky;
+  top: 4px;
+  z-index: 1;
+  box-shadow: 0 1px 2px -1px #b14625, 0 27px 0 rgba(255,255,255,.23) inset;
+  /* box-shadow: 0 1px 2px -1px #b14625; */
+}
+
+.nav_btn, .nav_link {
+  display: inline-block;
+  position: relative;
+  margin: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-weight: bold;
+  color: #fbefea;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: 1px 4px;
+}
+
+.nav_btn:hover, .nav_link:hover, .nav_btn:focus, .nav_link:focus {
+  background-color: rgba(255, 255, 255, 0.213);
+  /* opacity: .5; */
+}
+
+.nav_btn.opened {
+  background-color: white;
+  color: #d64d23;
+  box-shadow: 0 1px 3px -1px #b14625;
+}
+
+.nav_btn:active, .nav_link:active {
+  background-color: rgba(0, 0, 0, 0.121);
+}
+
+.nav_btn.opened:active {
+  background-color: rgb(146, 146, 146);
+}
+
+.nav_btn>span, .nav_link>span {
+  display: inline-block;
+  margin: 2px;
+  padding: 4px 6px;
+  line-height: 24px;
+}
+
+.nav_ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.nav_item {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  border-radius: 7px;
+  max-width: 450px;
+  width: calc(100vw - 36px);
+  box-sizing: border-box;
+  left: -4px;
+  top: calc(100% + 12px);
+  z-index: 7;
+  padding: 18px;
+  border: 1px solid #d4d4d4;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  box-shadow:0 3px 7px #220b0427,0 127px 0 rgba(255,255,255,.23) inset;
+  background:#F7F7F7;
+  background:linear-gradient(to bottom,#F7F7F7,#C7C7C7);
+  display: none;
+}
+
+.menu.opened {
+  display: grid;
+}
+
+.menu_link {
+  text-decoration: none;
+  padding: 8px;
+  display: block;
+  border-radius: 6px;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.menu_link:hover, .menu_link:focus {
+  /* background-color: rgba(0, 0, 0, 0.049); */
+  background:#FAFAFA;
+background:rgba(255,255,255,.7);
+}
+
+.menu_link .title {
+  color: #333333;
+}
+
+.menu_link .desc {
+  color: rgb(149, 149, 149);
+  font-weight: lighter;
+  font-size: 15px;
+}
+
+.link_mark {
+  display: inline-block;
+  margin-top: -2px;
+  margin-left: 4px;
+  width: 11px;
+  height: 11px;
+  fill: #fbefea;
+  vertical-align: middle;
+}

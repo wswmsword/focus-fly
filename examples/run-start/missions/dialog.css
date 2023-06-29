@@ -4,7 +4,7 @@
   padding: 25px;
   box-sizing: border-box;
   background-color: white;
-  z-index: 1;
+  z-index: 3;
   border-radius: 7px;
   box-shadow: rgba(14, 18, 22, 0.35) 0px 10px 38px -10px, rgba(14, 18, 22, 0.2) 0px 10px 20px -15px;
 }
@@ -57,14 +57,18 @@
   font-size: 14px;
   border-radius: 6px;
   color: #fbefea;
-  background-color: #f05321;
+  background-color: #f06d43;
   box-shadow: 0 1px 2px -1px #b14625;
+
+  /* background: linear-gradient(180deg, rgb(27, 37, 138), rgb(3, 139, 213)); */
+
   font-weight: bold;
+  /* box-shadow:0 1px 2px -1px #2590b1,0 17px 0 rgba(255,255,255,.23) inset; */
 }
 
 .button:hover {
   border-color: var(--dark-orange);
-  background-color: #e74b1b;
+  background-color: #f5805c;
   cursor: default;
 }
 
@@ -99,7 +103,7 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.44);
-  z-index: 1;
+  z-index: 2;
 }
 
 .closed_mask {

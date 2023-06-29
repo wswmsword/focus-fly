@@ -39,7 +39,7 @@ export default {
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
       {
-        test: /\.(jpe?g|svg|png|gif)$/,
+        test: /\.(jpe?g|svg|png|gif|ico)$/,
         type: "asset",
         generator: {
           filename: "img/[name]-[hash:8][ext]",
@@ -73,6 +73,7 @@ export default {
 function getHtmlWebpackPluginOpts() {
   return isProdMode ? {
     template: path.join(__dirname, `src/index.html`),
+    // favicon: path.resolve(__dirname, "src/assets/focus-no-jutsu.ico"),
     inject: true,
     minify: {
       html5: true,
