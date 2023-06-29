@@ -7,7 +7,7 @@
 您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
 <details>
-<summary>网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，进行业务或组件开发的时候，如果不考虑焦点的影响，程序可能会变得混乱，用户界面可能会出现一些不严谨的意外情况，显得脆弱。</summary>
+<summary>网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，进行业务或组件开发的时候，如果不考虑焦点的影响，程序可能会变得混乱，用户界面可能会出现意外情况，显得非常脆弱。</summary>
 
 假设现在准备开发一个弹窗，下面是需要考虑的一些情况：
 
@@ -20,7 +20,7 @@
 
 </details>
 
-也许你希望能集中管理焦点的分布情况，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
+也许你希望能集中管理相互关联的焦点，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
 
@@ -41,7 +41,7 @@
 
 例如开发一个模态对话框，对话框的背景应该对所有用户隐藏，对于鼠标用户，鼠标不能访问背景元素，对于键盘用户，键盘不能访问背景元素，对于使用辅助设备的用户，辅助设备也不能访问背景元素。
 
-这个项目可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
+focus-no-jutsu 可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
 </details>
 
 > **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
@@ -153,9 +153,11 @@ npm run start
 
 **list**，`(string | Element)[]`，是一个数组，数组内的元素可以是 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-这个参数表示列表，默认情况下，数组 `list` 只需要两个元素，一个可聚焦的头元素，一个可聚焦的尾元素，如果传入的数组长度大于 2，将只取头和尾。这两个元素被用于确定按下 <kbd>Tab</kbd> 后的聚焦元素，识别到尾元素将跳转到头元素，按下 <kbd>Shift-Tab</kbd>，识别到头元素将跳转到尾元素。
+这个参数表示列表，文档里提到的“列表”都是指这里 list，的默认情况下，数组 `list` 只需要两个元素，一个可聚焦的头元素，一个可聚焦的尾元素，如果传入的数组长度大于 2，将只取头和尾。这两个元素被用于确定按下 <kbd>Tab</kbd> 后的聚焦元素，识别到尾元素将跳转到头元素，按下 <kbd>Shift-Tab</kbd>，识别到头元素将跳转到尾元素。
 
-设置 `options.sequence` 为 true 后，`list` 可以是一个长度大于 2 的序列，这时按下 <kbd>Tab</kbd> 后，将以 `list` 中元素的顺序进行聚焦。在设置 `options.next` 或 `options.prev` 后，`options.sequence` 默认为 true。
+设置 `options.sequence` 为 true 后，`list` 可以是一个长度大于 2 的序列，这时按下 <kbd>Tab</kbd> 后，将以 `list` 中元素的顺序进行聚焦。在设置 `options.next` 或 `options.prev` 后，原来的 <kbd>Tab</kbd> 被自定义导航键取代，同时 `options.sequence` 被默认设为 true。
+
+通过入口进入列表，如果有封面，则列表会退出至封面，如果没有封面，列表会退出至入口。
 
 ### options
 
@@ -163,37 +165,38 @@ npm run start
 
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
-| sequence | boolean | false | 是否指定聚焦的元素，设置 true 则按顺序聚焦列表内每项元素 |
+| sequence | boolean | false | 是否指定聚焦的序列，设置 true 则按顺序聚焦列表内每项元素 |
 | loop | boolean | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
-| next | isKey \| subNodesForward | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
-| prev | isKey \| subNodesForward | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
+| next | isKey \| listForward | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
+| prev | isKey \| listBackward | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
 | trigger | element | null | 入口元素，用于退出列表时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `entry.node` 后，不用设置 `trigger` |
-| entry | enterSubNodes \| enterSubNodes[] | {} | 入口相关配置，进入列表 |
-| exit | exitSubNodes \| exitSubNodes[] | {} | 出口相关配置，退出列表 |
-| onEscape | false \| handleKeydown | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取 `options.exit.on` |
+| entry | element \| entry \| entry[] | {} | 入口相关配置，进入列表，可以直接设置为一个元素 |
+| exit | element \| exit \| exit[] | {} | 出口相关配置，退出列表，回到入口，如果存在封面，则是回到封面，可以直接设置为一个元素 |
+| onEscape | false \| handleKeydown | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取第一个 `options.exit.on` |
 | onClick | handleClick | null | 点击列表里的某一项后的行为 |
-| moMove | handleMoveListItem | null | 移动的时候触发 |
-| cover | boolean \| cover | false | 封面相关配置 |
-| initialActive | number | 0 | 初始的 activeIndex，默认的初始的焦点位置 |
-| correctionTarget | boolean \| getTarget | null | 焦点矫正 |
-| delayToFocus | promiseDelay \| callbackDelay | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦 |
-| delayToBlur | promiseDelay \| callbackDelay | null | 延迟 blur，触发出口后等待执行 delayToBlur 完成后 blur |
+| moMove | handleMoveListItem | null | 移动的时候触发，包括进入列表时，移动列表时，以及退出列表时 |
+| cover | boolean \| cover | false | 封面相关配置，设置为 true，则是默认封面，默认把根元素 root 作为封面，当焦点在封面上，默认 <kbd>Enter</kbd> 进入列表，默认 <kbd>Tab</kbd> 聚焦列表的后一个元素 |
+| initialActive | number | 0 | 默认的初始的焦点在列表中的位置，可能会被用于修改当前和上一个聚焦元素的样式时使用 |
+| correctionTarget | boolean \| getTarget | null | 焦点矫正，设为 true 后，从非入口的空白区域进入列表，也将聚焦上一次退出前焦点在列表中的位置 |
+| delayToFocus | boolean \| promiseDelay \| callbackDelay | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦，延迟聚焦的本意是等待列表渲染完成后再聚焦，延迟聚焦意味延迟添加列表相关的事件，也即在触发入口前，没有列表相关的事件，如果设为 true，则会在触发入口后立刻添加列表相关的事件 |
+| delayToBlur | promiseDelay \| callbackDelay | null | 延迟失列表的焦，触发出口后等待执行 `delayToBlur` 完成后失焦，和 `delayToFocus` 类似 |
 | removeListenersEachExit | boolean | true | 每次退出列表回到入口是否移除列表事件 |
 | removeListenersEachEnter | boolean | true | 每次进入列表后是否移除入口事件 |
+| manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
 | allowSafariToFocusAfterMousedown | boolean | true | 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题 |
 
 ### options.next
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| key | isKey | N | null | 自定义在列表前进的组合键 |
+| key | isKey | N | null | 自定义在列表前进的组合键，设置组合键并返回 true |
 | on | handleNextOrPrev | N | null | 前进时被执行，前进时的行为 |
 
 ### options.prev
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| key | isKey | N | null | 自定义在列表后退的组合键 |
+| key | isKey | N | null | 自定义在列表后退的组合键，设置组合键并返回 true |
 | on | handleNextOrPrev | N | null | 后退时被执行，后退时的行为 |
 
 <details>
@@ -243,38 +246,47 @@ focus(dialog, ["#head", "#second", "#tail"], {
 
 这些选项和入口相关，描述了如何通过入口进入封面或列表。下面的选项可以在一个对象里，也可以在由这个对象组成的数组里。下面的每一个选项都是可选的。
 
+如果已经通过入口进入列表，则在退出列表前，不能再次触发入口进入列表。通过直接点击列表，也被算作进入列表。
+
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
 | node | element | null | 入口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
 | key | iskey | null | 自定义进入列表组合键 |
-| on | handleKeydown | null | 进入时被调用，进入列表前的行为，如果列表或封面在这里渲染，需要设置 `options.delayToFocus` 来延迟聚焦 |
-| type | enterType[] | ["keydown", "click"] | 入口的监听方式 |
-| target | element \| getTarget | null | 进入到哪个元素？ |
+| on | handleKeydown | null | 进入时被调用，进入列表前的行为，如果列表或封面在这里才开始渲染，需要设置 `options.delayToFocus` 来延迟聚焦，否则不能聚焦不存在的元素 |
+| type | enterType \| enterType[] | null | 入口的监听方式，如果 `options.entry` 设置了 `node` 选项，则默认为 `"click"`，如果还设置了 `key` 选项，则默认为 `["click", "keydown"]`，另外还支持 `"focus"` 类型用于聚焦触发入口，`"invoke"` 类型用于返回值 `Return.enter` 触发入口 |
+| target | boolean \| element \| getTarget | null | 进入到哪个元素？设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 |
+| if | ef | null | 触发入口的条件，如果不符合条件，将不被认为是进入了列表 |
+| onExit | true | handleExit | 指定当前入口同时也是出口，作为出口的行为，设为 true，则行为取 `options.entry.on` |
 
 ### options.exit
 
 这些选项和*出口*相关，描述了焦点如何从列表回到封面或入口。
+
+和入口类似，在下次进入列表前，不能够重复触发出口退出列表。通过点击非列表的空白区域，也被算作退出列表。
 
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
 | node | element | null | 出口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
 | key | iskey | null | 自定义退出列表组合键 |
 | on | handleKeydown | null | 退出时被调用，退出列表前的行为，如果有封面就退出至封面，如果没有就退出至入口，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
-| type | exitType[] | ["keydown", "click"] | 出口的事件类型 |
-| target | element | null | 退出至哪个元素？ |
+| type | exitType \| exitType[] | ["keydown", "click"] | 出口的事件类型，和 `options.entry.type` 类似，但是多了 `"outlist"` 类型，用于聚焦空白区域、非列表区域时触发出口，这常用于弹窗的半透明蒙版 |
+| target | boolean \| element \| getTarget | null | 退出至哪个元素？设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟失焦，触发 node 后等待执行 delay 完成后失焦 |
+| if | ef | null | 触发出口的条件，如果不符合条件，将不被认为是退出了列表 |
 
 ### options.cover
 
 这些选项和封面有关，每个选项都是可选且默认值为空。
 
+如果存在封面，将通过入口进入封面，通过封面进入列表，通过出口退出至封面，通过封面退出至入口。
+
 | Name | Type | Desc |
 |:--|:--|:--|
 | node | element | 封面元素，如果不指定，默认将取根元素 `root` |
-| exit | isKey \| exitCover \| exitCover[] | 退出封面 |
-| enterKey | isKey | 自定义进入 subNodes 的组合键 |
-| onEnter | handleKeydown | 进入 subNodes 时的行为 |
+| exit | isKey \| exitCover \| exitCover[] | 退出封面，可以直接设置退出封面的组合键，如果不设置，<kbd>Tab</kbd> 将作为默认退出封面的按键，并且退出至列表的后一个元素 |
+| enterKey | isKey | 自定义进入列表的组合键，如果不设置，默认为 <kbd>Enter</kbd> |
+| onEnter | handleKeydown | 进入列表时的行为 |
 
 `options.cover.exit` 是一个有若干选项的对象，也可以是一个包含这类对象的数组。下面是 `options.cover.exit` 的所有选项，每一个选项都是可选的，且默认值为空：
 
@@ -290,17 +302,17 @@ focus(dialog, ["#head", "#second", "#tail"], {
 
 | Name | Type | Desc |
 |:--|:--|:--|
-| enter | () => Promise\<void\> | 聚焦 `subNodes` 的头元素，如果自己管理入口元素的点击监听器，可以使用该方法 |
-| exit | () => Promise\<void\> | 聚焦入口元素，例如 `trigger`，如果自己管理退出入口元素的点击监听器，可以使用该方法 |
+| enter | (entry: ReturnEntry) => Promise\<void\> | 进入列表，如果自己管理入口元素的点击监听器，可以使用该方法 |
+| exit | (exit: ReturnExit) => Promise\<void\> | 退出列表，如果自己管理退出入口元素的点击监听器，可以使用该方法 |
 | removeListeners | () => void | 移除所有的监听事件 |
 | addEntryListeners | () => void | 添加入口的监听事件 |
 | removeEntryListeners | () => void | 移除入口事件 |
 | addListRelatedListeners | () => void | 添加列表相关（封面、列表、出口）的监听事件 |
 | removeListRelatedListeners | () => void | 移除列表相关的事件 |
-| addForward | (id: string, forward: forward \| getForward) => void | 添加转发 |
+| addForward | (id: string, forward: forward \| getForward) => void | 添加转发，转发用于不涉及入口、列表、出口、封面的焦点转移 |
 | removeForward | (id: string) => void | 移除转发 |
 | updateList | (newList: element[]) => void | 更新列表 |
-| i | (newI?: number) => number | 获取和设置当前焦点的编号 |
+| i | (newI?: number) => number | 获取和设置当前焦点的编号，设置新的编号之后，会聚焦对应编号的焦点，并触发 `options.onMove` |
 
 <details>
 <summary>
@@ -359,6 +371,43 @@ npm i
 npm run test
 ```
 
+## 常见问题
+
+<details>
+<summary>macOS 的 Safari 浏览器中，“entry.onExit” 无效，不能实现切换的功能。</summary>
+
+`entry.onExit` 利用了 `relatedTarget`，至少对于 `<button>` 元素，Safari 不能正常获取。为了让入口在 Safari 上支持切换出口，可以添加下面这样的 `outlist` 类型的出口：
+
+```javascript
+focusNoJutsu("#container", ["#start", "#end"], {
+  onEscape: toggle,
+  entry: {
+    node: "#btn",
+    on: toggle,
+    onExit: true, // 另 #btn 支持作为出口
+  },
+  exit: [
+    {
+      type: "outlist",
+      if: () => false, // 强制不执行（跳过） outlist 类型的出口
+    },
+    // 其它出口
+    // {
+    //   node: ...
+    //   key: ...
+    //   on: ...
+    // }
+  ],
+});
+
+function toggle() {
+  // ...
+}
+```
+
+不过像这样添加后，`outlist` 就不能正常使用了，点击空白区域将不会触发 `outlist` 退出列表焦点。
+</details>
+
 ## CHANGELOG
 
 查看[更新日志](./CHANGELOG.md)。
@@ -378,6 +427,7 @@ npm run test
 ## 其它
 
 相关链接：
-- [https://www.toptal.com/developers/keycode](https://www.toptal.com/developers/keycode)
 - [Developing a Keyboard Interface](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)
 - [Keyboard Accessibility](https://webaim.org/techniques/keyboard/)
+- [接受 #NoMouse 挑战！](https://github.com/wswmsword/my-logs/blob/main/%E7%BF%BB%E8%AF%91/nomouse.md)
+- [JavaScript Key Code Event Key](https://www.toptal.com/developers/keycode)
