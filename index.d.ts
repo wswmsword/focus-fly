@@ -41,6 +41,17 @@ type listBackward = {
   on?: handleNextOrPrev;
 };
 
+type ifParams = {
+  e: Event,
+  prev: Element,
+  cur: Element,
+  prevI: number,
+  curI: number,
+  trappedList: boolean,
+}
+
+type ef = (obj: ifParams) => boolean;
+
 type enterType = "keydown" | "focus" | "click" | "invoke";
 type exitType = enterType | "outlist";
 
@@ -62,6 +73,9 @@ type entry = {
 
   /** 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 */
   delay?: false | promiseDelay | callbackDelay;
+
+  /** 入口的条件 */
+  if?: ef;
 }
 
 type exit = {
@@ -83,6 +97,9 @@ type exit = {
 
   /** 延迟失焦，触发 node 后等待执行 delay 完成后失焦 */
   delay?: false | promiseDelay | callbackDelay;
+
+  /** 出口的条件 */
+  if?: ef;
 };
 
 type exitCover = {

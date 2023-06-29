@@ -599,9 +599,11 @@ const focusNoJutsu = (...props) => {
   }
 
   /** 出口 handler */
-  async function exitHandler(e, on, target, delay, cover, list, root) {
+  function exitHandler(e, on, target, delay, cover, list, root, ef) {
 
-    if (!trappedList) return;
+    if (!trappedList || 
+      !(isFun(ef) ? ef({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+      return false;
 
     trappedList = false;
 
@@ -756,14 +758,16 @@ const focusNoJutsu = (...props) => {
           trappedCover = false; // 退出封面
           return;
         }
-        // 聚焦在 rootNode 之外，并且没有聚焦在封面上
-        if (isOutRootNode && !isActiveCover)
-          outListExitHandler(e);
-        // 聚焦在 rootNode 之外，或者聚焦在封面上
-        if (isActiveCover || isOutRootNode) {
-          onMove?.({ e, prev: _subNodes[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+
+        let isOutList = null;
+        if (isActiveCover || isOutRootNode) isOutList = outListExitHandler(e);
+        if (isOutList === false) return; // 不符合退出列表的条件
+
+        if (isActiveCover) { // 聚焦在封面
           trappedList = false;
-          if (!isActiveCover) trappedCover = false; // 退出封面
+        } else if (isOutRootNode) { // 聚焦在非封面、非列表的区域
+          trappedList = false;
+          trappedCover = false;
         }
       });
     }
@@ -865,8 +869,7 @@ const focusNoJutsu = (...props) => {
       for (const exit of outListExits) {
         const { on, target: origin_target, delay } = exit;
         const target = element(origin_target);
-        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
-        break;
+        return exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit.if);
       }
     }
 
@@ -878,7 +881,7 @@ const focusNoJutsu = (...props) => {
       if (
         (node != null && !node.contains(e.target)) ||
         node == null) return false;
-      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit.if);
       return true;
     }
 
@@ -898,7 +901,7 @@ const focusNoJutsu = (...props) => {
       if (
         (node != null && e.target !== node) ||
         node == null) return false;
-      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
+      exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit.if);
       return true;
     }
 
@@ -916,7 +919,7 @@ const focusNoJutsu = (...props) => {
       const node = element(origin_node);
       if (node != null && e.target !== node) return false;
       if (key?.(e, activeIndex)) {
-        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode);
+        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit.if);
         return true;
       }
     }
@@ -1010,6 +1013,7 @@ const focusNoJutsu = (...props) => {
 
     for (let entry of entries) {
       const { node: origin, on, key, type, target, delay } = entry;
+      const ef = entry.if;
       const types = [].concat(type);
       const allTypes = ["keydown", "focus", "click"];
       const node = element(origin);
@@ -1024,7 +1028,9 @@ const focusNoJutsu = (...props) => {
       });
 
       function entryKeyHandler(e) {
-        if (key?.(e, activeIndex)) {
+        if (key?.(e, activeIndex) && 
+          (isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+        {
           e.preventDefault();
           entryHandler(e, on, target, delay);
           if (removeListenersEachEnter && !manual)
@@ -1033,6 +1039,8 @@ const focusNoJutsu = (...props) => {
       }
     
       function entryNotKeyHandler(e) {
+        if (!(isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
+          return;
         entryHandler(e, on, target, delay);
         if (removeListenersEachEnter && !manual)
           entryListeners.removeListeners();
