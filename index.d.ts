@@ -76,6 +76,8 @@ type entry = {
 
   /** 入口的条件 */
   if?: ef;
+
+  onExit?: true | handleExit;
 }
 
 type exit = {

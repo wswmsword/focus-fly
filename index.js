@@ -353,10 +353,13 @@ const focusNoJutsu = (...props) => {
       ...entry,
       delay: entry.delay ?? delayToFocus,
       type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
+      onExit: entry.onExit === true ? entry.on : entry.onExit,
     }))
     .reduce(nodesReducer, []);
   /** 是否是空入口 */
   const hasNoEntry = entries.length === 0;
+  /** 带切换的入口 */
+  const toggles = new Set(entries.map(e => isFun(e.onExit) ? e.node : null).filter(n => n != null).map(n => element(n)));
 
   /** 默认入口 */
   let _trigger = element(trigger || entries[0]?.node);
@@ -746,6 +749,8 @@ const focusNoJutsu = (...props) => {
     }
 
     function blurTrapListHandler(e) {
+      // 用于保护可切换的入口能够被触发
+      if (toggles.has(e.relatedTarget)) return;
 
       setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
 
@@ -1012,7 +1017,7 @@ const focusNoJutsu = (...props) => {
     if (!entryListeners.isEmpty) return;
 
     for (let entry of entries) {
-      const { node: origin, on, key, type, target, delay } = entry;
+      const { node: origin, on, key, type, target, delay, onExit } = entry;
       const ef = entry.if;
       const types = [].concat(type);
       const allTypes = ["keydown", "focus", "click"];
@@ -1030,20 +1035,33 @@ const focusNoJutsu = (...props) => {
       function entryKeyHandler(e) {
         if (key?.(e, activeIndex) && 
           (isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
-        {
-          e.preventDefault();
-          entryHandler(e, on, target, delay);
-          if (removeListenersEachEnter && !manual)
-            entryListeners.removeListeners();
-        }
+          toggleEntryAndExit(e, true)
       }
     
       function entryNotKeyHandler(e) {
         if (!(isFun(ef) ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex, trappedList }) : true))
           return;
-        entryHandler(e, on, target, delay);
-        if (removeListenersEachEnter && !manual)
-          entryListeners.removeListeners();
+        toggleEntryAndExit(e)
+      }
+
+      function toggleEntryAndExit(e, isKey) {
+        if (trappedList) {
+          if (isFun(onExit)) {
+            const {
+              subNodes: list,
+              coverNode: cover,
+              rootNode: root,
+            } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
+            isKey && e.preventDefault();
+            exitHandler(e, onExit, target, false, cover, list, root);
+          }
+        }
+        else {
+          isKey && e.preventDefault();
+          entryHandler(e, on, target, delay);
+          if (removeListenersEachEnter && !manual)
+            entryListeners.removeListeners();
+        }
       }
     }
 
