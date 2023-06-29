@@ -53,16 +53,16 @@ type entry = {
   node?: element;
 
   /** 自定义进入 subNodes 组合键 */
-  key?: iskey;
+  key?: isKey;
 
   /** 点击触发器后的行为 */
   on?: handleEnter;
 
   /** 入口的事件类型 */
-  type?: enterType[];
+  type?: enterType | enterType[];
 
   /** 进入到哪个元素？ */
-  target?: element | getTarget;
+  target?: boolean | element | getTarget;
 
   /** 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 */
   delay?: false | promiseDelay | callbackDelay;
@@ -70,7 +70,19 @@ type entry = {
   /** 入口的条件 */
   if?: ef;
 
+  /** 设置入口同时也是出口，设置作为出口时的行为 */
   onExit?: true | handleExit;
+}
+
+type ReturnEntry = {
+  /** 点击触发器后的行为 */
+  on?: handleEnter;
+
+  /** 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦 */
+  delay?: false | promiseDelay | callbackDelay;
+
+  /** 进入到哪个元素？ */
+  target?: boolean | element | getTarget;
 }
 
 type exit = {
@@ -85,7 +97,7 @@ type exit = {
   on?: handleExit;
 
   /** 出口的事件类型 */
-  type?: exitType[];
+  type?: exitType | exitType[];
 
   /** 退出至哪个元素？ */
   target?: boolean | element | getTarget;
@@ -96,6 +108,14 @@ type exit = {
   /** 出口的条件 */
   if?: ef;
 };
+
+type ReturnExit = {
+  /** 点击退出循环焦点的触发器后的行为 */
+  on?: handleExit;
+
+  /** 退出至哪个元素？ */
+  target?: boolean | element | getTarget;
+}
 
 type exitCover = {
 
@@ -165,10 +185,10 @@ interface Options {
   trigger?: element;
 
   /** 入口，进入 list */
-  entry?: entry | entry[];
+  entry?: element | entry | entry[];
 
   /** 出口，退出 list */
-  exit?: exit | exit[];
+  exit?: element | exit | exit[];
 
   /** 按下 `esc` 的行为，如果未设置，默认取 `exit.on` */
   onEscape?: boolean | handleKeydown;
@@ -210,10 +230,10 @@ interface Options {
 interface Return {
 
   /** 进入循环，聚焦 */
-  enter(): Promise<void>;
+  enter(entry: ReturnEntry): Promise<void>;
 
   /** 退出循环，聚焦触发元素 */
-  exit(): Promise<void>;
+  exit(exit: ReturnExit): Promise<void>;
 
   /** 移除所有的监听事件 */
   removeListeners(): void;
