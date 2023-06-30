@@ -1,4 +1,9 @@
-output
+output/*
 .DS_Store
 node_modules
 coverage
+
+!output/focus-no-jutsu.umd.js
+!output/focus-no-jutsu.umd.js.map
+!output/focus-no-jutsu.umd.min.js
+!output/focus-no-jutsu.umd.min.js.map
