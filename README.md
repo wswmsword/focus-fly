@@ -8,10 +8,32 @@
 
 网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹，进行业务或组件开发的时候，如果不考虑焦点的影响，程序可能会变得混乱，用户界面可能会出现意外情况，显得非常脆弱。
 
+也许你希望能集中管理相互关联的焦点，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
+
+下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
+
+> **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
+>
+> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
+
+
+<!-- <table>
+	<tr>
+		<td>
+
+> **Note**
+>
+> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
+    
+</td>
+		<td><img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="500"></td>
+	</tr>
+</table> -->
+
 <details>
 <summary>假设现在准备开发一个弹窗，至少要考虑弹窗内的焦点循环，以及触发关闭按钮和蒙层的时候，要让焦点回到激活弹窗的地方，等等。</summary>
 
-下面是在开发弹窗是，要考虑的焦点的几种情况：
+下面是在开发弹窗时，要考虑的焦点的几种情况：
 
 - 在“打开”按钮上按下 <kbd>Enter</kbd>，弹窗内第一个元素获得焦点；
 - 在弹窗的内部按住 <kbd>Tab</kbd>，焦点（中幻术）不能逃出弹窗；
@@ -20,10 +42,6 @@
 - 按下 <kbd>Esc</kbd>，或者点击弹窗背后的半透明蒙层，“打开”按钮获得焦点；
 - 管理弹窗、半透明蒙版、“打开”按钮、“关闭”按钮的点击和键盘事件。
 </details>
-
-也许你希望能集中管理相互关联的焦点，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
-
-下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
 
 <details>
 <summary>一个常规的聚焦流程可以用入口、列表和出口这几个关键词来描述。</summary>
@@ -45,34 +63,27 @@
 focus-no-jutsu 可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
 </details>
 
-> **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
->
-> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
-
-
-<!-- <table>
-	<tr>
-		<td>
-
-> **Note**
->
-> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
-    
-</td>
-		<td><img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="500"></td>
-	</tr>
-</table> -->
-
 ## 安装
 
-> 开发中，等待发布至 npm。
+npm 安装：
+```bash
+npm install focus-no-jutsu
+```
+
+yarn 安装：
+```bash
+yarn add focus-no-jutsu
+```
 
 ## 使用
+
+focus-no-jutsu 支持 ESM 和 CJS 导入，如果直接用于浏览器标签引入，可以[在本项目的 `output/` 文件夹内下载 UMD 文件](https://github.com/wswmsword/focus-no-jutsu/tree/main/output)。
 
 添加下面这两行代码后，焦点会在元素 `#firstTabbableNode` 和 `#lastTabbableNode` 之间陷入循环：
 
 ```javascript
-import focus from "focus-no-jutsu";
+import focus from "focus-no-jutsu"; // ESM 导入方式
+// const focus = require("focus-no-jutsu"); // CJS 导入方式
 focus(["#firstTabbableNode", "#lastTabbableNode"]);
 ```
 
@@ -258,7 +269,7 @@ focus(dialog, ["#head", "#second", "#tail"], {
 | target | boolean \| element \| getTarget | null | 进入到哪个元素？设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦，如果没有设置，将取 `options.delayToFocus` |
 | if | ef | null | 触发入口的条件，如果不符合条件，将不被认为是进入了列表 |
-| onExit | true | handleExit | 指定当前入口同时也是出口，作为出口的行为，设为 true，则行为取 `options.entry.on`，该选项类似表明这个元素是个开关 |
+| onExit | true \| handleExit | null | 指定当前入口同时也是出口，作为出口的行为，设为 true，则行为取 `options.entry.on`，该选项类似表明这个元素是个开关 |
 
 ### options.exit
 
