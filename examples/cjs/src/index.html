@@ -158,7 +158,7 @@ function closeDialog() {
       </nav>
 
       <details>
-        <summary>查看源码。</summary>
+        <summary id="navigation_code">查看源码。</summary>
         <pre>
 <code>const menuBtn = document.getElementById("menu_btn");
 const menuBody = document.getElementById("menu");
@@ -272,7 +272,7 @@ focusNoJutsu("#tab_list", tabList, { // L:4
     target: "#tags_code",
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
-    target: "#dialog_code",
+    target: "#navigation_code",
   }],
   initialActive: 1,
   removeListenersEachExit: false,

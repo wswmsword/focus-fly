@@ -9,7 +9,7 @@ focusNoJutsu("#tab_list", tabList, { // L:4
     target: "#tags_code",
   }, {
     key: e => e.key === "Tab" && e.shiftKey,
-    target: "#dialog_code",
+    target: "#navigation_code",
   }],
   initialActive: 1,
   removeListenersEachExit: false,
