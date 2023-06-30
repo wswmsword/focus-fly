@@ -1,6 +1,6 @@
 {
   "name": "focus-no-jutsu",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "type": "module",
   "description": "焦点管理。Focus management.",
   "main": "output/focus-no-jutsu.cjs",
@@ -17,7 +17,8 @@
     "index.js",
     "index.d.ts",
     "utils.js",
-    "output"
+    "output",
+    "images"
   ],
   "types": "index.d.ts",
   "scripts": {
@@ -39,10 +40,11 @@
     "focus-management",
     "accessibility",
     "keyboard",
+    "tab-sequence",
     "focus-lock",
     "focus-trap"
   ],
-  "author": "",
+  "author": "wsWmsword",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/wswmsword/focus-no-jutsu/issues"
