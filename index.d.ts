@@ -50,7 +50,7 @@ type exitType = enterType | "outlist";
 
 type entry = {
   /** 触发器，将用于监听点击事件，用于退出焦点循环时聚焦使用 */
-  node?: element;
+  node?: element | element[];
 
   /** 自定义进入 subNodes 组合键 */
   key?: isKey;
@@ -88,7 +88,7 @@ type ReturnEntry = {
 type exit = {
 
   /** 退出循环焦点的触发器，用于监听点击事件 */
-  node?: element;
+  node?: element | element[];
 
   /** 自定义退出 subNodes 组合键 */
   key?: isKey;
@@ -185,10 +185,10 @@ interface Options {
   trigger?: element;
 
   /** 入口，进入 list */
-  entry?: element | entry | entry[];
+  entry?: element | element[] | entry | entry[];
 
   /** 出口，退出 list */
-  exit?: element | exit | exit[];
+  exit?: element | element[] | exit | exit[];
 
   /** 按下 `esc` 的行为，如果未设置，默认取 `exit.on` */
   onEscape?: boolean | handleKeydown;
