@@ -18,7 +18,10 @@
     "index.d.ts",
     "utils.js",
     "output",
-    "images"
+    "!output/focus-no-jutsu.umd.js",
+    "!output/focus-no-jutsu.umd.js.map",
+    "!output/focus-no-jutsu.umd.min.js",
+    "!output/focus-no-jutsu.umd.min.js.map"
   ],
   "types": "index.d.ts",
   "scripts": {
@@ -29,7 +32,8 @@
     "compile:esm": "BUILD_ENV=esm BABEL_ENV=esm rollup -c",
     "compile:cjs": "BUILD_ENV=cjs BABEL_ENV=es5 rollup -c",
     "compile:umd": "BUILD_ENV=umd BABEL_ENV=es5 rollup -c",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+    "check:files": "npm pack --dry-run"
   },
   "repository": {
     "type": "git",
