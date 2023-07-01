@@ -3,6 +3,9 @@ output/*
 node_modules
 coverage
 
+examples/cjs/output
+examples/esm/output
+
 !output/focus-no-jutsu.umd.js
 !output/focus-no-jutsu.umd.js.map
 !output/focus-no-jutsu.umd.min.js
