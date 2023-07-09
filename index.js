@@ -9,11 +9,9 @@ const focus = function(e) {
 };
 
 /** 尝试聚焦，如果聚焦失效，则下个 setTimeout 再次聚焦 */
-const tickFocus = async function(e) {
-  return new Promise(resolve => {
-    if (e == null) tick(() => resolve(e && focus(e)));
-    else resolve(focus(e));
-  });
+const tickFocus = function(e) {
+  if (e == null) tick(() => e && focus(e));
+  else focus(e);
 };
 
 /** 手动聚焦下一个元素 */
@@ -166,28 +164,26 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
 };
 
 /** 获取聚焦或失焦时延迟的类型 */
-const getDelayType = function(delay) {
+const getDelayType = function(delay, processor) {
   const isFunctionDelay = isFun(delay);
-  const delayRes = isFunctionDelay && delay(() => {});
-  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
+  const delayRes = isFunctionDelay && delay(processor);
+  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
   const callbackDelay = isFunctionDelay && !promiseDelay;
   const commonDelay = (delay === true) && !promiseDelay && !callbackDelay;
   return {
     promiseDelay,
     callbackDelay,
     commonDelay,
+    delayRes,
   };
 };
 
 /** 延迟执行某些操作 */
-const delayToProcess = async function(delay, processor) {
+const delayToProcess = function(delay, processor) {
 
-  const { promiseDelay, callbackDelay, commonDelay } = !!delay ? getDelayType(delay) : {};
-  if (promiseDelay) {
-    await delay(() => {});
-    processor();
-  }
-  else if (callbackDelay) delay(processor);
+  const { promiseDelay, callbackDelay, commonDelay, delayRes } = !!delay ? getDelayType(delay, processor) : {};
+  if (promiseDelay) delayRes.then(processor);
+  else if (callbackDelay) {}
   else if (commonDelay) processor();
   else return true;
 };
@@ -561,16 +557,16 @@ const focusNoJutsu = (...props) => {
   return Return;
 
   /** 入口 handler */
-  async function entryHandler(e, onEnter, target, delay) {
+  function entryHandler(e, onEnter, target, delay) {
 
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
 
-    await onEnter?.(e);
-
-    const isImmediate = !delay;
-    if (isImmediate) findNodesToLoadListenersAndFocus();
-    else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+    Promise.resolve(onEnter?.(e)).then(_ => {
+      const isImmediate = !delay;
+      if (isImmediate) findNodesToLoadListenersAndFocus();
+      else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+    })
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
     function findNodesToLoadListenersAndFocus() {
@@ -618,13 +614,13 @@ const focusNoJutsu = (...props) => {
     else return exitListWithoutTarget();
 
     /** 退出列表，有 target */
-    async function exitListWithTarget() {
+    function exitListWithTarget() {
 
-      await on?.(e);
-
-      delay = delay ?? delayToBlur;
-      const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
-      if (isImmediate) focusThenRemoveListeners();
+      Promise.resolve(on?.(e)).then(_ => {
+        delay = delay ?? delayToBlur;
+        const isImmediate = delayToProcess(delay, focusThenRemoveListeners);
+        if (isImmediate) focusThenRemoveListeners();
+      });
 
       function focusThenRemoveListeners() {
         focus(gotTarget);
@@ -638,30 +634,32 @@ const focusNoJutsu = (...props) => {
     }
 
     /** 退出列表，无 target */
-    async function exitListWithoutTarget() {
+    function exitListWithoutTarget() {
 
-      if (gotTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
-        await on?.(e);
-        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
-        if (!manual) {
-          removeListRelatedListeners();
-          addEntryListeners();
+      Promise.resolve(on?.(e)).then(_ => {
+
+        if (gotTarget === false) { // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+
+          const removeListenersWithoutFocus = focusThenRemoveListeners();
+          removeListenersWithoutFocus();
+          return ;
         }
-        return ;
-      }
-      if (enabledCover) {
-        await on?.(e);
-        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
-        focus(cover);
-      } else {
-        await on?.(e);
+        if (enabledCover) {
 
-        delay = delay ?? delayToBlur;
-        const isImmediate = await delayToProcess(delay, focusThenRemoveListeners);
-        if (isImmediate) focusThenRemoveListeners();
+          onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+          focus(cover);
+        } else {
+  
+          delay = delay ?? delayToBlur;
+          const focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
+          const isImmediate = delayToProcess(delay, focusTriggerThenRemoveListeners);
+          if (isImmediate) focusTriggerThenRemoveListeners();
+        }
+      });
 
-        function focusThenRemoveListeners() {
-          _trigger && focus(_trigger);
+      function focusThenRemoveListeners(focusTarget) {
+        return _ => {
+          focusTarget && focus(focusTarget);
           onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           if (!manual) {
             removeListRelatedListeners();
