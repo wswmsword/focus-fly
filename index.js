@@ -435,8 +435,8 @@ const focusNoJutsu = (...props) => {
         const { on, target, delay } = entry;
         return entryHandler({ fromInvoke: true }, on, target, delay);
       } else {
-        for (const entry of entries) {
-          const { on, type, node, target, delay } = entry;
+        for (let i = 0; i < entries.length; ++ i) {
+          const { on, type, node, target, delay } = entries[i];
           const invokeType = "invoke";
 
           if (type?.some(type => type == null || type === false || type === invokeType) || node == null) {
@@ -461,8 +461,8 @@ const focusNoJutsu = (...props) => {
         return toExit(target, on);
       } else {
         const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
-        for (const exit of exits) {
-          const { on, type, target } = exit;
+        for (let i = 0; i < exits.length; ++ i) {
+          const { on, type, target } = exits[i];
           const invokeType = "invoke";
   
           if (type?.some(type => type == null || type === false || type === invokeType)) {
@@ -839,8 +839,8 @@ const focusNoJutsu = (...props) => {
       }
 
       // 出口
-      for (let exit of exitsCover) {
-        const { key, on, target: origin } = exit;
+      for (let i = 0; i < exitsCover.length; ++ i) {
+        const { key, on, target: origin } = exitsCover[i];
         const target = element(origin);
         if (key?.(e, activeIndex)) {
           exitCoverHandler(e, on, target);
@@ -869,8 +869,8 @@ const focusNoJutsu = (...props) => {
      +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
     function outListExitHandler(e) {
-      for (const exit of outListExits) {
-        const { on, target: origin_target, delay } = exit;
+      for (let i = 0; i < outListExits.length; ++ i) {
+        const { on, target: origin_target, delay } = outListExits[i];
         const target = element(origin_target);
         return exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit.if);
       }
@@ -890,8 +890,8 @@ const focusNoJutsu = (...props) => {
 
     /** 点击列表的出口 */
     function clickListExitHandler(e) {
-      for (const exit of clickExits) {
-        const isOK = clickExitHandler(e, exit);
+      for (let i = 0; i < clickExits.length; ++ i) {
+        const isOK = clickExitHandler(e, clickExits[i]);
         if (isOK) break;
       }
     }
@@ -911,8 +911,8 @@ const focusNoJutsu = (...props) => {
     /** 聚焦列表一个单项而退出 */
     function focusListExitHandler(e) {
 
-      for (const exit of focusExits) {
-        const isOK = focusExitHandler(e, exit)
+      for (let i = 0; i < focusExits.length; ++ i) {
+        const isOK = focusExitHandler(e, focusExits[i])
         if (isOK) break;
       }
     }
@@ -933,8 +933,8 @@ const focusNoJutsu = (...props) => {
 
       if (disabledEsc && isEscapeEvent(e)) return;
 
-      for (const exit of keyExits) {
-        const isOK = keyExitHandler(e, exit);
+      for (let i = 0; i < keyExits.length; ++ i) {
+        const isOK = keyExitHandler(e, keyExits[i]);
         if (isOK) break;
       }
     }
@@ -1014,7 +1014,8 @@ const focusNoJutsu = (...props) => {
 
     if (!entryListeners.isEmpty) return;
 
-    for (let entry of entries) {
+    for (let i = 0; i < entries.length; ++ i) {
+      const entry = entries[i];
       const { node: origin, on, key, type, target, delay, onExit } = entry;
       const ef = entry.if;
       const types = [].concat(type);
