@@ -118,6 +118,7 @@
   font-weight: bold;
   font-size: 57px;
   line-height: 57px;
+  text-align: right;
 }
 
 .begonia::after {
