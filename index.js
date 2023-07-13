@@ -726,18 +726,17 @@ const focusNoJutsu = (...props) => {
         if (hasKeyExits) keyListExitHandler(e);
       });
 
-      if (enabledTabSequence) {
-        // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
-        listListeners.push(root, "click", clickListItemHandler);
+      if (enabledTabSequence || hasClickExits) {
+        listListeners.push(root, "click", e => {
+          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
+          enabledTabSequence && clickListItemHandler(e);
+          // 列表点击出口
+          hasClickExits && clickListExitHandler(e);
+        });
       }
 
       // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
       listListeners.push(root, "mousedown", mousedownListItemHandler);
-
-      if (hasClickExits) {
-        // 列表点击出口
-        listListeners.push(root, "click", clickListExitHandler);
-      }
 
       if (hasFocusExits) {
         // 列表聚焦出口
