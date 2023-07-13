@@ -884,7 +884,7 @@ const focusNoJutsu = (...props) => {
         if((coverEnterKey ?? isEnterEvent)(e) && !trappedList) {
           e.preventDefault();
           isEnterFromCover = true;
-          trappedList = true
+          trappedList = true;
           onEnterCover?.(e);
           activeIndex = activeIndex === -1 ? 0 : activeIndex;
           focus(list[activeIndex]);
@@ -926,7 +926,7 @@ const focusNoJutsu = (...props) => {
         for (let i = 0; i < outListExits.length; ++ i) {
           const { on, target: origin_target, delay } = outListExits[i];
           const target = element(origin_target);
-          return exitHandler(e, on, target, delay, cover, list, root, exit.if);
+          return exitHandler(e, on, target, delay, cover, list, root, outListExits[i].if);
         }
       }
 
