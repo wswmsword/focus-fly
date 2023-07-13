@@ -315,6 +315,8 @@ const focusNoJutsu = (...props) => {
     removeListenersEachExit = true,
     /** 每次进入列表是否移除入口事件 */
     removeListenersEachEnter,
+    /** 每次退出列表是否添加入口监听事件 */
+    addEntryListenersEachExit = true,
     /** 手动添加和移除监听事件，入口、列表、出口的监听事件，`removeListenersEachExit` 和 `removeListenersEachEnter` 将失效 */
     manual,
     /** 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题 */
@@ -624,7 +626,8 @@ const focusNoJutsu = (...props) => {
         if (!manual) {
           if (gotTarget !== cover)
             removeListRelatedListeners();
-          addEntryListeners();
+          if (addEntryListenersEachExit)
+            addEntryListeners();
         }
       }
     }
@@ -659,7 +662,8 @@ const focusNoJutsu = (...props) => {
           onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
           if (!manual) {
             removeListRelatedListeners();
-            addEntryListeners();
+            if (addEntryListenersEachExit)
+              addEntryListeners();
           }
         }
       }

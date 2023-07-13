@@ -220,6 +220,9 @@ interface Options {
   /** 每次进入列表是否移除入口事件 */
   removeListenersEachEnter?: boolean;
 
+  /** 每次退出列表是否添加入口监听事件 */
+  addEntryListenersEachExit?: boolean;
+
   /** 手动添加监听事件，入口、列表、出口的监听事件 */
   manual?: boolean;
 
