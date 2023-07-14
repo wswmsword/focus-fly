@@ -795,10 +795,9 @@ const focusNoJutsu = (...props) => {
             activeIndex = targetIndex;
             onMove?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
           }
+          trappedList = true;
           tickFocus(gotCorrectionTarget);
         }
-
-        trappedList = true;
       }
 
       function blurTrapListHandler(e) {
