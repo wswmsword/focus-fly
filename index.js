@@ -772,10 +772,8 @@ const focusNoJutsu = (...props) => {
 
       function focusTrapListHandler(e) {
 
-        const focusTarget = e.target;
-
         // 进入封面（封面在列表中）
-        if (enabledCover && focusTarget === cover) {
+        if (enabledCover && e.target === cover) { // TODO: 保留确认，或是否需要添加 `&& trappedList` 条件
           trappedCover = true;
           return ;
         }
@@ -789,7 +787,7 @@ const focusNoJutsu = (...props) => {
         // 纠正外部聚焦进来的焦点
         if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
         {
-          const originGotCorrectionTarget = correctionTarget?.({ list, cover: cover, root: root, last: list[activeIndex], lastI: activeIndex }) ?? (activeIndex === -1 ? list[0] : list[activeIndex]);
+          const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: list[activeIndex], lastI: activeIndex }) ?? (activeIndex === -1 ? list[0] : list[activeIndex]);
           const gotCorrectionTarget = element(originGotCorrectionTarget);
           const targetIndex = list.findIndex(item => item === gotCorrectionTarget);
           if (targetIndex > -1) {
@@ -807,7 +805,7 @@ const focusNoJutsu = (...props) => {
         // 用于保护可切换的入口能够被触发
         if (toggles.has(e.relatedTarget)) return;
 
-        setTimeout(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
+        tick(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
 
           const active = getActiveElement();
           const isOutRootNode = !root.contains(active);
@@ -834,16 +832,18 @@ const focusNoJutsu = (...props) => {
 
       function mousedownListItemHandler(e) {
         isMouseDown = true;
-        setTimeout(() => {
-          isMouseDown = false; // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
-        });
+        tick(() => isMouseDown = false); // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
 
         let targetItem;
-        if (!enabledTabSequence ||
-          (enabledTabSequence && (targetItem = list.find(item => item.contains(e.target))))) {
+        if (!enabledTabSequence || // 未打开 sequence 属性 或者
+          (enabledTabSequence && // 已打开 sequence 属性 并且
+            (targetItem = list.find(item => item.contains(e.target))) // 点击的目标是列表中的元素
+          )
+        ) {
           trappedList = true;
           if (enabledCover) trappedCover = true;
-          if (allowSafariToFocusAfterMousedown && targetItem && window.safari !== undefined) { // 兼容 Safari（桌面端），具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
+          // 兼容 Safari（桌面端），具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
+          if (allowSafariToFocusAfterMousedown && targetItem && window.safari !== undefined) {
             focus(targetItem); // Safari 不会聚焦按钮元素，这里强制使用 api 聚焦
             e.preventDefault(); // 阻止默认行为可以避免 targetItem 失焦
           }
@@ -852,8 +852,7 @@ const focusNoJutsu = (...props) => {
 
       /** 点击聚焦列表某一单项 */
       function clickListItemHandler(e) {
-        const target = e.target;
-        const targetIndex = list.findIndex(e => e.contains(target));
+        const targetIndex = list.findIndex(item => item.contains(e.target));
         if (targetIndex > -1) {
           prevActive = activeIndex;
           activeIndex = targetIndex;
@@ -871,11 +870,10 @@ const focusNoJutsu = (...props) => {
       function focusTrapCoverHandler() { trappedCover = true; } // 捕获点击封面的情况
 
       function blurTrapCoverHandler() { // 捕获点击空白区域的情况
-        if (isEnterFromCover) { // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
+        if (isEnterFromCover) // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
           isEnterFromCover = false;
-          return;
-        }
-        trappedCover = false;
+        else
+          trappedCover = false;
       }
 
       /** 封面的键盘事件响应 */
@@ -883,7 +881,7 @@ const focusNoJutsu = (...props) => {
         if (e.target !== cover) return;
         if (!(trappedCover && !trappedList)) return; // 继续执行，必须满足焦点在封面上，且不在列表中
 
-        // 入口
+        // 入口（封面），从封面进入列表
         if((coverEnterKey ?? isEnterEvent)(e) && !trappedList) {
           e.preventDefault();
           isEnterFromCover = true;
@@ -895,7 +893,7 @@ const focusNoJutsu = (...props) => {
           return;
         }
 
-        // 出口
+        // 出口（封面），从封面回到入口
         for (let i = 0; i < exitsCover.length; ++ i) {
           const { key, on, target: origin } = exitsCover[i];
           const target = element(origin);
@@ -905,7 +903,7 @@ const focusNoJutsu = (...props) => {
           }
         }
 
-        // 默认出口
+        // 默认出口，默认行为，默认的行为的场景是包含子元素的长列表
         if (isDefaultExitCover &&
           isTabForward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
           focus(tail);
@@ -933,36 +931,35 @@ const focusNoJutsu = (...props) => {
         }
       }
 
-      function clickExitHandler(e, exit) {
+      function exitHandlerWithCondition(e, exit, condition) {
         const { node: origin_node, on, target: origin_target, delay } = exit;
         const node = element(origin_node);
         const target = element(origin_target);
 
-        if (
-          (node != null && !node.contains(e.target)) ||
-          node == null) return false;
+        if (condition(e, node, exit.key)) // 未设置点击目标
+          return false;
         exitHandler(e, on, target, delay, cover, list, root, exit.if);
         return true;
+      }
+
+      function clickExitHandler(e, exit) {
+
+        const cantClick = (e, node) => (node != null && !node.contains(e.target)) || node == null; // 点击目标不匹配 或者 未设置点击目标
+        return exitHandlerWithCondition(e, exit, cantClick);
       }
 
       /** 点击列表的出口 */
       function clickListExitHandler(e) {
         for (let i = 0; i < clickExits.length; ++ i) {
           const isOK = clickExitHandler(e, clickExits[i]);
-          if (isOK) break;
+          if (isOK) break; // 只生效第一个满足条件的出口
         }
       }
 
       function focusExitHandler(e, exit) {
-        const { node: origin_node, on, target: origin_target, delay } = exit;
-        const node = element(origin_node);
-        const target = element(origin_target);
 
-        if (
-          (node != null && e.target !== node) ||
-          node == null) return false;
-        exitHandler(e, on, target, delay, cover, list, root, exit.if);
-        return true;
+        const cantFocus = (e, node) => (node != null && e.target !== node) || node == null; // 聚焦目标不匹配 或者 未设置点击目标
+        return exitHandlerWithCondition(e, exit, cantFocus);
       }
 
       /** 聚焦列表一个单项而退出 */
@@ -975,13 +972,9 @@ const focusNoJutsu = (...props) => {
       }
 
       function keyExitHandler(e, exit) {
-        let { key, node: origin_node, target, on, delay } = exit;
-        const node = element(origin_node);
-        if (node != null && e.target !== node) return false;
-        if (key?.(e, activeIndex)) {
-          exitHandler(e, on, target, delay, cover, list, root, exit.if);
-          return true;
-        }
+
+        const cantKey = (e, node, key) => (node != null && e.target !== node) || (!key?.(e, activeIndex)); // 聚焦目标不匹配 或者 未设置点击目标
+        return exitHandlerWithCondition(e, exit, cantKey);
       }
 
       /** 触发键盘退出列表，退出列表焦点 */
