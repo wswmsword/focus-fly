@@ -283,10 +283,10 @@ focusNoJutsu("#tab_list", tabList, { // L:4
 
 /** 进行样式修改，当焦点移动时，本次聚焦添加样式，上一次聚焦移除样式，更新 ARIA */
 function onMove({ prev, cur, prevI, curI }) {
-  if (curI === prevI || curI === -1) return;
-  (prev ?? document.getElementById("tab_1")).setAttribute("aria-selected", "false");
+  if (prevI === -1 || curI === -1) return;
+  prev.setAttribute("aria-selected", "false");
   cur.setAttribute("aria-selected", "true");
-  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1)) || document.getElementById("tabpanel_1");
+  const prevPanel = document.getElementById("tabpanel_" + (prevI + 1));
   const curPanel = document.getElementById("tabpanel_" + (curI + 1));
   prevPanel.classList.add('is-hidden');
   curPanel.classList.remove('is-hidden');
