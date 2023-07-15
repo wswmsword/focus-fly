@@ -587,7 +587,7 @@ const focusNoJutsu = (...props) => {
       if (targetIdx > -1) {
         prevActive = activeIndex;
         activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-        onMove?.({ e, prev: list[prevActive], cur: gotTarget, prevI: prevActive, curI: activeIndex });
+        onMove?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
         trappedList = true;
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
@@ -622,7 +622,7 @@ const focusNoJutsu = (...props) => {
 
       function focusThenRemoveListeners() {
         focus(gotTarget);
-        onMove?.({ e, prev: list[activeIndex], cur: gotTarget, prevI: activeIndex, curI: -1 });
+        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
         if (!manual) {
           if (gotTarget !== cover)
             removeListRelatedListeners();
@@ -793,7 +793,7 @@ const focusNoJutsu = (...props) => {
           if (targetIndex > -1) {
             prevActive = activeIndex;
             activeIndex = targetIndex;
-            onMove?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
+            onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
           }
           trappedList = true;
           tickFocus(gotCorrectionTarget);
@@ -858,7 +858,7 @@ const focusNoJutsu = (...props) => {
 
           onClick?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
           if (prevActive !== activeIndex || trappedList === false)
-            onMove?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
+            onMove?.({ e, prev: list[prevActive] || null, cur: list[activeIndex], prevI: prevActive < 0 ? -1 : prevActive, curI: activeIndex });
         }
       }
 
@@ -888,7 +888,7 @@ const focusNoJutsu = (...props) => {
           onEnterCover?.(e);
           activeIndex = activeIndex === -1 ? 0 : activeIndex;
           focus(list[activeIndex]);
-          onMove?.({ e, prev: null, cur: list[activeIndex], prevI: null, curI: activeIndex });
+          onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
           return;
         }
 
