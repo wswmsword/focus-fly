@@ -587,7 +587,7 @@ const focusNoJutsu = (...props) => {
       if (targetIdx > -1) {
         prevActive = activeIndex;
         activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-        onMove?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
+        onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
         trappedList = true;
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
