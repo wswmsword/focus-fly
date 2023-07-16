@@ -33,7 +33,7 @@ const playerBagel = focusNoJutsu("#songs_wrapper", songs, { // L:3
 
 playerBagel.addForward("grid", {
   node: "#grid_wrapper",
-  key: (e, active) => (e.key === "Tab" && !e.shiftKey && active === -1),
+  key: (e, _, active) => (e.key === "Tab" && !e.shiftKey && active === -1),
   target: "#more_from",
 }); // L:38
 

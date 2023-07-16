@@ -14,12 +14,11 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
+const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
   if (e.target === coverNode) return;
   if (!trappedList()) return;
 
   const [index_, setIndex] = useActiveIndex();
-  const [, setPrev] = usePrevActive();
   const index = Math.max(0, index_);
   const itemsLen = subNodes.length;
   if ((isNext ?? isTabForward)(e)) {
@@ -29,7 +28,6 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, is
     onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
-    setPrev(index);
     focus(subNodes[nextI]);
     e.preventDefault();
   }
@@ -40,7 +38,6 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, usePrevActive, is
     onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
-    setPrev(index);
     focus(subNodes[nextI]);
     e.preventDefault();
   }
@@ -257,6 +254,22 @@ class TabList {
   data = [];
   head = null;
   tail = null;
+  prevI = -1;
+  curI = -1;
+  _prev = null;
+  _cur = null;
+  get prev() {
+    return this._prev || this.data[this.prevI] || null; // _prev 可能由于 dom 未加载而为 null，为 null 则通过 prevI 取值
+  };
+  get cur() {
+    return this._cur || this.data[this.curI] || null;
+  };
+  set prev(v) {
+    this._prev = v;
+  };
+  set cur(v) {
+    this._cur = v;
+  };
   update(list) {
     this.data.splice(0, this.data.length);
     Array.prototype.push.apply(this.data, list);
@@ -268,7 +281,23 @@ class TabList {
   };
   has(i) {
     return !!this.data[i];
-  }
+  };
+  record(cur, curI) {
+    if (curI === -1 && this.curI === curI) return; // curI 为 -1 后，不会再次更新新的 -1
+    this.recordPrev(this.cur, this.curI);
+    this.recordCur(cur, curI);
+  };
+  recordPrev(prev, prevI) {
+    this.prevI = prevI < 0 ? -1 : prevI;
+    this.prev = prev || null;
+  };
+  recordCur(cur, curI) {
+    this.curI = curI < 0 ? -1 : curI;
+    this.cur = cur || null;
+  };
+  recordSequenceByIdx(curI) {
+    this.record(this.data[curI], curI);
+  };
 }
 
 const focusNoJutsu = (...props) => {
@@ -303,7 +332,7 @@ const focusNoJutsu = (...props) => {
     onMove,
     /** cover: 封面，默认情况，触发入口后首先聚焦封面，而不是子元素 */
     cover,
-    /** 初始的 activeIndex */
+    /** 初始的列表中聚焦元素的序号 */
     initialActive,
     /** 矫正列表的焦点 */
     correctionTarget,
@@ -370,6 +399,8 @@ const focusNoJutsu = (...props) => {
   /** 列表 */
   const list = new TabList();
 
+  list.recordPrev(null, initialActive ?? -1);
+
   const {
     key: isNext,
     on: onNext,
@@ -388,11 +419,6 @@ const focusNoJutsu = (...props) => {
 
   /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
   const enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
-
-
-  /** 活动元素在列表中的编号，打开 sequence 生效 */
-  let activeIndex = initialActive ?? -1;
-  let prevActive = -1;
 
   /** 进入了列表 */
   let trappedList = false;
@@ -416,11 +442,11 @@ const focusNoJutsu = (...props) => {
     if (hasImmediateEntry) {
 
       const {
-        root, list: newList, head, tail, cover,
+        root, list: newList, cover,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       list.update(newList);
 
-      loadListRelatedListeners(root, list.data, head, tail, cover);
+      loadListRelatedListeners(root, list, cover);
     }
   }
 
@@ -503,7 +529,7 @@ const focusNoJutsu = (...props) => {
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       if (list.isEmpty()) list.update(newList);
 
-      loadListRelatedListeners(root, list.data, list.head, list.tail, cover);
+      loadListRelatedListeners(root, list, cover);
     },
     /** 添加转发 */
     addForward(id, forward) {
@@ -511,11 +537,11 @@ const focusNoJutsu = (...props) => {
       if (isFun(forward)) {
         const {
           root,
-          list, head, tail,
+          list: listData, head, tail,
           cover,
         } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
 
-        opts = forward({ root, list, head, tail, cover, curI: activeIndex, prevI: prevActive });
+        opts = forward({ root, list: listData, head, tail, cover, curI: list.curI, prevI: list.prevI });
       }
       else opts = forward;
 
@@ -523,7 +549,7 @@ const focusNoJutsu = (...props) => {
       const node = element(origin_node);
       const target = element(origin_target);
       keyForwards.push(id, node, e => {
-        if (key?.(e, activeIndex)) {
+        if (key?.(e, list.prevI, list.curI)) {
           e.preventDefault();
           on?.();
           tickFocus(target);
@@ -542,13 +568,13 @@ const focusNoJutsu = (...props) => {
     /** 当前聚焦的列表单项序号 */
     i(newI) {
       if (list.has(newI) && trappedList) {
-        prevActive = activeIndex;
-        activeIndex = newI;
-        onMove?.({ e: { fromI: true }, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex });
-        focus(subNodes[activeIndex]);
+        list.recordSequenceByIdx(newI);
+        const { prev, prevI, cur, curI } = list;
+        onMove?.({ e: { fromI: true }, prev, prevI, cur, curI });
+        focus(subNodes[curI]);
         return newI;
       }
-      else return activeIndex;
+      else return list.curI < 0 ? list.prevI : list.curI;
     },
   };
 
@@ -570,24 +596,27 @@ const focusNoJutsu = (...props) => {
     function findNodesToLoadListenersAndFocus() {
       const {
         root,
-        list: newList, head, tail,
+        list: newList,
         cover,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       list.update(newList);
 
       if (!manual)
-        loadListRelatedListeners(root, list.data, head, tail, cover);
+        loadListRelatedListeners(root, list, cover);
       if (target !== false)
-        focusTarget(cover, list.data, root);
+        focusTarget(cover, list, root);
     }
     
-    function focusTarget(cover, list, rootNode) {
-      const gotTarget = getTarget(target, cover, list, rootNode, enabledCover, activeIndex, list[activeIndex === -1 ? 0 : activeIndex], e);
+    function focusTarget(cover, listInfo, rootNode) {
+      const list = listInfo.data;
+      const { prev, head, curI } = listInfo;
+      const defaultTarget = prev || head;
+      const gotTarget = getTarget(target, cover, list, rootNode, enabledCover, curI, defaultTarget, e);
       const targetIdx = list.indexOf(gotTarget);
       if (targetIdx > -1) {
-        prevActive = activeIndex;
-        activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-        onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
+        listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
+        const { cur, curI } = listInfo;
+        onMove?.({ e, prev: null, cur, prevI: -1, curI });
         trappedList = true;
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
@@ -596,17 +625,19 @@ const focusNoJutsu = (...props) => {
   }
 
   /** 出口 handler */
-  function exitHandler(e, on, target, delay, cover, list, root, ef) {
+  function exitHandler(e, on, target, delay, cover, listData, root, ef) {
 
     if (!trappedList || 
-      !(isFun(ef) ? ef({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex }) : true))
+      !(isFun(ef) ? ef({ e, prev: list.prev, cur: list.cur, prevI: list.prevI, curI: list.curI }) : true))
       return false;
+
+    list.recordSequenceByIdx(-1);
 
     trappedList = false;
 
     e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
 
-    const gotTarget = getTarget(target, cover, list, root, enabledCover, activeIndex, _trigger, e);
+    const gotTarget = getTarget(target, cover, listData, root, enabledCover, list.curI, _trigger, e);
 
     if (gotTarget) return exitListWithTarget();
     else return exitListWithoutTarget();
@@ -622,7 +653,7 @@ const focusNoJutsu = (...props) => {
 
       function focusThenRemoveListeners() {
         focus(gotTarget);
-        onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+        onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
         if (!manual) {
           if (gotTarget !== cover)
             removeListRelatedListeners();
@@ -645,7 +676,7 @@ const focusNoJutsu = (...props) => {
         }
         if (enabledCover) {
 
-          onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           focus(cover);
         } else {
   
@@ -659,7 +690,7 @@ const focusNoJutsu = (...props) => {
       function focusThenRemoveListeners(focusTarget) {
         return _ => {
           focusTarget && focus(focusTarget);
-          onMove?.({ e, prev: list[activeIndex], cur: null, prevI: activeIndex, curI: -1 });
+          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           if (!manual) {
             removeListRelatedListeners();
             if (addEntryListenersEachExit)
@@ -671,7 +702,11 @@ const focusNoJutsu = (...props) => {
   }
 
   /** 生成事件行为，添加事件监听器 */
-  function loadListRelatedListeners(root, list, head, tail, cover) {
+  function loadListRelatedListeners(root, listInfo, cover) {
+
+    const list = listInfo.data;
+    const head = listInfo.head;
+    const tail = listInfo.tail;
 
     if (!listListeners.isEmpty) return ; // 列表的监听事件没有移除之前，不需要再次添加列表监听事件
 
@@ -686,14 +721,13 @@ const focusNoJutsu = (...props) => {
     /** 添加焦点需要的事件监听器 */
     function addListRelatedListeners() {
 
-      const useActiveIndex = () => [activeIndex, newVal => activeIndex = newVal];
-      const usePrevActive = () => [, prev => prevActive = prev];
+      const useActiveIndex = () => [listInfo.curI, listInfo.recordSequenceByIdx.bind(listInfo)];
 
       const isTrappedList = () => hasNoEntry ? true : trappedList;
 
       // 在焦点循环中触发聚焦
       const keyListMoveHandler = enabledTabSequence ?
-        focusNextListItemBySequence(list, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList) :
+        focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList) :
         focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
 
       /** 出口们，列表的出口们，list 的出口们 */
@@ -728,7 +762,7 @@ const focusNoJutsu = (...props) => {
 
       if (enabledTabSequence || hasClickExits) {
         listListeners.push(root, "click", e => {
-          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
+          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
           enabledTabSequence && clickListItemHandler(e);
           // 列表点击出口
           hasClickExits && clickListExitHandler(e);
@@ -787,13 +821,13 @@ const focusNoJutsu = (...props) => {
         // 纠正外部聚焦进来的焦点
         if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
         {
-          const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: list[activeIndex], lastI: activeIndex }) ?? (activeIndex === -1 ? list[0] : list[activeIndex]);
+          const defaultLast = listInfo.prev || listInfo.head;
+          const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI }) ?? defaultLast;
           const gotCorrectionTarget = element(originGotCorrectionTarget);
           const targetIndex = list.findIndex(item => item === gotCorrectionTarget);
           if (targetIndex > -1) {
-            prevActive = activeIndex;
-            activeIndex = targetIndex;
-            onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
+            listInfo.recordSequenceByIdx(targetIndex);
+            onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
           }
           trappedList = true;
           tickFocus(gotCorrectionTarget);
@@ -817,8 +851,11 @@ const focusNoJutsu = (...props) => {
           }
 
           let isOutList = null;
-          if (isActiveCover || isOutRootNode) isOutList = outListExitHandler(e);
-          if (isOutList === false) return; // 不符合退出列表的条件
+          if (isActiveCover || isOutRootNode) {
+            isOutList = outListExitHandler(e);
+            listInfo.recordSequenceByIdx(-1);
+          }
+          if (isOutList === false) return; // 不符合 outlist 退出列表的条件
 
           if (isActiveCover) { // 聚焦在封面
             trappedList = false;
@@ -853,12 +890,14 @@ const focusNoJutsu = (...props) => {
       function clickListItemHandler(e) {
         const targetIndex = list.findIndex(item => item.contains(e.target));
         if (targetIndex > -1) {
-          prevActive = activeIndex;
-          activeIndex = targetIndex;
-
-          onClick?.({ e, prev: list[prevActive], cur: list[activeIndex], prevI: prevActive, curI: activeIndex });
-          if (prevActive !== activeIndex || trappedList === false)
-            onMove?.({ e, prev: list[prevActive] || null, cur: list[activeIndex], prevI: prevActive < 0 ? -1 : prevActive, curI: activeIndex });
+          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord } = listInfo;
+          listInfo.recordSequenceByIdx(targetIndex);
+          const { prev: prevAfterRecord, prevI: prevIAfterRecord, cur, curI } = listInfo;
+          const prev = prevAfterRecord || prevBeforeRecord;
+          const prevI = prevIAfterRecord < 0 ? prevIBeforeRecord : prevIAfterRecord;
+          onClick?.({ e, prev, cur, prevI, curI });
+          if (prevI !== curI || trappedList === false)
+            onMove?.({ e, prev, cur, prevI, curI });
         }
       }
 
@@ -886,9 +925,9 @@ const focusNoJutsu = (...props) => {
           isEnterFromCover = true;
           trappedList = true;
           onEnterCover?.(e);
-          activeIndex = activeIndex === -1 ? 0 : activeIndex;
-          focus(list[activeIndex]);
-          onMove?.({ e, prev: null, cur: list[activeIndex], prevI: -1, curI: activeIndex });
+          listInfo.recordSequenceByIdx(listInfo.prevI === -1 ? 0 : listInfo.prevI);
+          focus(listInfo.cur);
+          onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
           return;
         }
 
@@ -896,7 +935,7 @@ const focusNoJutsu = (...props) => {
         for (let i = 0; i < exitsCover.length; ++ i) {
           const { key, on, target: origin } = exitsCover[i];
           const target = element(origin);
-          if (key?.(e, activeIndex)) {
+          if (key?.(e, listInfo.prevI, listInfo.curI)) {
             exitCoverHandler(e, on, target);
             return;
           }
@@ -972,7 +1011,7 @@ const focusNoJutsu = (...props) => {
 
       function keyExitHandler(e, exit) {
 
-        const cantKey = (e, node, key) => (node != null && e.target !== node) || (!key?.(e, activeIndex)); // 聚焦目标不匹配 或者 未设置点击目标
+        const cantKey = (e, node, key) => (node != null && e.target !== node) || (!key?.(e, listInfo.prevI, listInfo.curI)); // 聚焦目标不匹配 或者 未设置点击目标
         return exitHandlerWithCondition(e, exit, cantKey);
       }
 
@@ -1022,7 +1061,7 @@ const focusNoJutsu = (...props) => {
           /** 是否是键盘事件 */
           const isKey = type === "keydown";
           /** 如果是键盘事件，则判断键位是否匹配，如果是非键盘事件，则直接返回 true */
-          const ifKey = isKey ? e => key?.(e, activeIndex) : _ => true;
+          const ifKey = isKey ? e => key?.(e, list.prevI, list.curI) : _ => true;
           entryListeners.push(node, type, toggleHandler(ifKey, isKey)); // 保存事件信息
         }
       });
@@ -1031,7 +1070,7 @@ const focusNoJutsu = (...props) => {
         return e => {
           if (
             (isFun(ef)
-              ? ef({ e, prev: list.data[prevActive], cur: list.data[activeIndex], prevI: prevActive, curI: activeIndex })
+              ? ef({ e, prev: list.prev, cur: list.cur, prevI: list.prevI, curI: list.curI })
               : true) &&
             ifKey(e))
             toggleEntryAndExit(e, isKey);
