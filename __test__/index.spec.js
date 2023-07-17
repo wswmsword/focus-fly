@@ -145,14 +145,14 @@ describe("focus-bagel", function() {
     await user.click(open);
     expect(first).toHaveFocus();
     const i3 = bagel.i();
-    expect(i3).toBe(0);
+    expect(i3).toBe(-1);
     await user.tab();
     expect(getByText(container, "不二家棒棒糖")).toHaveFocus();
-    expect(i3).toBe(0);
+    expect(i3).toBe(-1);
     await user.click(close);
     expect(open).toHaveFocus();
     const i4 = bagel.i();
-    expect(i4).toBe(0);
+    expect(i4).toBe(-1);
   });
 
   // 打开 sequence 选项之后，activeIndex 改变

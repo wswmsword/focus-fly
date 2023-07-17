@@ -614,9 +614,11 @@ const focusNoJutsu = (...props) => {
       const gotTarget = getTarget(target, cover, list, rootNode, enabledCover, curI, defaultTarget, e);
       const targetIdx = list.indexOf(gotTarget);
       if (targetIdx > -1) {
-        listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
-        const { cur, curI } = listInfo;
-        onMove?.({ e, prev: null, cur, prevI: -1, curI });
+        if (enabledTabSequence) { // onMove 仅支持打开 sequence 后
+          listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
+          const { cur, curI } = listInfo;
+          onMove?.({ e, prev: null, cur, prevI: -1, curI });
+        }
         trappedList = true;
       }
       if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
@@ -653,7 +655,7 @@ const focusNoJutsu = (...props) => {
 
       function focusThenRemoveListeners() {
         focus(gotTarget);
-        onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+        enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
         if (!manual) {
           if (gotTarget !== cover)
             removeListRelatedListeners();
@@ -676,7 +678,7 @@ const focusNoJutsu = (...props) => {
         }
         if (enabledCover) {
 
-          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           focus(cover);
         } else {
   
@@ -690,7 +692,7 @@ const focusNoJutsu = (...props) => {
       function focusThenRemoveListeners(focusTarget) {
         return _ => {
           focusTarget && focus(focusTarget);
-          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           if (!manual) {
             removeListRelatedListeners();
             if (addEntryListenersEachExit)
@@ -925,9 +927,12 @@ const focusNoJutsu = (...props) => {
           isEnterFromCover = true;
           trappedList = true;
           onEnterCover?.(e);
-          listInfo.recordSequenceByIdx(listInfo.prevI === -1 ? 0 : listInfo.prevI);
-          focus(listInfo.cur);
-          onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+          if (enabledTabSequence) {
+            listInfo.recordSequenceByIdx(Math.max(0, listInfo.prevI));
+            focus(listInfo.cur);
+            onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+          } else
+            focus(listInfo.data[0]);
           return;
         }
 
