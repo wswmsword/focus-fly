@@ -30,11 +30,13 @@
 
       <div>
         <button id="b0">E</button>
-        <button id="b1">D</button>
-        <button>C</button>
+        <span id="loop">
+          <button id="b1">D</button>
+          <button>C</button>
 
-        <button>B</button>
-        <button id="b2">A</button>
+          <button>B</button>
+          <button id="b2">A</button>
+        </span>
         <button>S</button>
       </div> -->
 
@@ -584,6 +586,7 @@ function onMovePlayer({ cur, prev, curI }) {
   <script>
     // const bg = focusNoJutsu(["#b1", "#b2"], {
     //   onEscape: true,
+    //   entry: "#b0",
     // });
 
     // focusNoJutsu(["#l1", "#l9"], {
