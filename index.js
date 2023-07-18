@@ -892,13 +892,14 @@ const focusNoJutsu = (...props) => {
       function clickListItemHandler(e) {
         const targetIndex = list.findIndex(item => item.contains(e.target));
         if (targetIndex > -1) {
-          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord } = listInfo;
+          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord, curI: curIBeforeRecord } = listInfo;
           listInfo.recordSequenceByIdx(targetIndex);
           const { prev: prevAfterRecord, prevI: prevIAfterRecord, cur, curI } = listInfo;
           const prev = prevAfterRecord || prevBeforeRecord;
           const prevI = prevIAfterRecord < 0 ? prevIBeforeRecord : prevIAfterRecord;
           onClick?.({ e, prev, cur, prevI, curI });
-          if (prevI !== curI || trappedList === false)
+          if (curIBeforeRecord < 0 // 从外部进入
+            || prevI !== curI) // 列表内的移动
             onMove?.({ e, prev, cur, prevI, curI });
         }
       }
