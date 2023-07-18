@@ -4,56 +4,17 @@
 
 使用 focus-no-jutsu 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。
 
-> 键盘可访问的用户界面，在用户丧失或暂时丧失使用鼠标能力的时候，依然保有用户使用键盘的能力。对于同时使用鼠标和键盘的用户，他们可以自由地切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
+> 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，依然保有用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以自由地切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
-网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹，进行业务或组件开发的时候，如果不考虑焦点的影响，程序可能会变得混乱，用户界面可能会出现意外情况，显得非常脆弱。
+网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等，前往[“其它”](#其它)一节查看开发弹窗时需要考虑焦点的哪些方面。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹。进行业务或组件开发的时候，如果不考虑焦点的影响，处处关联的焦点可能让程序变得混乱，如果遗漏处理某些情况，反应到用户界面上，也会出现不符预期的意外行为，最终会让应用的体验感非常脆弱。
 
 也许你希望能集中管理相互关联的焦点，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
 
-下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述**如何进入焦点，进入后如何移动焦点，以及如何退出焦点**。
+下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述“焦点如何通过入口进入列表，进入列表后如何移动焦点，以及如何让焦点通过出口退出列表”。
 
 > **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
 >
 > Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
-
-
-<!-- <table>
-	<tr>
-		<td>
-
-> **Note**
->
-> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
-    
-</td>
-		<td><img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="500"></td>
-	</tr>
-</table> -->
-
-<details>
-<summary>假设现在准备开发一个弹窗，至少要考虑弹窗内的焦点循环，以及触发关闭按钮和蒙层的时候，要让焦点回到激活弹窗的地方，等等。</summary>
-
-下面是在开发弹窗时，要考虑的焦点的几种情况：
-
-- 在“打开”按钮上按下 <kbd>Enter</kbd>，弹窗内第一个元素获得焦点；
-- 在弹窗的内部按住 <kbd>Tab</kbd>，焦点（中幻术）不能逃出弹窗；
-- 点击弹窗的空白区域，按下反向 <kbd>Tab</kbd>，弹窗内的最后一个元素获得焦点；
-- 在“关闭”按钮上按下 <kbd>Enter</kbd>，“打开”按钮获得焦点；
-- 按下 <kbd>Esc</kbd>，或者点击弹窗背后的半透明蒙层，“打开”按钮获得焦点；
-- 管理弹窗、半透明蒙版、“打开”按钮、“关闭”按钮的点击和键盘事件。
-</details>
-
-<details>
-<summary>一个常规的聚焦流程可以用入口、列表和出口这几个关键词来描述。</summary>
-
-<!-- ![焦点从入口进入列表，从列表到出口，从出口回到入口，如果有封面，焦点则会从入口进入封面，再从封面进入列表。](./images/flow.png) -->
-
-一个常规流程是这样的，开始焦点在*入口*，焦点通过*入口*到达*列表*，在*列表*中焦点可以自由移动，前进或者后退聚焦*列表*的每一个单项，*列表*中有些特殊的单项是*出口*，通过*出口*，焦点会从*列表*回到*入口*。
-
-也有一些情况，*入口*和*列表*之间有*封面*，*出口*和*入口*之间也要有*封面*。
-
-如果能像上面这样描述焦点的路径，就能用 focus-no-jutsu 完成工作。
-</details>
 
 <details>
 <summary>在开发无障碍组件的时候需要控制焦点。</summary>
@@ -177,7 +138,7 @@ npm run start
 
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
-| sequence | boolean | false | 是否指定聚焦的序列，设置 true 则按顺序聚焦列表内每项元素 |
+| sequence | boolean | false | 是否指定焦点导航的序列，设置 true 则按顺序聚焦列表内每项元素 |
 | loop | boolean | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
 | next | isKey \| listForward | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
 | prev | isKey \| listBackward | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
@@ -186,7 +147,7 @@ npm run start
 | exit | element \| element[] \| exit \| exit[] | null | 出口相关配置，退出列表，回到入口，如果存在封面，则是回到封面，可以直接设置为一个元素，也可以设置数组，表示多个出口 |
 | onEscape | false \| handleKeydown | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取第一个 `options.exit.on` |
 | onClick | handleClick | null | 点击列表里的某一项后的行为 |
-| moMove | handleMoveListItem | null | 移动的时候触发，包括进入列表时，移动列表时，以及退出列表时 |
+| onMove | handleMoveListItem | null | 移动的时候触发，包括进入列表时，移动列表时，以及退出列表时 |
 | cover | boolean \| cover | false | 封面相关配置，设置为 true，则是默认封面，默认把根元素 root 作为封面，当焦点在封面上，默认 <kbd>Enter</kbd> 进入列表，默认 <kbd>Tab</kbd> 聚焦列表的后一个元素 |
 | initialActive | number | -1 | 默认的初始的焦点在列表中的位置，可能会被用于修改当前和上一个聚焦元素的样式时使用 |
 | correctionTarget | boolean \| getTarget | true | 焦点矫正，默认从非入口的空白区域进入列表，也将聚焦上一次退出前焦点在列表中的位置，设置为 false 则不进行矫正 |
@@ -194,6 +155,7 @@ npm run start
 | delayToBlur | promiseDelay \| callbackDelay | null | 延迟失列表的焦，触发出口后等待执行 `delayToBlur` 完成后失焦，和 `delayToFocus` 类似 |
 | removeListenersEachExit | boolean | true | 每次退出列表回到入口是否移除列表事件 |
 | removeListenersEachEnter | boolean | false | 每次进入列表后是否移除入口事件 |
+| addEntryListenersEachExit | boolean | true | 每次退出列表是否添加入口监听事件 |
 | manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
 | allowSafariToFocusAfterMousedown | boolean | true | 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题，设置为 true，Safari 中 将会在列表的 mousedown 事件里执行 `focus()` |
 
@@ -291,7 +253,7 @@ focus(dialog, ["#head", "#second", "#tail"], {
 
 这些选项和封面有关，每个选项都是可选且默认值为空。
 
-如果存在封面，将通过入口进入封面，通过封面进入列表，通过出口退出至封面，通过封面退出至入口。
+如果存在封面，焦点将通过入口进入封面，焦点又通过封面进入列表，焦点通过出口退出至封面，最后焦点通过封面退出至入口。也就是说，在进入列表的阶段时，封面在入口和列表之间，在退出列表的阶段，封面在出口和入口之间。
 
 | Name | Type | Desc |
 |:--|:--|:--|
@@ -357,7 +319,7 @@ closeBtn.addEventListener("click", e => {
 
 查看[使用 `addForward` 的一个范例](https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/cjs/src/player.js)，这个范例中，`#grid_wrapper` 是一个中转节点，通过按下 <kbd>Tab</kbd> 和反向 <kbd>Tab</kbd>，焦点中转到 `#more_from`。
 
-## 范例与开发
+## 范例与项目开发
 
 查看和运行范例：
 
@@ -367,14 +329,14 @@ npm i # 安装依赖
 npm run start # 本地运行
 ```
 
-进行开发：
+进行项目开发：
 
 ```bash
 npm i
 npm run start
 ```
 
-运行之后，修改根目录的 index.js（focus-no-jutsu 主文件）和 `examples/run-start` 下的文件，即可在浏览器看到实时修改结果。
+运行之后，修改根目录的 index.js（focus-no-jutsu 主文件）和 `examples/run-start` 下的文件，即可在浏览器看到实时修改结果。开发后，提交时请编写相应的单元测试。
 
 ## 单元测试
 
@@ -386,7 +348,7 @@ npm run test
 ## 常见问题
 
 <details>
-<summary>macOS 的 Safari 浏览器中，“entry.onExit” 无效，不能实现切换的功能。</summary>
+<summary>macOS 的 Safari 浏览器中，“entry.onExit” 无效，不能实现切换（开关）的功能。</summary>
 
 `entry.onExit` 利用了 `relatedTarget`，至少对于 `<button>` 元素，Safari 不能正常获取。为了让入口在 Safari 上支持切换出口，可以添加下面这样的 `outlist` 类型的出口：
 
@@ -396,7 +358,7 @@ focusNoJutsu("#container", ["#start", "#end"], {
   entry: {
     node: "#btn",
     on: toggle,
-    onExit: true, // 另 #btn 支持作为出口
+    onExit: true, // 令 #btn 支持作为出口
   },
   exit: [
     {
@@ -420,6 +382,17 @@ function toggle() {
 不过像这样添加后，`outlist` 就不能正常使用了，点击空白区域将不会触发 `outlist` 退出列表焦点。
 </details>
 
+
+<details>
+<summary>有些情况，通过 onMove、onNext、onPrev、entry.on 等钩子回调，不能完成样式修改。</summary>
+
+focus-no-jutsu 的主要任务是管理和控制**焦点**，如果有钩子不能满足需求，可以考虑在业务开发中自行监听事件，处理样式的变化。
+</details>
+
+## 原理
+
+查看[原理](./HOW-IT-WORKS.md)。
+
 ## CHANGELOG
 
 查看[更新日志](./CHANGELOG.md)。
@@ -437,6 +410,14 @@ function toggle() {
 请随意 Issue、PR 和 Star，通过[爱发电](https://afdian.net/a/george-chen)进行赞助。
 
 ## 其它
+
+假设准备开发一个弹窗，进行焦点管理，需要有下面的流程、考虑下面几种情况：
+- 在“打开”按钮上按下 <kbd>Enter</kbd>，弹窗内第一个元素获得焦点；
+- 在弹窗的内部按住 <kbd>Tab</kbd>，焦点（中幻术）不能逃出弹窗；
+- 点击弹窗的空白区域，按下反向 <kbd>Tab</kbd>，弹窗内的最后一个元素获得焦点；
+- 在“关闭”按钮上按下 <kbd>Enter</kbd>，“打开”按钮获得焦点；
+- 按下 <kbd>Esc</kbd>，或者点击弹窗背后的半透明蒙层，“打开”按钮获得焦点；
+- 管理弹窗、半透明蒙版、“打开”按钮、“关闭”按钮的点击和键盘事件。
 
 相关链接：
 - [Developing a Keyboard Interface](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)
