@@ -4,6 +4,7 @@ require("./navigation.css");
 require("./tabs.css");
 require("./player.css");
 
+require("./base-hot.js");
 require("./dialog.js");
 require("./navigation.js");
 require("./tabs.js");
