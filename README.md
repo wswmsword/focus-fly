@@ -48,9 +48,19 @@ import focus from "focus-no-jutsu"; // ESM 导入方式
 focus(["#firstTabbableNode", "#lastTabbableNode"]);
 ```
 
-只是这样编写调用，不太符合实际场景，因为我们不会让焦点永远循环在某个范围。举个例子，一个循环里至少会有一个“关闭”按钮提供出口，点击这个按钮，或者按下 <kbd>Esc</kbd>，焦点会逃出循环。
+这是最简洁的调用，以这种方式调用，焦点可以通过键盘（<kbd>Tab</kbd>）进入列表，但是无法通过键盘退出列表，下面对调用参数稍加修改，让焦点在入口、列表和出口间流动：
 
-继续阅读查看关于选项的详细介绍，以了解如何管理“关闭”按钮之类的出口。
+```javascript
+focus(["#firstTabbableNode", "#lastTabbableNode"], {
+  entry: "#entryBtn",
+  exit: "#lastTabbableNode",
+  onEscape: true
+});
+```
+
+上面的代码执行后，在浏览器中将会有这样的行为：点击 `#entryBtn`，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，点击 `#lastTabbableNode` 或者按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-no-jutsu#h-hot)。
+
+继续阅读查看调用传递入参的详细介绍。
 
 ### focusNoJutsu(list[, options])
 
