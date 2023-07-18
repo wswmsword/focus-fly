@@ -20,18 +20,6 @@
 
       <p>现在开始我们用 <code>Focus-no-Jutsu</code> 完成和焦点有关的一系列任务！🥷</p>
 
-      <!-- <hr />
-
-      <div>
-        <button id="b0">E</button>
-        <button id="b1">D</button>
-        <button>C</button>
-
-        <button>B</button>
-        <button id="b2">A</button>
-        <button>S</button>
-      </div> -->
-
 
       <!-- <hr />
 
@@ -45,6 +33,30 @@
         <li><button id="l9">测试</button></li>
       </ul>
       <button>最后</button> -->
+
+      <h2 id="h-hot" tabindex="-1">热身</h2>
+
+      <p>这个简单的例子演示了焦点在入口、列表和出口之间的行为，演示了 focus-no-jutsu 基本的用法。</p>
+
+      <div>
+        <button id="entryBtn">entryBtn</button>
+        <span id="loop">
+          <button id="firstTabbableNode">firstTabbableNode</button>
+          <button>second</button>
+          <button>third</button>
+          <button id="lastTabbableNode">lastTabbableNode(exit)</button>
+        </span>
+        <button>other</button>
+      </div>
+
+      <pre>
+<code>focusNoJutsu(["#firstTabbableNode", "#lastTabbableNode"], {
+  entry: "#entryBtn",
+  exit: "#lastTabbableNode",
+  onEscape: true
+});
+</code>
+      </pre>
 
       <h2 id="h-dialog" tabindex="-1">对话框</h2>
 
@@ -119,7 +131,13 @@ function closeDialog() {
             </button>
             <ul class="menu" id="menu" tabindex="0">
               <li>
-                <a class="menu_link" href="#h-dialog" id="dialog_anchor">
+                <a class="menu_link" href="#h-hot" id="hot_anchor">
+                  <div class="title">热身</div>
+                  <div class="desc">热身可以减少运动损伤、提高身体肌肉体温、提高内脏器官的功能水平</div>
+                </a>
+              </li>
+              <li>
+                <a class="menu_link" href="#h-dialog">
                   <div class="title">对话框</div>
                   <div class="desc">开发对话框时，要注意的焦点之间的跳跃和传递，对话框很常见，但通常会存在可访问性的问题</div>
                 </a>
@@ -164,7 +182,7 @@ function closeDialog() {
 const menuBody = document.getElementById("menu");
 
 // 5～28 行为焦点管理和控制的部分，包含了触发入口和出口时的行为——切换菜单状态，toggleMenu
-focusNoJutsu(menuBody, ["#dialog_anchor", "#player_anchor"], { // L:5
+focusNoJutsu(menuBody, ["#hot_anchor", "#player_anchor"], { // L:5
   onEscape: toggleMenu,
   entry: {
     node: menuBtn,
@@ -172,7 +190,7 @@ focusNoJutsu(menuBody, ["#dialog_anchor", "#player_anchor"], { // L:5
     onExit: true,
   },
   exit: [{
-    node: "#dialog_anchor",
+    node: "#hot_anchor",
     type: "keydown",
     key: e => e.key === "Tab" && e.shiftKey,
     on: toggleMenu,
