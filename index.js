@@ -897,9 +897,17 @@ const focusNoJutsu = (...props) => {
       function clickListItemHandler(e) {
         const targetIndex = list.findIndex(item => item.contains(e.target));
         if (targetIndex > -1) {
-          const curIBeforeRecord = listInfo.curI;
+          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord, curI: curIBeforeRecord } = listInfo;
           listInfo.recordSequenceByIdx(targetIndex);
-          const { prev, prevI, cur, curI } = listInfo;
+
+          let { prev, prevI, cur, curI } = listInfo;
+          if (curIBeforeRecord < 0) { // 从外部进入
+            if (prevIBeforeRecord !== targetIndex) { // 上一次进入 和 本次进入 的元素不同
+              prev = prevBeforeRecord;
+              prevI = prevIBeforeRecord;
+            }
+          }
+
           onClick?.({ e, prev, cur, prevI, curI });
           if (curIBeforeRecord !== curI) // 从外部进入 或者 列表内的移动
             onMove?.({ e, prev, cur, prevI, curI });
