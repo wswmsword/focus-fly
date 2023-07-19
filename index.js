@@ -831,9 +831,10 @@ const focusNoJutsu = (...props) => {
             listInfo.recordSequenceByIdx(targetIndex);
             onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
           }
-          trappedList = true;
           tickFocus(gotCorrectionTarget);
         }
+
+        trappedList = true; // 无论列表的类型是序列还是范围，被聚焦后都被定义为“已陷入列表”
       }
 
       function blurTrapListHandler(e) {
