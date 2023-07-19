@@ -283,7 +283,9 @@ class TabList {
     return !!this.data[i];
   };
   record(cur, curI) {
-    if (curI === -1 && this.curI === curI) return; // curI 为 -1 后，不会再次更新新的 -1
+    if (this.curI === curI // this.curI 和 curI 必须不同
+      || (this.curI < 0 && curI < 0)) // curI 为 -1 后，不会再次更新新的 -1
+      return;
     this.recordPrev(this.cur, this.curI);
     this.recordCur(cur, curI);
   };
@@ -893,14 +895,11 @@ const focusNoJutsu = (...props) => {
       function clickListItemHandler(e) {
         const targetIndex = list.findIndex(item => item.contains(e.target));
         if (targetIndex > -1) {
-          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord, curI: curIBeforeRecord } = listInfo;
+          const curIBeforeRecord = listInfo.curI;
           listInfo.recordSequenceByIdx(targetIndex);
-          const { prev: prevAfterRecord, prevI: prevIAfterRecord, cur, curI } = listInfo;
-          const prev = prevAfterRecord || prevBeforeRecord;
-          const prevI = prevIAfterRecord < 0 ? prevIBeforeRecord : prevIAfterRecord;
+          const { prev, prevI, cur, curI } = listInfo;
           onClick?.({ e, prev, cur, prevI, curI });
-          if (curIBeforeRecord < 0 // 从外部进入
-            || prevI !== curI) // 列表内的移动
+          if (curIBeforeRecord !== curI) // 从外部进入 或者 列表内的移动
             onMove?.({ e, prev, cur, prevI, curI });
         }
       }
