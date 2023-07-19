@@ -157,6 +157,17 @@ export function initBagel_16(dialog, open, focusA, focusB, focusC, focusD, focus
   });
 }
 
+export function initBagel_16_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: {
+      node: open,
+      target: () => null,
+    },
+    exit: focusF,
+  });
+}
+
 export function initBagel_17(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
   focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
     sequence: true,
@@ -197,6 +208,16 @@ export function initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focus
     entry: open,
     exit: focusF,
     correctionTarget: ({ list }) => list[3],
+    removeListenersEachExit: false,
+  });
+}
+
+export function initBagel_20_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: focusF,
+    onEscape: true,
     removeListenersEachExit: false,
   });
 }
@@ -319,5 +340,62 @@ export function initBagel_31(container, dialog, first, last, open, close) {
       exit: e => e.key === 'e',
     },
     onEscape: true,
+  });
+}
+
+export function initBagel_32(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: focusG,
+    onMove({ cur, prev }) {
+      cur?.classList.add("selected");
+      prev?.classList.remove("selected");
+    },
+  });
+}
+
+export function initBagel_33(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: focusG,
+    onMove({ cur, prev }) {
+      cur?.classList.add("selected");
+      prev?.classList.remove("selected");
+    },
+    correctionTarget({ list }) {
+      return list[3];
+    },
+  });
+}
+
+export function initBagel_34(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: [focusG, {
+      type: "outlist"
+    }],
+    onMove({ cur, prev }) {
+      cur?.classList.add("selected");
+      prev?.classList.remove("selected");
+    },
+    removeListenersEachExit: false,
+  });
+}
+
+export function initBagel_35(container, dialog, first, last, open, close) {
+
+  return focusBagel(dialog, [first, last], {
+    entry: {
+      node: open,
+      onExit: true,
+      on() {
+        open.classList.toggle("opened");
+      },
+    },
+    exit: close,
+    // removeListenersEachExit: false,
   });
 }

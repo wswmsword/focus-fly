@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -424,7 +424,7 @@ describe("focus-bagel", function() {
 
   // 通过 correctionTarget 矫正从非入口进入列表的焦点
   it("should correct focus by correctionTarget", async function() {
-    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
     initBagel_20(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
 
     await user.click(walk2);
@@ -674,6 +674,7 @@ describe("cover", function() {
 describe("options", function() {
 
   describe("entry", function() {
+
     // 入口的目标是一个函数
     it("function target", async function() {
       const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
@@ -681,6 +682,15 @@ describe("options", function() {
 
       await user.click(open);
       expect(focusB).toHaveFocus();
+    });
+
+    // 目标的返回值是 null
+    it("null target", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_16_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
     });
 
     // 入口的目标是选择器字符串
@@ -717,6 +727,20 @@ describe("options", function() {
       expect(first).toHaveFocus();
       await user.click(close);
       expect(open).toHaveFocus();
+    });
+
+    // 开关，入口同时作为出口
+    it("toggle", async function() {
+      const { container, dialog, first, last, open, close, walk1 } = getRangeModalDom();
+      initBagel_35(container, dialog, first, last, open, close, walk1)
+
+      await user.click(open);
+      expect(first).toHaveFocus();
+      expect(open).toHaveClass("opened");
+
+      await user.click(open);
+      expect(open).toHaveFocus();
+      expect(open).not.toHaveClass("opened");
     });
   });
 
@@ -795,6 +819,98 @@ describe("options", function() {
       expect(focusA).toHaveFocus();
       await user.click(focusD);
       expect(focusD).toHaveFocus();
+    });
+  });
+
+  describe("onMove", function() {
+
+    // 触发入口和出口，列表移动的时候，会触发 onMove
+    it("should onMove in entry, list and exit", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      initBagel_32(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+      expect(focusA).toHaveClass("selected");
+
+      await user.tab();
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+      expect(focusA).not.toHaveClass("selected");
+
+      await user.tab();
+      await user.tab({ shift: true });
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+      expect(focusC).not.toHaveClass("selected");
+
+      await user.click(focusG);
+      expect(open).toHaveFocus();
+      expect(focusG).not.toHaveClass("selected");
+      expect(focusB).not.toHaveClass("selected");
+    });
+
+    // 焦点矫正后，触发 onMove
+    it("should onMove after correctionTarget", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1 } = getSequenceModalDom();
+      initBagel_33(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.tab();
+      await user.tab();
+      expect(walk1).toHaveFocus();
+
+      await user.tab(); // correction
+      expect(focusD).toHaveFocus();
+
+      expect(focusD).toHaveClass("selected");
+      expect(dialog).not.toHaveClass("selected");
+      expect(focusA).not.toHaveClass("selected");
+    });
+
+    it("should onMove again after first onMove by clicking", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1 } = getSequenceModalDom();
+      initBagel_34(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(focusB);
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+
+      await user.click(walk1);
+      await wait(100);
+      expect(open).toHaveFocus();
+      expect(focusB).not.toHaveFocus();
+      expect(focusB).not.toHaveClass("selected");
+
+      await user.click(focusB);
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+    });
+  });
+
+  describe("correctionTarget", function() {
+
+    // 可以通过 tab 触发矫正
+    it("should correction by tab in default sequence-list mode", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1 } = getSequenceModalDom();
+      initBagel_20_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(focusC);
+      expect(focusC).toHaveFocus();
+
+      await user.keyboard("[Escape]");
+      expect(open).toHaveFocus();
+
+      await user.tab();
+      expect(walk1).toHaveFocus();
+      await user.tab();
+      expect(focusC).toHaveFocus(); // correction
+
+      await user.click(focusF);
+      expect(open).toHaveFocus();
+      await user.tab();
+      await user.tab();
+      expect(focusF).toHaveFocus(); // correction
+
     });
   });
 
