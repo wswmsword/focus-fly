@@ -169,7 +169,7 @@ type callbackDelay = (fn: () => any) => any;
 
 interface Options {
 
-  /** tab 序列，指定之后焦点的路径就是列表，否则列表是一个范围 */
+  /** 序列列表，开启之后，列表的元素将作为焦点导航的路径，否则列表是一个范围 */
   sequence?: boolean;
 
   /** 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 */
