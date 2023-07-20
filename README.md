@@ -1,14 +1,13 @@
 # Focus-no-Jutsu
 
-[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu) [![B level Genjutsu](https://img.shields.io/badge/Genjutsu-B-%23fbadcc)](https://naruto.fandom.com/wiki/Genjutsu)
+<a href="https://naruto.fandom.com/wiki/Genjutsu"><img src="https://img.shields.io/badge/Genjutsu-B-%23fbadcc" alt="B level Genjutsu" align="right"></a>
+<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
 使用 focus-no-jutsu 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。
 
-> 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，依然保有用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以自由地切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
+> 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，*依然保有*用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以*自由地*切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
-网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等，前往[“其它”](#其它)一节查看开发弹窗时需要考虑焦点的哪些方面。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹。进行业务或组件开发的时候，如果不考虑焦点的影响，处处关联的焦点可能让程序变得混乱，如果遗漏处理某些情况，反应到用户界面上，也会出现不符预期的意外行为，最终会让应用的体验感非常脆弱。
-
-也许你希望能集中管理相互关联的焦点，同时希望能控制焦点导航的路径，不妨试试 focus-no-jutsu，focus-no-jutsu 集中管理焦点、控制焦点路径。
+网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹。进行业务或组件开发的时候，如果不考虑焦点的影响，处处关联的焦点可能让程序变得混乱，如果遗漏处理某些情况，反应到用户界面上，则是不符预期的意外行为。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述“焦点如何通过入口进入列表，进入列表后如何移动焦点，以及如何让焦点通过出口退出列表”。
 
@@ -26,21 +25,16 @@ focus-no-jutsu 可以控制从“打开”按钮开始、到对话框内导航�
 
 ## 安装
 
-npm 安装：
+npm 安装（yarn 则使用 `yarn add focus-no-jutsu` 进行安装）：
 ```bash
 npm install focus-no-jutsu
 ```
 
-yarn 安装：
-```bash
-yarn add focus-no-jutsu
-```
-
 ## 使用
 
-focus-no-jutsu 支持 ESM 和 CJS 导入，如果直接用于浏览器标签引入，可以[在本项目的 `output/` 文件夹内下载 UMD 文件](https://github.com/wswmsword/focus-no-jutsu/tree/main/output)。
+focus-no-jutsu 支持 ESM 和 CJS 导入，如果希望直接通过浏览器标签导入，可以下载[本项目 `output/` 文件夹内的 UMD 文件](https://github.com/wswmsword/focus-no-jutsu/tree/main/output) 进行 `<script>` 标签引入。
 
-添加下面这两行代码后，焦点会在元素 `#firstTabbableNode` 和 `#lastTabbableNode` 之间陷入循环：
+添加下面这两行代码后，焦点将会在一个列表之间陷入循环，这个列表的头元素是 `#firstTabbableNode`，尾元素是 `#lastTabbableNode`：
 
 ```javascript
 import focus from "focus-no-jutsu"; // ESM 导入方式
@@ -48,7 +42,7 @@ import focus from "focus-no-jutsu"; // ESM 导入方式
 focus(["#firstTabbableNode", "#lastTabbableNode"]);
 ```
 
-这是最简洁的调用，以这种方式调用，焦点可以通过键盘（<kbd>Tab</kbd>）进入列表，但是无法通过键盘退出列表，下面对调用参数稍加修改，让焦点在入口、列表和出口间流动：
+这是最简洁的调用，以这种方式调用，焦点可以通过键盘（<kbd>Tab</kbd>）进入列表，但是无法通过键盘退出列表，下面对调用参数稍加修改，加入元素 `#entryBtn` 作为入口，元素 `#lastTabbableNode` 作为出口，这样焦点就能够通过键盘在入口、列表和出口间流动：
 
 ```javascript
 focus(["#firstTabbableNode", "#lastTabbableNode"], {
@@ -58,21 +52,21 @@ focus(["#firstTabbableNode", "#lastTabbableNode"], {
 });
 ```
 
-上面的代码执行后，在浏览器中将会有这样的行为：点击 `#entryBtn`，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，点击 `#lastTabbableNode` 或者按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-no-jutsu#h-hot)。
+上面的代码执行后，在浏览器中将会有这样的行为：在 `#entryBtn` 上按下 <kbd>Enter</kbd>，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，在 `#lastTabbableNode` 上按下 <kbd>Enter</kbd>，或者在列表内的任意元素上按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-no-jutsu#h-hot)。
 
-继续阅读查看调用传递入参的详细介绍。
+这是一个简单和完整的用法，解释了入口、列表和出口对焦点的管理与控制，继续阅读，查看关于延迟注册列表事件、触发焦点移动的钩子、自定义焦点矫正目标等更多特性的详细介绍。
 
 ### focusNoJutsu(list[, options])
 
-调用函数 `focusNoJutsu` 管理焦点，函数可以传递 2 个参数，`list` 表示焦点列表，第二个入参 `options` 是可选的，用于设定若干选项，例如设定入口、封面、列表和出口相关的详细配置。
+调用函数 `focusNoJutsu` 时可以传递 2 个参数，`list` 表示焦点列表，第二个入参 `options` 是可选的，用于设定若干选项，例如设定入口、封面、列表和出口相关的详细配置。
 
 ### focusNoJutsu(root, list[, options])
 
-调用函数 `focusNoJutsu` 管理焦点，函数可以传递 3 个参数，`root` 是 `list` 的祖先元素，将会被用来监听键盘（keydown）之类的事件，如果不提供 `root`，focus-no-jutsu 将会通过 `list` 找到最小公共祖先元素，第二个入参 `list` 表示列表，第三个 `options` 是可选的，用于设定若干选项。
+调用函数 `focusNoJutsu` 时可以传递 3 个参数，`root` 是 `list` 内各元素的公共祖先元素，将会被用来监听键盘（keydown）之类的事件，如果不提供 `root`，focus-no-jutsu 将会通过 `list` 找到最小公共祖先元素，第二个入参 `list` 表示列表，第三个 `options` 是可选的，用于设定若干选项。
 
 <details>
 <summary>
-查看一种使用范例，范例演示了上面提到的“管理‘关闭’按钮和 <kbd>Esc</kbd>”。
+查看一种使用范例，范例演示了如何通过 focus-no-jutsu 完成对话框组件的焦点管理。
 </summary>
 
 ```javascript
@@ -126,19 +120,19 @@ npm run start
 
 ### root
 
-**root**，`string | Element`，可以是一个 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是一个 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
+**root**，`string | Element`，可以是一个 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是一个 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)（如 `#container`）。
 
-根元素 `root` 将被用于监听键盘（keydown）事件，默认会监听按键 <kbd>Tab</kbd> 来控制焦点循环聚焦，如果开启了 `options.onEscape`，也会监听 <kbd>Esc</kbd>。
+根元素 `root` 是列表内各元素的公共祖先元素，将被用于监听键盘（keydown）事件以及和列表有关的其它事件，默认会监听按键 <kbd>Tab</kbd> 来控制焦点循环聚焦，如果开启了 `options.onEscape`，也会监听 <kbd>Esc</kbd>。
 
-如果不提供这个参数，focus-no-jutsu 会取得列表 `list` 的最小公共祖先作为根元素 `root`。
+如果不提供这个参数，focus-no-jutsu 会取得列表 `list` 内元素的最小公共祖先作为根元素 `root`。
 
 ### list
 
 **list**，`(string | Element)[]`，是一个数组，数组内的元素可以是 [Element](https://developer.mozilla.org/zh-CN/docs/Web/API/Element) 对象，也可以是 [DOMString](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String)。
 
-这个参数表示列表，文档里提到的“列表”都是指这里的 list，默认情况下，数组 `list` 只需要两个元素，一个可聚焦的头元素，一个可聚焦的尾元素，如果传入的数组长度大于 2，将只取头和尾。这两个元素被用于确定按下 <kbd>Tab</kbd> 后的聚焦元素，识别到尾元素将跳转到头元素，按下 <kbd>Shift-Tab</kbd>，识别到头元素将跳转到尾元素。
+这个参数表示列表，文档里提到的“列表”都是指这里的 list，默认情况下，数组 `list` 表示范围，只需要两个元素，一个可聚焦的头元素，一个可聚焦的尾元素，如果传入的数组长度大于 2，将只取头和尾。
 
-设置 `options.sequence` 为 true 后，`list` 可以是一个长度大于 2 的序列，这时按下 <kbd>Tab</kbd> 后，将以 `list` 中元素的顺序进行聚焦。在设置 `options.next` 或 `options.prev` 后，原来的 <kbd>Tab</kbd> 被自定义导航键取代，同时 `options.sequence` 被默认设为 true。
+设置 `options.sequence` 为 true 后，`list` 表示序列，是一个长度大于 2 的数组，这时按下 <kbd>Tab</kbd> 后，焦点将以 `list` 中元素的顺序进行导航。在设置 `options.next` 或 `options.prev` 后，原来的 <kbd>Tab</kbd> 被自定义导航键取代，同时 `options.sequence` 被默认设为 true。
 
 通过入口进入列表，如果有封面，则入口进入封面，封面再进入列表。通过出口退出列表，回到入口，如果有封面，出口会退出列表，回到封面，再通过封面回到入口。
 
@@ -157,16 +151,21 @@ npm run start
 | exit | element \| element[] \| exit \| exit[] | null | 出口相关配置，退出列表，回到入口，如果存在封面，则是回到封面，可以直接设置为一个元素，也可以设置数组，表示多个出口 |
 | onEscape | false \| handleKeydown | null | 按下 <kbd>Esc</kbd> 的行为，如果未设置，默认取第一个 `options.exit.on` |
 | onClick | handleClick | null | 点击列表里的某一项后的行为 |
-| onMove | handleMoveListItem | null | 移动的时候触发，包括进入列表时，移动列表时，以及退出列表时 |
+| onMove | handleMoveListItem | null | 移动的时候触发，包括进入列表时，移动列表时，以及退出列表时，`sequence` 为 true 才会触发 |
 | cover | boolean \| cover | false | 封面相关配置，设置为 true，则是默认封面，默认把根元素 root 作为封面，当焦点在封面上，默认 <kbd>Enter</kbd> 进入列表，默认 <kbd>Tab</kbd> 聚焦列表的后一个元素 |
 | initialActive | number | -1 | 默认的初始的焦点在列表中的位置，可能会被用于修改当前和上一个聚焦元素的样式时使用 |
 | correctionTarget | boolean \| getTarget | true | 焦点矫正，默认从非入口的空白区域进入列表，也将聚焦上一次退出前焦点在列表中的位置，设置为 false 则不进行矫正 |
-| delayToFocus | boolean \| promiseDelay \| callbackDelay | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦，延迟聚焦的本意是等待列表渲染完成后再聚焦，延迟聚焦意味延迟添加列表相关的事件，也即在触发入口前，没有列表相关的事件，如果设为 true，则会在触发入口后立刻添加列表相关的事件 |
+| delayToFocus | boolean \| promiseDelay \| callbackDelay | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦，延迟聚焦的本意是等待列表渲染完成后再聚焦，延迟聚焦意味延迟添加列表相关的事件，也即在触发入口前，没有列表相关的事件，如果设为 true，则会在触发入口后立刻添加列表相关的事件，可用于性能优化 |
 | delayToBlur | promiseDelay \| callbackDelay | null | 延迟失列表的焦，触发出口后等待执行 `delayToBlur` 完成后失焦，和 `delayToFocus` 类似 |
+| manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
+
+为了不影响排版阅读，下面 4 个名称过长的选项被单独制成一张表格：
+
+| Name | Type | Default | Desc |
+|:--|:--|:--|:--|
 | removeListenersEachExit | boolean | true | 每次退出列表回到入口是否移除列表事件 |
 | removeListenersEachEnter | boolean | false | 每次进入列表后是否移除入口事件 |
 | addEntryListenersEachExit | boolean | true | 每次退出列表是否添加入口监听事件 |
-| manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
 | allowSafariToFocusAfterMousedown | boolean | true | 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题，设置为 true，Safari 中 将会在列表的 mousedown 事件里执行 `focus()` |
 
 ### options.next
@@ -238,14 +237,16 @@ focus(dialog, ["#head", "#second", "#tail"], {
 | key | iskey | null | 自定义进入列表组合键 |
 | on | handleKeydown | null | 进入时被调用，进入列表前的行为，如果列表或封面在这里才开始渲染，需要设置 `options.delayToFocus` 来延迟聚焦，否则不能聚焦不存在的元素 |
 | type | enterType \| enterType[] | null | 入口的监听方式，如果 `options.entry` 设置了 `node` 选项，则默认为 `"click"`，如果还设置了 `key` 选项，则默认为 `["click", "keydown"]`，另外还支持 `"focus"` 类型用于聚焦触发入口，`"invoke"` 类型用于返回值 `Return.enter` 触发入口 |
-| target | boolean \| element \| getTarget | null | 进入到哪个元素？设置为 false 将不改变焦点 |
+| target | boolean \| element \| getTarget | null | 进入到哪个元素？默认将聚焦列表第一个元素，设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦，如果没有设置，将取 `options.delayToFocus` |
 | if | ef | null | 触发入口的条件，如果不符合条件，将不被认为是进入了列表 |
 | onExit | true \| handleExit | null | 指定当前入口同时也是出口，作为出口的行为，设为 true，则行为取 `options.entry.on`，该选项类似表明这个元素是个开关 |
 
+入口定义的方式非常自由，例如 `entry: "#entryBtn"`，`entry: { node: "#entryBtn", type: "click" }`，`entry: ["#entryBtn"]`，`entry: ["#entryBtn", { node: "#btn2", type: "click" }]`，这四种写法都是允许的。
+
 ### options.exit
 
-这些选项和*出口*相关，描述了焦点如何从列表回到封面或入口。
+这些选项和出口相关，描述了焦点如何从列表回到封面或入口。
 
 和入口类似，在下次进入列表前，不能够重复触发出口退出列表。通过点击非列表的空白区域，也被算作退出列表。
 
@@ -255,9 +256,11 @@ focus(dialog, ["#head", "#second", "#tail"], {
 | key | iskey | null | 自定义退出列表组合键 |
 | on | handleKeydown | null | 退出时被调用，退出列表前的行为，如果有封面就退出至封面，如果没有就退出至入口，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
 | type | exitType \| exitType[] | ["keydown", "click"] | 出口的事件类型，和 `options.entry.type` 类似，但是多了 `"outlist"` 类型，用于聚焦空白区域、非列表区域时触发出口，这常用于弹窗的半透明蒙版 |
-| target | boolean \| element \| getTarget | null | 退出至哪个元素？设置为 false 将不改变焦点 |
+| target | boolean \| element \| getTarget | null | 退出至哪个元素？默认将聚焦第一个入口，设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟失焦，触发 node 后等待执行 delay 完成后失焦，如果没有设置，将取 `options.delayToBlur` |
 | if | ef | null | 触发出口的条件，如果不符合条件，将不被认为是退出了列表 |
+
+出口定义的方式和入口一样，例如 `exit: "#exitBtn"`，`exit: { node: "#exitBtn", type: "click" }`，`exit: ["#exitBtn"]`，`entry: ["#exitBtn", { node: "#btn2", type: "click" }]`，这四种写法都是允许的。
 
 ### options.cover
 
@@ -420,6 +423,13 @@ focus-no-jutsu 的主要任务是管理和控制**焦点**，如果有钩子不�
 请随意 Issue、PR 和 Star，通过[爱发电](https://afdian.net/a/george-chen)进行赞助。
 
 ## 其它
+
+focus-no-jutsu 支持的特性：
+- 集中管理焦点；
+- 通过指定范围或序列循环焦点；
+- 按需监听、移除事件；
+- 矫正不是从入口进入列表的焦点；
+- 提供钩子函数完成诸如样式修改的任务。
 
 假设准备开发一个弹窗，进行焦点管理，需要有下面的流程、考虑下面几种情况：
 - 在“打开”按钮上按下 <kbd>Enter</kbd>，弹窗内第一个元素获得焦点；
