@@ -3,7 +3,7 @@
 <a href="https://naruto.fandom.com/wiki/Genjutsu"><img src="https://img.shields.io/badge/Genjutsu-B-%23fbadcc" alt="B level Genjutsu" align="right"></a>
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-使用 focus-no-jutsu 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。
+使用 focus-no-jutsu 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。focus-no-jutsu 的压缩体积为 [5.7kB](https://bundlephobia.com/package/focus-no-jutsu)。
 
 > 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，*依然保有*用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以*自由地*切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
 
