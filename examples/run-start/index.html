@@ -24,7 +24,7 @@
       
       <p>网页程序里有很多需要管理和控制的场景，例如弹窗、菜单、选项卡、抽屉等等，在我们按下键盘的 <kbd>Tab</kbd> ，焦点进入某个场景，我们希望焦点被施加一个幻术，让焦点陷入一个循环，或者被卡在首尾元素之间的秘密空间，直到我们按下 <kbd>Esc</kbd> 或者点击“返回”，解开幻术。</p>
 
-      <p>现在开始我们用 <code>Focus-no-Jutsu</code> 完成和焦点有关的一系列任务！🥷</p>
+      <p>接下来我们将施展 <code>Focus-no-Jutsu</code>，完成和焦点有关的一系列任务！🥷</p>
 
       <!-- <hr />
 
@@ -41,7 +41,7 @@
 
       <h2 id="h-hot" tabindex="-1">热身</h2>
 
-      <p>这个简单的例子演示了焦点在入口、列表和出口之间的行为，演示了 focus-no-jutsu 基本的用法。</p>
+      <p>这个简单的例子演示了 focus-no-jutsu 基本的用法。首先通过 <kbd>Tab</kbd> 访问 entryBtn，然后按下 <kbd>Enter</kbd>，firstTabbableNode 成为焦点，按住 <kbd>Tab</kbd>，焦点将在 firstTabbableNode 和 lastTabbableNode 之间循环，最后，当焦点落在 lastTabbableNode 时按下 <kbd>Enter</kbd>，或者在列表内的任意元素上按下 <kbd>Esc</kbd>，焦点回到 entryBtn。</p>
 
       <div>
         <button id="entryBtn">entryBtn</button>
@@ -58,7 +58,8 @@
 <code>focusNoJutsu(["#firstTabbableNode", "#lastTabbableNode"], {
   entry: "#entryBtn",
   exit: "#lastTabbableNode",
-  onEscape: true
+  onEscape: true,
+  delayToFocus: true,
 });
 </code>
       </pre>
@@ -602,7 +603,8 @@ function onMovePlayer({ cur, prev, curI }) {
     focusNoJutsu(["#firstTabbableNode", "#lastTabbableNode"], {
       entry: "#entryBtn",
       exit: "#lastTabbableNode",
-      onEscape: true
+      onEscape: true,
+      delayToFocus: true,
     });
 
     // focusNoJutsu(["#l1", "#l9"], {
