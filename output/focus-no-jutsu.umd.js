@@ -9,336 +9,22 @@
   })());
 })(this, (function () { 'use strict';
 
-  function _regeneratorRuntime() {
-    _regeneratorRuntime = function () {
-      return exports;
-    };
-    var exports = {},
-      Op = Object.prototype,
-      hasOwn = Op.hasOwnProperty,
-      defineProperty = Object.defineProperty || function (obj, key, desc) {
-        obj[key] = desc.value;
-      },
-      $Symbol = "function" == typeof Symbol ? Symbol : {},
-      iteratorSymbol = $Symbol.iterator || "@@iterator",
-      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
-      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-    function define(obj, key, value) {
-      return Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: !0,
-        configurable: !0,
-        writable: !0
-      }), obj[key];
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
     }
-    try {
-      define({}, "");
-    } catch (err) {
-      define = function (obj, key, value) {
-        return obj[key] = value;
-      };
-    }
-    function wrap(innerFn, outerFn, self, tryLocsList) {
-      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
-        generator = Object.create(protoGenerator.prototype),
-        context = new Context(tryLocsList || []);
-      return defineProperty(generator, "_invoke", {
-        value: makeInvokeMethod(innerFn, self, context)
-      }), generator;
-    }
-    function tryCatch(fn, obj, arg) {
-      try {
-        return {
-          type: "normal",
-          arg: fn.call(obj, arg)
-        };
-      } catch (err) {
-        return {
-          type: "throw",
-          arg: err
-        };
-      }
-    }
-    exports.wrap = wrap;
-    var ContinueSentinel = {};
-    function Generator() {}
-    function GeneratorFunction() {}
-    function GeneratorFunctionPrototype() {}
-    var IteratorPrototype = {};
-    define(IteratorPrototype, iteratorSymbol, function () {
-      return this;
+  }
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
     });
-    var getProto = Object.getPrototypeOf,
-      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-    function defineIteratorMethods(prototype) {
-      ["next", "throw", "return"].forEach(function (method) {
-        define(prototype, method, function (arg) {
-          return this._invoke(method, arg);
-        });
-      });
-    }
-    function AsyncIterator(generator, PromiseImpl) {
-      function invoke(method, arg, resolve, reject) {
-        var record = tryCatch(generator[method], generator, arg);
-        if ("throw" !== record.type) {
-          var result = record.arg,
-            value = result.value;
-          return value && "object" == typeof value && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
-            invoke("next", value, resolve, reject);
-          }, function (err) {
-            invoke("throw", err, resolve, reject);
-          }) : PromiseImpl.resolve(value).then(function (unwrapped) {
-            result.value = unwrapped, resolve(result);
-          }, function (error) {
-            return invoke("throw", error, resolve, reject);
-          });
-        }
-        reject(record.arg);
-      }
-      var previousPromise;
-      defineProperty(this, "_invoke", {
-        value: function (method, arg) {
-          function callInvokeWithMethodAndArg() {
-            return new PromiseImpl(function (resolve, reject) {
-              invoke(method, arg, resolve, reject);
-            });
-          }
-          return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-        }
-      });
-    }
-    function makeInvokeMethod(innerFn, self, context) {
-      var state = "suspendedStart";
-      return function (method, arg) {
-        if ("executing" === state) throw new Error("Generator is already running");
-        if ("completed" === state) {
-          if ("throw" === method) throw arg;
-          return doneResult();
-        }
-        for (context.method = method, context.arg = arg;;) {
-          var delegate = context.delegate;
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel) continue;
-              return delegateResult;
-            }
-          }
-          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
-            if ("suspendedStart" === state) throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self, context);
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
-            return {
-              value: record.arg,
-              done: context.done
-            };
-          }
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(delegate, context) {
-      var methodName = context.method,
-        method = delegate.iterator[methodName];
-      if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator.return && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
-      var record = tryCatch(method, delegate.iterator, context.arg);
-      if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-      var info = record.arg;
-      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-    }
-    function pushTryEntry(locs) {
-      var entry = {
-        tryLoc: locs[0]
-      };
-      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-    }
-    function resetTryEntry(entry) {
-      var record = entry.completion || {};
-      record.type = "normal", delete record.arg, entry.completion = record;
-    }
-    function Context(tryLocsList) {
-      this.tryEntries = [{
-        tryLoc: "root"
-      }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
-    }
-    function values(iterable) {
-      if (iterable) {
-        var iteratorMethod = iterable[iteratorSymbol];
-        if (iteratorMethod) return iteratorMethod.call(iterable);
-        if ("function" == typeof iterable.next) return iterable;
-        if (!isNaN(iterable.length)) {
-          var i = -1,
-            next = function next() {
-              for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
-              return next.value = undefined, next.done = !0, next;
-            };
-          return next.next = next;
-        }
-      }
-      return {
-        next: doneResult
-      };
-    }
-    function doneResult() {
-      return {
-        value: undefined,
-        done: !0
-      };
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
-      value: GeneratorFunctionPrototype,
-      configurable: !0
-    }), defineProperty(GeneratorFunctionPrototype, "constructor", {
-      value: GeneratorFunction,
-      configurable: !0
-    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
-      var ctor = "function" == typeof genFun && genFun.constructor;
-      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-    }, exports.mark = function (genFun) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-    }, exports.awrap = function (arg) {
-      return {
-        __await: arg
-      };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
-      return this;
-    }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
-      void 0 === PromiseImpl && (PromiseImpl = Promise);
-      var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
-      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
-        return result.done ? result.value : iter.next();
-      });
-    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
-      return this;
-    }), define(Gp, "toString", function () {
-      return "[object Generator]";
-    }), exports.keys = function (val) {
-      var object = Object(val),
-        keys = [];
-      for (var key in object) keys.push(key);
-      return keys.reverse(), function next() {
-        for (; keys.length;) {
-          var key = keys.pop();
-          if (key in object) return next.value = key, next.done = !1, next;
-        }
-        return next.done = !0, next;
-      };
-    }, exports.values = values, Context.prototype = {
-      constructor: Context,
-      reset: function (skipTempReset) {
-        if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
-      },
-      stop: function () {
-        this.done = !0;
-        var rootRecord = this.tryEntries[0].completion;
-        if ("throw" === rootRecord.type) throw rootRecord.arg;
-        return this.rval;
-      },
-      dispatchException: function (exception) {
-        if (this.done) throw exception;
-        var context = this;
-        function handle(loc, caught) {
-          return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
-        }
-        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-          var entry = this.tryEntries[i],
-            record = entry.completion;
-          if ("root" === entry.tryLoc) return handle("end");
-          if (entry.tryLoc <= this.prev) {
-            var hasCatch = hasOwn.call(entry, "catchLoc"),
-              hasFinally = hasOwn.call(entry, "finallyLoc");
-            if (hasCatch && hasFinally) {
-              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-            } else if (hasCatch) {
-              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-            } else {
-              if (!hasFinally) throw new Error("try statement without catch or finally");
-              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-            }
-          }
-        }
-      },
-      abrupt: function (type, arg) {
-        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-          var entry = this.tryEntries[i];
-          if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-            var finallyEntry = entry;
-            break;
-          }
-        }
-        finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-        var record = finallyEntry ? finallyEntry.completion : {};
-        return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-      },
-      complete: function (record, afterLoc) {
-        if ("throw" === record.type) throw record.arg;
-        return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-      },
-      finish: function (finallyLoc) {
-        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-          var entry = this.tryEntries[i];
-          if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-        }
-      },
-      catch: function (tryLoc) {
-        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-          var entry = this.tryEntries[i];
-          if (entry.tryLoc === tryLoc) {
-            var record = entry.completion;
-            if ("throw" === record.type) {
-              var thrown = record.arg;
-              resetTryEntry(entry);
-            }
-            return thrown;
-          }
-        }
-        throw new Error("illegal catch attempt");
-      },
-      delegateYield: function (iterable, resultName, nextLoc) {
-        return this.delegate = {
-          iterator: values(iterable),
-          resultName: resultName,
-          nextLoc: nextLoc
-        }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
-      }
-    }, exports;
-  }
-  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator(fn) {
-    return function () {
-      var self = this,
-        args = arguments;
-      return new Promise(function (resolve, reject) {
-        var gen = fn.apply(self, args);
-        function _next(value) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(undefined);
-      });
-    };
+    return Constructor;
   }
   function _extends() {
     _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -354,36 +40,19 @@
     };
     return _extends.apply(this, arguments);
   }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-    return arr2;
-  }
-  function _createForOfIteratorHelperLoose(o, allowArrayLike) {
-    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
-    if (it) return (it = it.call(o)).next.bind(it);
-    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-      if (it) o = it;
-      var i = 0;
-      return function () {
-        if (i >= o.length) return {
-          done: true
-        };
-        return {
-          done: false,
-          value: o[i++]
-        };
-      };
+  function _toPrimitive(input, hint) {
+    if (typeof input !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (typeof res !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
     }
-    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    return (hint === "string" ? String : Number)(input);
+  }
+  function _toPropertyKey(arg) {
+    var key = _toPrimitive(arg, "string");
+    return typeof key === "symbol" ? key : String(key);
   }
 
   /** Object.prototype.toString.call 快捷方式 */
@@ -470,41 +139,23 @@
   var focus = function focus(e) {
     e.focus();
     if (isSelectableInput(e)) e.select();
-    return true;
   };
 
   /** 尝试聚焦，如果聚焦失效，则下个 setTimeout 再次聚焦 */
-  var tickFocus = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            return _context.abrupt("return", new Promise(function (resolve) {
-              if (e == null) tick(function () {
-                return resolve(e && focus(e));
-              });else resolve(focus(e));
-            }));
-          case 1:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee);
-    }));
-    return function tickFocus(_x) {
-      return _ref.apply(this, arguments);
-    };
-  }();
+  var tickFocus = function tickFocus(e) {
+    if (e == null) tick(function () {
+      return e && focus(e);
+    });else focus(e);
+  };
 
   /** 手动聚焦下一个元素 */
-  var focusNextListItemBySequence = function focusNextListItemBySequence(subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) {
+  var focusNextListItemBySequence = function focusNextListItemBySequence(subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) {
     return function (e) {
       if (e.target === coverNode) return;
       if (!trappedList()) return;
       var _useActiveIndex = useActiveIndex(),
         index_ = _useActiveIndex[0],
         setIndex = _useActiveIndex[1];
-      var _usePrevActive = usePrevActive(),
-        setPrev = _usePrevActive[1];
       var index = Math.max(0, index_);
       var itemsLen = subNodes.length;
       if ((isNext !== null && isNext !== void 0 ? isNext : isTabForward)(e)) {
@@ -526,7 +177,6 @@
           curI: nextI
         });
         setIndex(nextI);
-        setPrev(index);
         focus(subNodes[nextI]);
         e.preventDefault();
       } else if ((isPrev !== null && isPrev !== void 0 ? isPrev : isTabBackward)(e)) {
@@ -548,7 +198,6 @@
           curI: _nextI
         });
         setIndex(_nextI);
-        setPrev(index);
         focus(subNodes[_nextI]);
         e.preventDefault();
       }
@@ -592,28 +241,28 @@
   };
 
   /** 获取关键节点 */
-  var getKeyNodes = function getKeyNodes(root, list, cover, coverIsRoot) {
+  var getKeyNodes = function getKeyNodes(originRoot, originList, originCover, coverIsRoot) {
     var _element;
-    var _list = list.map(function (item) {
+    var list = originList.map(function (item) {
       return element(item);
     }).filter(function (item) {
       return item != null;
     });
-    var head = _list[0];
-    var tail = _list.slice(-1)[0];
-    var _root = (_element = element(root)) !== null && _element !== void 0 ? _element : findLowestCommonAncestorNode(head, tail);
-    var _cover = coverIsRoot ? _root : element(cover);
+    var head = list[0];
+    var tail = list.slice(-1)[0];
+    var root = (_element = element(originRoot)) !== null && _element !== void 0 ? _element : findLowestCommonAncestorNode(head, tail);
+    var cover = coverIsRoot ? root : element(originCover);
     return {
-      rootNode: _root,
-      subNodes: _list,
+      root: root,
+      list: list,
       head: head,
       tail: tail,
-      coverNode: _cover
+      cover: cover
     };
   };
 
   /** 用于处理节点属性可以传递数组的情况，用于入口和出口 */
-  var nodesReducer = function nodesReducer(acc, cur) {
+  var pickNodesAry = function pickNodesAry(acc, cur) {
     var isAryNodes = Array.isArray(cur.node);
     var nodes = isAryNodes ? cur.node.map(function (n) {
       return _extends({}, cur, {
@@ -690,7 +339,7 @@
           return t !== '';
         }) : [].concat(e.type)
       });
-    }).reduce(nodesReducer, []);
+    }).reduce(pickNodesAry, []);
     var _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? (_tempExits$0$on = (_tempExits$ = tempExits[0]) === null || _tempExits$ === void 0 ? void 0 : _tempExits$.on) !== null && _tempExits$0$on !== void 0 ? _tempExits$0$on : function () {} : onEscape;
     /** 按下 esc 的出口 */
     var escapeExit = isFun(_onEscape) ? {
@@ -707,65 +356,29 @@
   };
 
   /** 获取聚焦或失焦时延迟的类型 */
-  var getDelayType = function getDelayType(delay) {
+  var getDelayType = function getDelayType(delay, processor) {
     var isFunctionDelay = isFun(delay);
-    var delayRes = isFunctionDelay && delay(function () {});
-    var promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]";
+    var delayRes = isFunctionDelay && delay(processor);
+    var promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
     var callbackDelay = isFunctionDelay && !promiseDelay;
     var commonDelay = delay === true && !promiseDelay && !callbackDelay;
     return {
       promiseDelay: promiseDelay,
       callbackDelay: callbackDelay,
-      commonDelay: commonDelay
+      commonDelay: commonDelay,
+      delayRes: delayRes
     };
   };
 
   /** 延迟执行某些操作 */
-  var delayToProcess = /*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(delay, processor) {
-      var _ref3, promiseDelay, callbackDelay, commonDelay;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            _ref3 = !!delay ? getDelayType(delay) : {}, promiseDelay = _ref3.promiseDelay, callbackDelay = _ref3.callbackDelay, commonDelay = _ref3.commonDelay;
-            if (!promiseDelay) {
-              _context2.next = 7;
-              break;
-            }
-            _context2.next = 4;
-            return delay(function () {});
-          case 4:
-            processor();
-            _context2.next = 16;
-            break;
-          case 7:
-            if (!callbackDelay) {
-              _context2.next = 11;
-              break;
-            }
-            delay(processor);
-            _context2.next = 16;
-            break;
-          case 11:
-            if (!commonDelay) {
-              _context2.next = 15;
-              break;
-            }
-            processor();
-            _context2.next = 16;
-            break;
-          case 15:
-            return _context2.abrupt("return", true);
-          case 16:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-    return function delayToProcess(_x2, _x3) {
-      return _ref2.apply(this, arguments);
-    };
-  }();
+  var delayToProcess = function delayToProcess(delay, processor) {
+    var _ref = !!delay ? getDelayType(delay, processor) : {},
+      promiseDelay = _ref.promiseDelay,
+      callbackDelay = _ref.callbackDelay,
+      commonDelay = _ref.commonDelay,
+      delayRes = _ref.delayRes;
+    if (promiseDelay) delayRes.then(processor);else if (callbackDelay) ; else if (commonDelay) processor();else return true;
+  };
 
   /** 获取出口或者入口的目标 */
   var getTarget = function getTarget(target, cover, list, root, enabledCover, activeIndex, defaultTarget, e) {
@@ -858,6 +471,10 @@
       this.data = [];
       this.head = null;
       this.tail = null;
+      this.prevI = -1;
+      this.curI = -1;
+      this._prev = null;
+      this._cur = null;
     }
     var _proto3 = TabList.prototype;
     _proto3.update = function update(list) {
@@ -872,14 +489,50 @@
     _proto3.has = function has(i) {
       return !!this.data[i];
     };
+    _proto3.record = function record(cur, curI) {
+      if (this.curI === curI // this.curI 和 curI 必须不同
+      || this.curI < 0 && curI < 0)
+        // curI 为 -1 后，不会再次更新新的 -1
+        return;
+      this.recordPrev(this.cur, this.curI);
+      this.recordCur(cur, curI);
+    };
+    _proto3.recordPrev = function recordPrev(prev, prevI) {
+      this.prevI = prevI < 0 ? -1 : prevI;
+      this.prev = prev || null;
+    };
+    _proto3.recordCur = function recordCur(cur, curI) {
+      this.curI = curI < 0 ? -1 : curI;
+      this.cur = cur || null;
+    };
+    _proto3.recordSequenceByIdx = function recordSequenceByIdx(curI) {
+      this.record(this.data[curI], curI);
+    };
+    _createClass(TabList, [{
+      key: "prev",
+      get: function get() {
+        return this._prev || this.data[this.prevI] || null; // _prev 可能由于 dom 未加载而为 null，为 null 则通过 prevI 取值
+      },
+      set: function set(v) {
+        this._prev = v;
+      }
+    }, {
+      key: "cur",
+      get: function get() {
+        return this._cur || this.data[this.curI] || null;
+      },
+      set: function set(v) {
+        this._cur = v;
+      }
+    }]);
     return TabList;
   }();
   var focusNoJutsu = function focusNoJutsu() {
-    var _ref4, _entries$;
+    var _ref2, _entries$;
     var offset = 0 - ((arguments.length <= 0 ? undefined : arguments[0]) instanceof Array);
     var rootNode = 0 + offset < 0 || arguments.length <= 0 + offset ? undefined : arguments[0 + offset];
     var subNodes = 1 + offset < 0 || arguments.length <= 1 + offset ? undefined : arguments[1 + offset];
-    var options = (_ref4 = 2 + offset < 0 || arguments.length <= 2 + offset ? undefined : arguments[2 + offset]) !== null && _ref4 !== void 0 ? _ref4 : {};
+    var options = (_ref2 = 2 + offset < 0 || arguments.length <= 2 + offset ? undefined : arguments[2 + offset]) !== null && _ref2 !== void 0 ? _ref2 : {};
     if (!(Array.isArray(subNodes) && subNodes.length > 1)) throw new Error("请至少传入一个数组，数组至少包含两个可聚焦元素，用来表示列表的头和尾。");
     var sequence = options.sequence,
       loop = options.loop,
@@ -899,45 +552,35 @@
       _options$removeListen = options.removeListenersEachExit,
       removeListenersEachExit = _options$removeListen === void 0 ? true : _options$removeListen,
       removeListenersEachEnter = options.removeListenersEachEnter,
+      _options$addEntryList = options.addEntryListenersEachExit,
+      addEntryListenersEachExit = _options$addEntryList === void 0 ? true : _options$addEntryList,
       manual = options.manual,
       _options$allowSafariT = options.allowSafariToFocusAfterMousedown,
       allowSafariToFocusAfterMousedown = _options$allowSafariT === void 0 ? true : _options$allowSafariT;
-      options.demo;
-    var _ref5 = isObj(cover) ? cover : {},
-      coverNode = _ref5.node,
-      coverEnterKey = _ref5.enterKey,
-      onEnterCover = _ref5.onEnter,
-      exitCover = _ref5.exit;
-
-    /** 是否已经打开封面选项 */
-    var enabledCover = cover != null && cover !== false && coverNode !== false;
-
-    /** 封面即根元素 */
-    var coverIsRoot = enabledCover && (cover === true || coverNode === true || coverNode == null);
-
-    /** 列表 */
-    var list = new TabList();
 
     /** 入口们 */
-    var entries = [].concat(entry).filter(function (o) {
+    var entries = [].concat(entry) // 转为数组
+    .filter(function (o) {
       return o != null;
-    }).map(function (ele) {
+    }) // 过滤空值
+    .map(function (ele) {
       return isObj(ele) ? ele : {
         node: ele
       };
-    }).map(function (entry) {
+    }) // 元素转为对象，并且默认元素的值被看作对象的 node 属性
+    .map(function (entry) {
       var _entry$delay;
       return _extends({}, entry, {
         delay: (_entry$delay = entry.delay) !== null && _entry$delay !== void 0 ? _entry$delay : delayToFocus,
         type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(function (t) {
           return t != '';
         }) : [].concat(entry.type),
-        onExit: entry.onExit === true ? entry.on : entry.onExit
+        onExit: entry.onExit === true ? entry.on : entry.onExit // 这个入口是开关吗
       });
-    }).reduce(nodesReducer, []);
+    }).reduce(pickNodesAry, []); // 处理元素的 node 属性是数组的情况，将它分解成多个元素
     /** 是否是空入口 */
     var hasNoEntry = entries.length === 0;
-    /** 带切换的入口 */
+    /** 带切换的入口，如果 entry.onExit 有值，代表这个入口同时也是出口，也就是开关 */
     var toggles = new Set(entries.map(function (e) {
       return isFun(e.onExit) ? e.node : null;
     }).filter(function (n) {
@@ -945,59 +588,69 @@
     }).map(function (n) {
       return element(n);
     }));
-
-    /** 默认入口 */
+    /** 默认入口，默认情况下，会从出口回到这个入口 */
     var _trigger = element(trigger || ((_entries$ = entries[0]) === null || _entries$ === void 0 ? void 0 : _entries$.node));
-
+    var _ref3 = isObj(cover) ? cover : {},
+      coverNode = _ref3.node,
+      coverEnterKey = _ref3.enterKey,
+      onEnterCover = _ref3.onEnter,
+      exitCover = _ref3.exit;
+    /** 是否已经打开封面选项 */
+    var enabledCover = cover != null && cover !== false && coverNode !== false;
+    /** 封面即根元素 */
+    var coverIsRoot = enabledCover && (cover === true || coverNode === true || coverNode == null);
     /** 退出封面，封面的出口们 */
-    var exitsCover = [].concat(exitCover).filter(function (e) {
+    var exitsCover = [].concat(exitCover) // 转为数组
+    .filter(function (e) {
       return e != null;
-    }).map(function (e) {
+    }) // 过滤空值
+    .map(function (e) {
       return isObj(e) ? e : {
         key: e
       };
-    }).map(function (e) {
+    }) // 元素转为对象，并且默认元素的值被看作对象的 key 属性
+    .map(function (e) {
       var _e$target;
       return _extends({}, e, {
         target: (_e$target = e.target) !== null && _e$target !== void 0 ? _e$target : _trigger
       });
     });
-
     /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
     var isDefaultExitCover = enabledCover && exitsCover.length === 0;
 
-    /** 禁用左上角 esc 出口 */
-    var disabledEsc = onEscape === false;
-    var _ref6 = isObj(next) ? next : {
+    /** 列表 */
+    var list = new TabList();
+    list.recordPrev(null, initialActive !== null && initialActive !== void 0 ? initialActive : -1);
+    var _ref4 = isObj(next) ? next : {
         key: next
       },
-      isNext = _ref6.key,
-      onNext = _ref6.on;
-    var _ref7 = isObj(prev) ? prev : {
+      isNext = _ref4.key,
+      onNext = _ref4.on;
+    var _ref5 = isObj(prev) ? prev : {
         key: prev
       },
-      isPrev = _ref7.key,
-      onPrev = _ref7.on;
+      isPrev = _ref5.key,
+      onPrev = _ref5.on;
+
+    /** 禁用左上角 esc 出口 */
+    var disabledEsc = onEscape === false;
 
     /** 取消循环则设置头和尾焦点 */
     var isClamp = !(loop !== null && loop !== void 0 ? loop : true);
 
-    // 自定义前进或后退焦点函数，则设置 sequence 为 true
-    var enabledTabSequence = !!(isNext || isPrev || sequence);
+    /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
+    var enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
 
-    /** 活动元素在列表中的编号，打开 sequence 生效 */
-    var activeIndex = initialActive !== null && initialActive !== void 0 ? initialActive : -1;
-    var prevActive = -1;
+    /** 进入了列表 */
+    var trappedList = false;
+    /** 进入了封面 */
+    var trappedCover = false;
 
     /** 是否已添加监听事件 */
     var listListeners = new ListenersCache();
-    var trappedList = false;
-    var trappedCover = false;
-
     /** 是否已添加入口的监听事件 */
     var entryListeners = new ListenersCache();
-
-    /** 按键转发 */
+    /** 按键转发，监听事件 */
     var keyForwards = new KeyForwardCache();
     if (!manual) {
       // 如果不是手动添加事件，则注册入口、列表相关（封面、列表、出口）的事件
@@ -1005,19 +658,17 @@
       _addEntryListeners();
 
       // 如果有入口不需要延迟，则立即加载列表的监听事件
-      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref8) {
-        var delay = _ref8.delay;
+      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref6) {
+        var delay = _ref6.delay;
         return !delay;
       });
       if (hasImmediateEntry) {
         var _getKeyNodes = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-          _rootNode = _getKeyNodes.rootNode,
-          _subNodes = _getKeyNodes.subNodes,
-          head = _getKeyNodes.head,
-          tail = _getKeyNodes.tail,
-          _coverNode = _getKeyNodes.coverNode;
-        list.update(_subNodes);
-        loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
+          root = _getKeyNodes.root,
+          newList = _getKeyNodes.list,
+          _cover = _getKeyNodes.cover;
+        list.update(newList);
+        loadListRelatedListeners(root, list, _cover);
       }
     }
     var Return = {
@@ -1032,12 +683,12 @@
           }, on, target, delay);
         } else {
           var _loop = function _loop() {
-            var entry = _step.value;
-            var on = entry.on,
-              type = entry.type,
-              node = entry.node,
-              target = entry.target,
-              delay = entry.delay;
+            var _entries$i = entries[i],
+              on = _entries$i.on,
+              type = _entries$i.type,
+              node = _entries$i.node,
+              target = _entries$i.target,
+              delay = _entries$i.delay;
             var invokeType = "invoke";
             if (type !== null && type !== void 0 && type.some(function (type) {
               return type == null || type === false || type === invokeType;
@@ -1049,7 +700,7 @@
               };
             }
           };
-          for (var _iterator = _createForOfIteratorHelperLoose(entries), _step; !(_step = _iterator()).done;) {
+          for (var i = 0; i < entries.length; ++i) {
             var _ret = _loop();
             if (typeof _ret === "object") return _ret.v;
           }
@@ -1060,9 +711,9 @@
       },
       /** 调用形式的出口 */exit: function exit(tempExit) {
         var _getKeyNodes2 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-          _list = _getKeyNodes2.subNodes,
-          cover = _getKeyNodes2.coverNode,
-          root = _getKeyNodes2.rootNode;
+          newList = _getKeyNodes2.list,
+          cover = _getKeyNodes2.cover,
+          root = _getKeyNodes2.root;
         if (tempExit) {
           var on = tempExit.on,
             originTarget = tempExit.target;
@@ -1071,10 +722,10 @@
         } else {
           var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger);
           var _loop2 = function _loop2() {
-            var exit = _step2.value;
-            var on = exit.on,
-              type = exit.type,
-              target = exit.target;
+            var _exits$i = exits[i],
+              on = _exits$i.on,
+              type = _exits$i.type,
+              target = _exits$i.target;
             var invokeType = "invoke";
             if (type !== null && type !== void 0 && type.some(function (type) {
               return type == null || type === false || type === invokeType;
@@ -1084,13 +735,13 @@
               };
             }
           };
-          for (var _iterator2 = _createForOfIteratorHelperLoose(exits), _step2; !(_step2 = _iterator2()).done;) {
+          for (var i = 0; i < exits.length; ++i) {
             var _ret2 = _loop2();
             if (typeof _ret2 === "object") return _ret2.v;
           }
         }
         function toExit(target, on) {
-          if (list.isEmpty()) list.update(_list);
+          if (list.isEmpty()) list.update(newList);
           return exitHandler({
             fromInvoke: true
           }, on, target, false, cover, list.data, root);
@@ -1111,29 +762,29 @@
       },
       /** 添加列表相关（封面、列表、出口）的监听事件 */addListRelatedListeners: function addListRelatedListeners() {
         var _getKeyNodes3 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-          _rootNode = _getKeyNodes3.rootNode,
-          _subNodes = _getKeyNodes3.subNodes,
-          _coverNode = _getKeyNodes3.coverNode;
-        if (list.isEmpty()) list.update(_subNodes);
-        loadListRelatedListeners(_rootNode, list.data, list.head, list.tail, _coverNode);
+          root = _getKeyNodes3.root,
+          newList = _getKeyNodes3.list,
+          cover = _getKeyNodes3.cover;
+        if (list.isEmpty()) list.update(newList);
+        loadListRelatedListeners(root, list, cover);
       },
       /** 添加转发 */addForward: function addForward(id, forward) {
         var opts = null;
         if (isFun(forward)) {
           var _getKeyNodes4 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-            root = _getKeyNodes4.rootNode,
-            _list2 = _getKeyNodes4.subNodes,
-            _head2 = _getKeyNodes4.head,
-            _tail2 = _getKeyNodes4.tail,
-            _cover2 = _getKeyNodes4.coverNode;
+            _root = _getKeyNodes4.root,
+            listData = _getKeyNodes4.list,
+            head = _getKeyNodes4.head,
+            tail = _getKeyNodes4.tail,
+            _cover2 = _getKeyNodes4.cover;
           opts = forward({
-            root: root,
-            list: _list2,
-            head: _head2,
-            tail: _tail2,
+            root: _root,
+            list: listData,
+            head: head,
+            tail: tail,
             cover: _cover2,
-            curI: activeIndex,
-            prevI: prevActive
+            curI: list.curI,
+            prevI: list.prevI
           });
         } else opts = forward;
         var _opts = opts,
@@ -1144,7 +795,7 @@
         var node = element(origin_node);
         var target = element(origin_target);
         keyForwards.push(id, node, function (e) {
-          if (key !== null && key !== void 0 && key(e, activeIndex)) {
+          if (key !== null && key !== void 0 && key(e, list.prevI, list.curI)) {
             e.preventDefault();
             on === null || on === void 0 ? void 0 : on();
             tickFocus(target);
@@ -1164,610 +815,563 @@
       },
       /** 当前聚焦的列表单项序号 */i: function i(newI) {
         if (list.has(newI) && trappedList) {
-          prevActive = activeIndex;
-          activeIndex = newI;
+          list.recordSequenceByIdx(newI);
+          var _prev = list.prev,
+            prevI = list.prevI,
+            cur = list.cur,
+            curI = list.curI;
           onMove === null || onMove === void 0 ? void 0 : onMove({
             e: {
               fromI: true
             },
-            prev: list.data[prevActive],
-            cur: list.data[activeIndex],
-            prevI: prevActive,
-            curI: activeIndex
+            prev: _prev,
+            prevI: prevI,
+            cur: cur,
+            curI: curI
           });
-          focus(subNodes[activeIndex]);
+          focus(subNodes[curI]);
           return newI;
-        } else return activeIndex;
+        } else return list.curI < 0 ? list.prevI : list.curI;
       }
     };
     return Return;
 
     /** 入口 handler */
-    function entryHandler(_x4, _x5, _x6, _x7) {
-      return _entryHandler.apply(this, arguments);
-    }
-    /** 出口 handler */
-    function _entryHandler() {
-      _entryHandler = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(e, onEnter, target, delay) {
-        var isImmediate, findNodesToLoadListenersAndFocus, focusTarget;
-        return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-          while (1) switch (_context5.prev = _context5.next) {
-            case 0:
-              focusTarget = function _focusTarget(cover, list, rootNode) {
-                var gotTarget = getTarget(target, cover, list, rootNode, enabledCover, activeIndex, list[activeIndex === -1 ? 0 : activeIndex], e);
-                var targetIdx = list.indexOf(gotTarget);
-                if (targetIdx > -1) {
-                  prevActive = activeIndex;
-                  activeIndex = targetIdx; // 只有在聚焦列表元素时才设置，否则会破坏原有 activeIndex
-                  onMove === null || onMove === void 0 ? void 0 : onMove({
-                    e: e,
-                    prev: list[prevActive],
-                    cur: gotTarget,
-                    prevI: prevActive,
-                    curI: activeIndex
-                  });
-                  trappedList = true;
-                }
-                if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
-                tickFocus(gotTarget);
-              };
-              findNodesToLoadListenersAndFocus = function _findNodesToLoadListe() {
-                var _getKeyNodes6 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-                  _rootNode = _getKeyNodes6.rootNode,
-                  _subNodes = _getKeyNodes6.subNodes,
-                  head = _getKeyNodes6.head,
-                  tail = _getKeyNodes6.tail,
-                  _coverNode = _getKeyNodes6.coverNode;
-                list.update(_subNodes);
-                if (!manual) loadListRelatedListeners(_rootNode, list.data, head, tail, _coverNode);
-                if (target !== false) focusTarget(_coverNode, _subNodes, _rootNode);
-              };
-              if (!(trappedCover || trappedList)) {
-                _context5.next = 4;
-                break;
-              }
-              return _context5.abrupt("return");
-            case 4:
-              _context5.next = 6;
-              return onEnter === null || onEnter === void 0 ? void 0 : onEnter(e);
-            case 6:
-              isImmediate = !delay;
-              if (isImmediate) findNodesToLoadListenersAndFocus();else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+    function entryHandler(e, onEnter, target, delay) {
+      // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
+      if (trappedCover || trappedList) return;
+      Promise.resolve(onEnter === null || onEnter === void 0 ? void 0 : onEnter(e)).then(function (_) {
+        var isImmediate = !delay;
+        if (isImmediate) findNodesToLoadListenersAndFocus();else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+      });
 
-              /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
-            case 8:
-            case "end":
-              return _context5.stop();
+      /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
+      function findNodesToLoadListenersAndFocus() {
+        var _getKeyNodes5 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
+          root = _getKeyNodes5.root,
+          newList = _getKeyNodes5.list,
+          cover = _getKeyNodes5.cover;
+        list.update(newList);
+        if (!manual) loadListRelatedListeners(root, list, cover);
+        if (target !== false) focusTarget(cover, list, root);
+      }
+      function focusTarget(cover, listInfo, rootNode) {
+        var list = listInfo.data;
+        var prev = listInfo.prev,
+          head = listInfo.head,
+          curI = listInfo.curI;
+        var defaultTarget = prev || head;
+        var gotTarget = getTarget(target, cover, list, rootNode, enabledCover, curI, defaultTarget, e);
+        var targetIdx = list.indexOf(gotTarget);
+        if (targetIdx > -1) {
+          if (enabledTabSequence) {
+            // onMove 仅支持打开 sequence 后
+            listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
+            var cur = listInfo.cur,
+              _curI = listInfo.curI;
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: null,
+              cur: cur,
+              prevI: -1,
+              curI: _curI
+            });
           }
-        }, _callee5);
-      }));
-      return _entryHandler.apply(this, arguments);
+          trappedList = true;
+        }
+        if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
+        tickFocus(gotTarget);
+      }
     }
-    function exitHandler(e, on, target, delay, cover, list, root, ef) {
+
+    /** 出口 handler */
+    function exitHandler(e, on, target, delay, cover, listData, root, ef) {
       var _e$preventDefault;
       if (!trappedList || !(isFun(ef) ? ef({
         e: e,
-        prev: list[prevActive],
-        cur: list[activeIndex],
-        prevI: prevActive,
-        curI: activeIndex
+        prev: list.prev,
+        cur: list.cur,
+        prevI: list.prevI,
+        curI: list.curI
       }) : true)) return false;
+      list.recordSequenceByIdx(-1);
       trappedList = false;
       (_e$preventDefault = e.preventDefault) === null || _e$preventDefault === void 0 ? void 0 : _e$preventDefault.call(e); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
 
-      var gotTarget = getTarget(target, cover, list, root, enabledCover, activeIndex, _trigger, e);
+      var gotTarget = getTarget(target, cover, listData, root, enabledCover, list.curI, _trigger, e);
       if (gotTarget) return exitListWithTarget();else return exitListWithoutTarget();
 
       /** 退出列表，有 target */
       function exitListWithTarget() {
-        return _exitListWithTarget.apply(this, arguments);
-      }
-      /** 退出列表，无 target */
-      function _exitListWithTarget() {
-        _exitListWithTarget = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+        Promise.resolve(on === null || on === void 0 ? void 0 : on(e)).then(function (_) {
           var _delay;
-          var isImmediate, focusThenRemoveListeners;
-          return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-            while (1) switch (_context3.prev = _context3.next) {
-              case 0:
-                focusThenRemoveListeners = function _focusThenRemoveListe() {
-                  focus(gotTarget);
-                  onMove === null || onMove === void 0 ? void 0 : onMove({
-                    e: e,
-                    prev: list[activeIndex],
-                    cur: gotTarget,
-                    prevI: activeIndex,
-                    curI: -1
-                  });
-                  if (!manual) {
-                    if (gotTarget !== cover) removeListRelatedListeners();
-                    _addEntryListeners();
-                  }
-                };
-                _context3.next = 3;
-                return on === null || on === void 0 ? void 0 : on(e);
-              case 3:
-                delay = (_delay = delay) !== null && _delay !== void 0 ? _delay : delayToBlur;
-                _context3.next = 6;
-                return delayToProcess(delay, focusThenRemoveListeners);
-              case 6:
-                isImmediate = _context3.sent;
-                if (isImmediate) focusThenRemoveListeners();
-              case 8:
-              case "end":
-                return _context3.stop();
-            }
-          }, _callee3);
-        }));
-        return _exitListWithTarget.apply(this, arguments);
+          delay = (_delay = delay) !== null && _delay !== void 0 ? _delay : delayToBlur;
+          var isImmediate = delayToProcess(delay, focusThenRemoveListeners);
+          if (isImmediate) focusThenRemoveListeners();
+        });
+        function focusThenRemoveListeners() {
+          focus(gotTarget);
+          enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
+            e: e,
+            prev: list.prev,
+            cur: null,
+            prevI: list.prevI,
+            curI: -1
+          }));
+          if (!manual) {
+            if (gotTarget !== cover) removeListRelatedListeners();
+            if (addEntryListenersEachExit) _addEntryListeners();
+          }
+        }
       }
+
+      /** 退出列表，无 target */
       function exitListWithoutTarget() {
-        return _exitListWithoutTarget.apply(this, arguments);
-      }
-      function _exitListWithoutTarget() {
-        _exitListWithoutTarget = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
-          var _delay2, focusThenRemoveListeners, isImmediate;
-          return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-            while (1) switch (_context4.prev = _context4.next) {
-              case 0:
-                if (!(gotTarget === false)) {
-                  _context4.next = 6;
-                  break;
-                }
-                _context4.next = 3;
-                return on === null || on === void 0 ? void 0 : on(e);
-              case 3:
-                onMove === null || onMove === void 0 ? void 0 : onMove({
-                  e: e,
-                  prev: list[activeIndex],
-                  cur: null,
-                  prevI: activeIndex,
-                  curI: -1
-                });
-                if (!manual) {
-                  removeListRelatedListeners();
-                  _addEntryListeners();
-                }
-                return _context4.abrupt("return");
-              case 6:
-                if (!enabledCover) {
-                  _context4.next = 13;
-                  break;
-                }
-                _context4.next = 9;
-                return on === null || on === void 0 ? void 0 : on(e);
-              case 9:
-                onMove === null || onMove === void 0 ? void 0 : onMove({
-                  e: e,
-                  prev: list[activeIndex],
-                  cur: null,
-                  prevI: activeIndex,
-                  curI: -1
-                });
-                focus(cover);
-                _context4.next = 21;
-                break;
-              case 13:
-                focusThenRemoveListeners = function focusThenRemoveListeners() {
-                  _trigger && focus(_trigger);
-                  onMove === null || onMove === void 0 ? void 0 : onMove({
-                    e: e,
-                    prev: list[activeIndex],
-                    cur: null,
-                    prevI: activeIndex,
-                    curI: -1
-                  });
-                  if (!manual) {
-                    removeListRelatedListeners();
-                    _addEntryListeners();
-                  }
-                };
-                _context4.next = 16;
-                return on === null || on === void 0 ? void 0 : on(e);
-              case 16:
-                delay = (_delay2 = delay) !== null && _delay2 !== void 0 ? _delay2 : delayToBlur;
-                _context4.next = 19;
-                return delayToProcess(delay, focusThenRemoveListeners);
-              case 19:
-                isImmediate = _context4.sent;
-                if (isImmediate) focusThenRemoveListeners();
-              case 21:
-              case "end":
-                return _context4.stop();
+        Promise.resolve(on === null || on === void 0 ? void 0 : on(e)).then(function (_) {
+          if (gotTarget === false) {
+            // 如果显式设为 false，则直接退出，不聚焦，会在一个列表退出另一个列表移动的场景使用
+
+            var removeListenersWithoutFocus = focusThenRemoveListeners();
+            removeListenersWithoutFocus();
+            return;
+          }
+          if (enabledCover) {
+            enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: list.prev,
+              cur: null,
+              prevI: list.prevI,
+              curI: -1
+            }));
+            focus(cover);
+          } else {
+            var _delay2;
+            delay = (_delay2 = delay) !== null && _delay2 !== void 0 ? _delay2 : delayToBlur;
+            var focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
+            var isImmediate = delayToProcess(delay, focusTriggerThenRemoveListeners);
+            if (isImmediate) focusTriggerThenRemoveListeners();
+          }
+        });
+        function focusThenRemoveListeners(focusTarget) {
+          return function (_) {
+            focusTarget && focus(focusTarget);
+            enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: list.prev,
+              cur: null,
+              prevI: list.prevI,
+              curI: -1
+            }));
+            if (!manual) {
+              removeListRelatedListeners();
+              if (addEntryListenersEachExit) _addEntryListeners();
             }
-          }, _callee4);
-        }));
-        return _exitListWithoutTarget.apply(this, arguments);
+          };
+        }
       }
     }
 
     /** 生成事件行为，添加事件监听器 */
-    function loadListRelatedListeners(_rootNode, _subNodes, _head, _tail, _coverNode) {
-      if (!listListeners.isEmpty) return;
-      if (_rootNode == null) throw new Error("\u6CA1\u6709\u627E\u5230\u5143\u7D20 " + rootNode + "\uFF0C\u60A8\u53EF\u4EE5\u5C1D\u8BD5 delayToFocus \u9009\u9879\uFF0C\u7B49\u5F85\u5143\u7D20 " + rootNode + " \u6E32\u67D3\u5B8C\u6BD5\u540E\u8FDB\u884C\u805A\u7126\u3002");
-      if (_head == null || _tail == null) throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
-      var useActiveIndex = function useActiveIndex() {
-        return [activeIndex, function (newVal) {
-          return activeIndex = newVal;
-        }];
-      };
-      var usePrevActive = function usePrevActive() {
-        return [, function (prev) {
-          return prevActive = prev;
-        }];
-      };
-      var isTrappedList = function isTrappedList() {
-        return hasNoEntry ? true : trappedList;
-      };
+    function loadListRelatedListeners(root, listInfo, cover) {
+      var list = listInfo.data;
+      var head = listInfo.head;
+      var tail = listInfo.tail;
+      if (!listListeners.isEmpty) return; // 列表的监听事件没有移除之前，不需要再次添加列表监听事件
 
-      // 在焦点循环中触发聚焦
-      var keyListMoveHandler = enabledTabSequence ? focusNextListItemBySequence(_subNodes, useActiveIndex, usePrevActive, isClamp, isNext, isPrev, onNext, onPrev, _coverNode, onMove, isTrappedList) : focusNextListItemByRange(_subNodes, isClamp, onNext, onPrev, _rootNode, _coverNode, isTrappedList);
-
-      /** 出口们，列表的出口们，subNodes 的出口们 */
-      var exits = getExits(_exit, onEscape, enabledCover, _coverNode, _trigger);
-      var _splitExits = splitExits(exits, _rootNode),
-        keyExits = _splitExits.keyExits,
-        clickExits = _splitExits.clickExits,
-        focusExits = _splitExits.focusExits,
-        hasClickExits = _splitExits.hasClickExits,
-        hasFocusExits = _splitExits.hasFocusExits,
-        hasKeyExits = _splitExits.hasKeyExits,
-        clickExits_wild = _splitExits.clickExits_wild,
-        focusExits_wild = _splitExits.focusExits_wild,
-        outListExits = _splitExits.outListExits;
-
-      /** 非跟节点内的，是跟节点之外的出口 */
-      var clickListExitHandlers_wild = clickExits_wild.map(function (exit) {
-        return [element(exit === null || exit === void 0 ? void 0 : exit.node), clickListExitHandler_wild(exit)];
-      });
-      var focusListExitHandlers_wild = focusExits_wild.map(function (exit) {
-        return [element(exit === null || exit === void 0 ? void 0 : exit.node), focusListExitHandler_wild(exit)];
-      });
+      if (root == null) throw new Error("\u6CA1\u6709\u627E\u5230\u5143\u7D20 " + rootNode + "\uFF0C\u60A8\u53EF\u4EE5\u5C1D\u8BD5 delayToFocus \u9009\u9879\uFF0C\u7B49\u5F85\u5143\u7D20 " + rootNode + " \u6E32\u67D3\u5B8C\u6BD5\u540E\u8FDB\u884C\u805A\u7126\u3002");
+      if (head == null || tail == null) throw new Error("至少需要包含两个可以聚焦的元素，如果元素需要等待渲染，您可以尝试 delayToFocus 选项。");
 
       // 添加除 trigger 以外其它和焦点相关的事件监听器
       addListRelatedListeners();
-      var isMouseDown = false;
-      /** 标记是否从封面进入列表，用于防止纠正列表焦点的误判，用于野生封面 */
-      var isEnterFromCover = false;
-
-      /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-       |          LIST HANDLERS          |
-       +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
-
-      function focusTrapListHandler(e) {
-        var focusTarget = e.target;
-
-        // 进入封面（封面在列表中）
-        if (enabledCover && focusTarget === _coverNode) {
-          trappedCover = true;
-          return;
-        }
-
-        // 纠正进入封面，从外部进入列表，如果没有通过封面，则重新聚焦封面
-        if (enabledCover && isMouseDown === false && trappedCover === false) {
-          tickFocus(_coverNode);
-          return;
-        }
-
-        // 纠正外部聚焦进来的焦点
-        if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false)
-          // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
-          {
-            var _correctionTarget;
-            var originGotCorrectionTarget = (_correctionTarget = correctionTarget === null || correctionTarget === void 0 ? void 0 : correctionTarget({
-              list: _subNodes,
-              cover: _coverNode,
-              root: _rootNode,
-              last: _subNodes[activeIndex],
-              lastI: activeIndex
-            })) !== null && _correctionTarget !== void 0 ? _correctionTarget : activeIndex === -1 ? _subNodes[0] : _subNodes[activeIndex];
-            var gotCorrectionTarget = element(originGotCorrectionTarget);
-            var targetIndex = _subNodes.findIndex(function (item) {
-              return item === gotCorrectionTarget;
-            });
-            if (targetIndex > -1) {
-              prevActive = activeIndex;
-              activeIndex = targetIndex;
-              onMove === null || onMove === void 0 ? void 0 : onMove({
-                e: e,
-                prev: _subNodes[prevActive],
-                cur: _subNodes[activeIndex],
-                prevI: prevActive,
-                curI: activeIndex
-              });
-            }
-            tickFocus(gotCorrectionTarget);
-          }
-        trappedList = true;
-      }
-      function blurTrapListHandler(e) {
-        // 用于保护可切换的入口能够被触发
-        if (toggles.has(e.relatedTarget)) return;
-        setTimeout(function () {
-          // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
-
-          var active = getActiveElement();
-          var isOutRootNode = !_rootNode.contains(active);
-          var isActiveCover = active === _coverNode;
-
-          // 从封面退出
-          if (e.target === _coverNode && isOutRootNode) {
-            trappedCover = false; // 退出封面
-            return;
-          }
-          var isOutList = null;
-          if (isActiveCover || isOutRootNode) isOutList = outListExitHandler(e);
-          if (isOutList === false) return; // 不符合退出列表的条件
-
-          if (isActiveCover) {
-            // 聚焦在封面
-            trappedList = false;
-          } else if (isOutRootNode) {
-            // 聚焦在非封面、非列表的区域
-            trappedList = false;
-            trappedCover = false;
-          }
-        });
-      }
-      function mousedownListItemHandler(e) {
-        isMouseDown = true;
-        setTimeout(function () {
-          isMouseDown = false; // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
-        });
-
-        var targetItem;
-        if (!enabledTabSequence || enabledTabSequence && (targetItem = _subNodes.find(function (item) {
-          return item.contains(e.target);
-        }))) {
-          trappedList = true;
-          if (enabledCover) trappedCover = true;
-          if (allowSafariToFocusAfterMousedown && targetItem && window.safari !== undefined) {
-            // 兼容 Safari（桌面端），具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
-            focus(targetItem); // Safari 不会聚焦按钮元素，这里强制使用 api 聚焦
-            e.preventDefault(); // 阻止默认行为可以避免 targetItem 失焦
-          }
-        }
-      }
-
-      /** 点击聚焦列表某一单项 */
-      function clickListItemHandler(e) {
-        var target = e.target;
-        var targetIndex = _subNodes.findIndex(function (e) {
-          return e.contains(target);
-        });
-        if (targetIndex > -1) {
-          prevActive = activeIndex;
-          activeIndex = targetIndex;
-          onClick === null || onClick === void 0 ? void 0 : onClick({
-            e: e,
-            prev: _subNodes[prevActive],
-            cur: _subNodes[activeIndex],
-            prevI: prevActive,
-            curI: activeIndex
-          });
-          if (prevActive !== activeIndex || trappedList === false) onMove === null || onMove === void 0 ? void 0 : onMove({
-            e: e,
-            prev: _subNodes[prevActive],
-            cur: _subNodes[activeIndex],
-            prevI: prevActive,
-            curI: activeIndex
-          });
-        }
-      }
-
-      /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-       |         COVER HANDLERS          |
-       +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
-
-      function focusTrapCoverHandler() {
-        trappedCover = true;
-      } // 捕获点击封面的情况
-
-      function blurTrapCoverHandler() {
-        // 捕获点击空白区域的情况
-        if (isEnterFromCover) {
-          // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
-          isEnterFromCover = false;
-          return;
-        }
-        trappedCover = false;
-      }
-
-      /** 封面的键盘事件响应 */
-      function keyCoverHandler(e) {
-        if (e.target !== _coverNode) return;
-        if (!(trappedCover && !trappedList)) return; // 继续执行，必须满足焦点在封面上，且不在列表中
-
-        // 入口
-        if ((coverEnterKey !== null && coverEnterKey !== void 0 ? coverEnterKey : isEnterEvent)(e) && !trappedList) {
-          e.preventDefault();
-          isEnterFromCover = true;
-          trappedList = true;
-          onEnterCover === null || onEnterCover === void 0 ? void 0 : onEnterCover(e);
-          activeIndex = activeIndex === -1 ? 0 : activeIndex;
-          focus(_subNodes[activeIndex]);
-          onMove === null || onMove === void 0 ? void 0 : onMove({
-            e: e,
-            prev: null,
-            cur: _subNodes[activeIndex],
-            prevI: null,
-            curI: activeIndex
-          });
-          return;
-        }
-
-        // 出口
-        for (var _iterator3 = _createForOfIteratorHelperLoose(exitsCover), _step3; !(_step3 = _iterator3()).done;) {
-          var exit = _step3.value;
-          var key = exit.key,
-            on = exit.on,
-            origin = exit.target;
-          var target = element(origin);
-          if (key !== null && key !== void 0 && key(e, activeIndex)) {
-            exitCoverHandler(e, on, target);
-            return;
-          }
-        }
-
-        // 默认出口
-        if (isDefaultExitCover && isTabForward(e)) {
-          // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
-          focus(_tail);
-          return;
-        }
-
-        /** 退出封面焦点的行为 */
-        function exitCoverHandler(e, onExit, target) {
-          onExit === null || onExit === void 0 ? void 0 : onExit(e);
-          target && focus(target);
-          removeListRelatedListeners();
-        }
-      }
-
-      /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-       |            + START +            |
-       |          EXIT HANDLERS          |
-       +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
-
-      function outListExitHandler(e) {
-        for (var _iterator4 = _createForOfIteratorHelperLoose(outListExits), _step4; !(_step4 = _iterator4()).done;) {
-          var exit = _step4.value;
-          var on = exit.on,
-            origin_target = exit.target,
-            delay = exit.delay;
-          var target = element(origin_target);
-          return exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit["if"]);
-        }
-      }
-      function clickExitHandler(e, exit) {
-        var origin_node = exit.node,
-          on = exit.on,
-          origin_target = exit.target,
-          delay = exit.delay;
-        var node = element(origin_node);
-        var target = element(origin_target);
-        if (node != null && !node.contains(e.target) || node == null) return false;
-        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit["if"]);
-        return true;
-      }
-
-      /** 点击列表的出口 */
-      function clickListExitHandler(e) {
-        for (var _iterator5 = _createForOfIteratorHelperLoose(clickExits), _step5; !(_step5 = _iterator5()).done;) {
-          var exit = _step5.value;
-          var isOK = clickExitHandler(e, exit);
-          if (isOK) break;
-        }
-      }
-      function focusExitHandler(e, exit) {
-        var origin_node = exit.node,
-          on = exit.on,
-          origin_target = exit.target,
-          delay = exit.delay;
-        var node = element(origin_node);
-        var target = element(origin_target);
-        if (node != null && e.target !== node || node == null) return false;
-        exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit["if"]);
-        return true;
-      }
-
-      /** 聚焦列表一个单项而退出 */
-      function focusListExitHandler(e) {
-        for (var _iterator6 = _createForOfIteratorHelperLoose(focusExits), _step6; !(_step6 = _iterator6()).done;) {
-          var exit = _step6.value;
-          var isOK = focusExitHandler(e, exit);
-          if (isOK) break;
-        }
-      }
-      function keyExitHandler(e, exit) {
-        var key = exit.key,
-          origin_node = exit.node,
-          target = exit.target,
-          on = exit.on,
-          delay = exit.delay;
-        var node = element(origin_node);
-        if (node != null && e.target !== node) return false;
-        if (key !== null && key !== void 0 && key(e, activeIndex)) {
-          exitHandler(e, on, target, delay, _coverNode, _subNodes, _rootNode, exit["if"]);
-          return true;
-        }
-      }
-
-      /** 触发键盘退出列表，退出列表焦点 */
-      function keyListExitHandler(e) {
-        if (e.target === _coverNode) return; // 被封面触发直接返回
-
-        if (disabledEsc && isEscapeEvent(e)) return;
-        for (var _iterator7 = _createForOfIteratorHelperLoose(keyExits), _step7; !(_step7 = _iterator7()).done;) {
-          var exit = _step7.value;
-          var isOK = keyExitHandler(e, exit);
-          if (isOK) break;
-        }
-      }
-      function clickListExitHandler_wild(exit) {
-        return function (e) {
-          clickExitHandler(e, exit);
-        };
-      }
-      function focusListExitHandler_wild(exit) {
-        return function (e) {
-          focusExitHandler(e, exit);
-        };
-      }
-
-      /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
-       |             - END -             |
-       |          EXIT HANDLERS          |
-       +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
       /** 添加焦点需要的事件监听器 */
       function addListRelatedListeners() {
-        listListeners.push(_rootNode, "focusin", focusTrapListHandler);
-        listListeners.push(_rootNode, "focusout", blurTrapListHandler);
-        if (!_rootNode.contains(_coverNode) && _coverNode != null) {
-          listListeners.push(_coverNode, "focus", focusTrapCoverHandler);
-          listListeners.push(_coverNode, "blur", blurTrapCoverHandler);
+        var useActiveIndex = function useActiveIndex() {
+          return [listInfo.curI, listInfo.recordSequenceByIdx.bind(listInfo)];
+        };
+        var isTrappedList = function isTrappedList() {
+          return hasNoEntry ? true : trappedList;
+        };
+
+        // 在焦点循环中触发聚焦
+        var keyListMoveHandler = enabledTabSequence ? focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList) : focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
+
+        /** 出口们，列表的出口们，list 的出口们 */
+        var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger);
+        var _splitExits = splitExits(exits, root),
+          keyExits = _splitExits.keyExits,
+          clickExits = _splitExits.clickExits,
+          focusExits = _splitExits.focusExits,
+          hasClickExits = _splitExits.hasClickExits,
+          hasFocusExits = _splitExits.hasFocusExits,
+          hasKeyExits = _splitExits.hasKeyExits,
+          clickExits_wild = _splitExits.clickExits_wild,
+          focusExits_wild = _splitExits.focusExits_wild,
+          outListExits = _splitExits.outListExits;
+
+        /** 非跟节点内的，是根节点之外的出口 */
+        var clickListExitHandlers_wild = clickExits_wild.map(function (exit) {
+          return [element(exit === null || exit === void 0 ? void 0 : exit.node), clickListExitHandler_wild(exit)];
+        });
+        var focusListExitHandlers_wild = focusExits_wild.map(function (exit) {
+          return [element(exit === null || exit === void 0 ? void 0 : exit.node), focusListExitHandler_wild(exit)];
+        });
+        listListeners.push(root, "focusin", focusTrapListHandler);
+        listListeners.push(root, "focusout", blurTrapListHandler);
+        if (!root.contains(cover) && cover != null) {
+          listListeners.push(cover, "focus", focusTrapCoverHandler);
+          listListeners.push(cover, "blur", blurTrapCoverHandler);
         }
-        listListeners.push(_rootNode, "keydown", function (e) {
+        listListeners.push(root, "keydown", function (e) {
           // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
           keyListMoveHandler(e);
           // 列表键盘出口
           if (hasKeyExits) keyListExitHandler(e);
         });
-        if (enabledTabSequence) {
-          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 activeIndex
-          listListeners.push(_rootNode, "click", clickListItemHandler);
+        if (enabledTabSequence || hasClickExits) {
+          listListeners.push(root, "click", function (e) {
+            // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
+            enabledTabSequence && clickListItemHandler(e);
+            // 列表点击出口
+            hasClickExits && clickListExitHandler(e);
+          });
         }
 
         // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
-        listListeners.push(_rootNode, "mousedown", mousedownListItemHandler);
-        if (hasClickExits) {
-          // 列表点击出口
-          listListeners.push(_rootNode, "click", clickListExitHandler);
-        }
+        listListeners.push(root, "mousedown", mousedownListItemHandler);
         if (hasFocusExits) {
           // 列表聚焦出口
-          listListeners.push(_rootNode, "focusin", focusListExitHandler);
+          listListeners.push(root, "focusin", focusListExitHandler);
         }
 
         // 非列表内的出口
-        focusListExitHandlers_wild.forEach(function (_ref9) {
-          var node = _ref9[0],
-            handler = _ref9[1];
+        focusListExitHandlers_wild.forEach(function (_ref7) {
+          var node = _ref7[0],
+            handler = _ref7[1];
           listListeners.push(node, "focus", handler);
         });
-        clickListExitHandlers_wild.forEach(function (_ref10) {
-          var node = _ref10[0],
-            handler = _ref10[1];
+        clickListExitHandlers_wild.forEach(function (_ref8) {
+          var node = _ref8[0],
+            handler = _ref8[1];
           listListeners.push(node, "click", handler);
         });
-        if (_coverNode != null) {
+        if (cover != null) {
           // 封面的事件
-          listListeners.push(_coverNode, "keydown", keyCoverHandler);
+          listListeners.push(cover, "keydown", keyCoverHandler);
         }
 
         // flush
         listListeners.addListeners();
+        var isMouseDown = false;
+        /** 标记是否从封面进入列表，用于防止纠正列表焦点的误判，用于野生封面 */
+        var isEnterFromCover = false;
+
+        /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
+         |          LIST HANDLERS          |
+         +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
+
+        function focusTrapListHandler(e) {
+          // 进入封面（封面在列表中）
+          if (enabledCover && e.target === cover) {
+            // TODO: 保留确认，或是否需要添加 `&& trappedList` 条件
+            trappedCover = true;
+            return;
+          }
+
+          // 纠正进入封面，从外部进入列表，如果没有通过封面，则重新聚焦封面
+          if (enabledCover && isMouseDown === false && trappedCover === false) {
+            tickFocus(cover);
+            return;
+          }
+
+          // 纠正外部聚焦进来的焦点
+          if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false)
+            // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+            {
+              var _correctionTarget;
+              var defaultLast = listInfo.prev || listInfo.head;
+              var originGotCorrectionTarget = (_correctionTarget = correctionTarget === null || correctionTarget === void 0 ? void 0 : correctionTarget({
+                list: list,
+                cover: cover,
+                root: root,
+                last: listInfo.prev,
+                lastI: listInfo.prevI
+              })) !== null && _correctionTarget !== void 0 ? _correctionTarget : defaultLast;
+              var gotCorrectionTarget = element(originGotCorrectionTarget);
+              var targetIndex = list.findIndex(function (item) {
+                return item === gotCorrectionTarget;
+              });
+              if (targetIndex > -1) {
+                listInfo.recordSequenceByIdx(targetIndex);
+                onMove === null || onMove === void 0 ? void 0 : onMove({
+                  e: e,
+                  prev: null,
+                  cur: listInfo.cur,
+                  prevI: -1,
+                  curI: listInfo.curI
+                });
+              }
+              trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
+              tickFocus(gotCorrectionTarget);
+            }
+          trappedList = true; // 无论列表的类型是序列还是范围，被聚焦后都被定义为“已陷入列表”（这里主要用于范围列表模式）
+        }
+
+        function blurTrapListHandler(e) {
+          // 用于保护可切换的入口能够被触发
+          if (toggles.has(e.relatedTarget)) return;
+          tick(function () {
+            // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
+
+            var active = getActiveElement();
+            var isOutRootNode = !root.contains(active);
+            var isActiveCover = active === cover;
+
+            // 从封面退出
+            if (e.target === cover && isOutRootNode) {
+              trappedCover = false; // 退出封面
+              return;
+            }
+            var isOutList = null;
+            if (isActiveCover || isOutRootNode) {
+              isOutList = outListExitHandler(e);
+              listInfo.recordSequenceByIdx(-1);
+            }
+            if (isOutList === false) return; // 不符合 outlist 退出列表的条件
+
+            if (isActiveCover) {
+              // 聚焦在封面
+              trappedList = false;
+            } else if (isOutRootNode) {
+              // 聚焦在非封面、非列表的区域
+              trappedList = false;
+              trappedCover = false;
+            }
+          });
+        }
+        function mousedownListItemHandler(e) {
+          isMouseDown = true;
+          tick(function () {
+            return isMouseDown = false;
+          }); // mousedown 没有出口，只能使用定时器，isMouseDown 主要在两个 focus 事件中使用，当触发 focus 时，此定时器还未执行，以此保证正确性
+
+          var targetItem;
+          if (!enabledTabSequence ||
+          // 未打开 sequence 属性 或者
+          enabledTabSequence && (
+          // 已打开 sequence 属性 并且
+          targetItem = list.find(function (item) {
+            return item.contains(e.target);
+          })) // 点击的目标是列表中的元素
+          ) {
+            trappedList = true;
+            if (enabledCover) trappedCover = true;
+            // 兼容 Safari（桌面端），具体问题查看：https://github.com/wswmsword/web-experiences/tree/main/browser/safari-button-focus
+            if (allowSafariToFocusAfterMousedown && targetItem && window.safari !== undefined) {
+              focus(targetItem); // Safari 不会聚焦按钮元素，这里强制使用 api 聚焦
+              e.preventDefault(); // 阻止默认行为可以避免 targetItem 失焦
+            }
+          }
+        }
+
+        /** 点击聚焦列表某一单项 */
+        function clickListItemHandler(e) {
+          var targetIndex = list.findIndex(function (item) {
+            return item.contains(e.target);
+          });
+          if (targetIndex > -1) {
+            var prevBeforeRecord = listInfo.prev,
+              prevIBeforeRecord = listInfo.prevI,
+              curIBeforeRecord = listInfo.curI;
+            listInfo.recordSequenceByIdx(targetIndex);
+            var _prev2 = listInfo.prev,
+              prevI = listInfo.prevI,
+              cur = listInfo.cur,
+              curI = listInfo.curI;
+            if (curIBeforeRecord < 0) {
+              // 从外部进入
+              if (prevIBeforeRecord !== targetIndex) {
+                // 上一次进入 和 本次进入 的元素不同
+                _prev2 = prevBeforeRecord;
+                prevI = prevIBeforeRecord;
+              }
+            }
+            onClick === null || onClick === void 0 ? void 0 : onClick({
+              e: e,
+              prev: _prev2,
+              cur: cur,
+              prevI: prevI,
+              curI: curI
+            });
+            if (curIBeforeRecord !== curI)
+              // 从外部进入 或者 列表内的移动
+              onMove === null || onMove === void 0 ? void 0 : onMove({
+                e: e,
+                prev: _prev2,
+                cur: cur,
+                prevI: prevI,
+                curI: curI
+              });
+          }
+        }
+
+        /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
+        |         COVER HANDLERS          |
+        +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
+
+        function focusTrapCoverHandler() {
+          trappedCover = true;
+        } // 捕获点击封面的情况
+
+        function blurTrapCoverHandler() {
+          // 捕获点击空白区域的情况
+          if (isEnterFromCover)
+            // 用于防止纠正列表焦点的误判，如果是进入列表，则 trappedCover 还应是 true
+            isEnterFromCover = false;else trappedCover = false;
+        }
+
+        /** 封面的键盘事件响应 */
+        function keyCoverHandler(e) {
+          if (e.target !== cover) return;
+          if (!(trappedCover && !trappedList)) return; // 继续执行，必须满足焦点在封面上，且不在列表中
+
+          // 入口（封面），从封面进入列表
+          if ((coverEnterKey !== null && coverEnterKey !== void 0 ? coverEnterKey : isEnterEvent)(e) && !trappedList) {
+            e.preventDefault();
+            isEnterFromCover = true;
+            trappedList = true;
+            onEnterCover === null || onEnterCover === void 0 ? void 0 : onEnterCover(e);
+            if (enabledTabSequence) {
+              listInfo.recordSequenceByIdx(Math.max(0, listInfo.prevI));
+              focus(listInfo.cur);
+              onMove === null || onMove === void 0 ? void 0 : onMove({
+                e: e,
+                prev: null,
+                cur: listInfo.cur,
+                prevI: -1,
+                curI: listInfo.curI
+              });
+            } else focus(listInfo.data[0]);
+            return;
+          }
+
+          // 出口（封面），从封面回到入口
+          for (var i = 0; i < exitsCover.length; ++i) {
+            var _exitsCover$i = exitsCover[i],
+              key = _exitsCover$i.key,
+              on = _exitsCover$i.on,
+              origin = _exitsCover$i.target;
+            var target = element(origin);
+            if (key !== null && key !== void 0 && key(e, listInfo.prevI, listInfo.curI)) {
+              exitCoverHandler(e, on, target);
+              return;
+            }
+          }
+
+          // 默认出口，默认行为，默认的行为的场景是包含子元素的长列表
+          if (isDefaultExitCover && isTabForward(e)) {
+            // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
+            focus(tail);
+            return;
+          }
+
+          /** 退出封面焦点的行为 */
+          function exitCoverHandler(e, onExit, target) {
+            onExit === null || onExit === void 0 ? void 0 : onExit(e);
+            target && focus(target);
+            removeListRelatedListeners();
+          }
+        }
+
+        /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
+        |            + START +            |
+        |          EXIT HANDLERS          |
+        +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
+
+        function outListExitHandler(e) {
+          for (var i = 0; i < outListExits.length; ++i) {
+            var _outListExits$i = outListExits[i],
+              on = _outListExits$i.on,
+              origin_target = _outListExits$i.target,
+              delay = _outListExits$i.delay;
+            var target = element(origin_target);
+            return exitHandler(e, on, target, delay, cover, list, root, outListExits[i]["if"]);
+          }
+        }
+        function exitHandlerWithCondition(e, exit, condition) {
+          var origin_node = exit.node,
+            on = exit.on,
+            origin_target = exit.target,
+            delay = exit.delay;
+          var node = element(origin_node);
+          var target = element(origin_target);
+          if (condition(e, node, exit.key))
+            // 未设置点击目标
+            return false;
+          exitHandler(e, on, target, delay, cover, list, root, exit["if"]);
+          return true;
+        }
+        function clickExitHandler(e, exit) {
+          var cantClick = function cantClick(e, node) {
+            return node != null && !node.contains(e.target) || node == null;
+          }; // 点击目标不匹配 或者 未设置点击目标
+          return exitHandlerWithCondition(e, exit, cantClick);
+        }
+
+        /** 点击列表的出口 */
+        function clickListExitHandler(e) {
+          for (var i = 0; i < clickExits.length; ++i) {
+            var isOK = clickExitHandler(e, clickExits[i]);
+            if (isOK) break; // 只生效第一个满足条件的出口
+          }
+        }
+
+        function focusExitHandler(e, exit) {
+          var cantFocus = function cantFocus(e, node) {
+            return node != null && e.target !== node || node == null;
+          }; // 聚焦目标不匹配 或者 未设置点击目标
+          return exitHandlerWithCondition(e, exit, cantFocus);
+        }
+
+        /** 聚焦列表一个单项而退出 */
+        function focusListExitHandler(e) {
+          for (var i = 0; i < focusExits.length; ++i) {
+            var isOK = focusExitHandler(e, focusExits[i]);
+            if (isOK) break;
+          }
+        }
+        function keyExitHandler(e, exit) {
+          var cantKey = function cantKey(e, node, key) {
+            return node != null && e.target !== node || !(key !== null && key !== void 0 && key(e, listInfo.prevI, listInfo.curI));
+          }; // 聚焦目标不匹配 或者 未设置点击目标
+          return exitHandlerWithCondition(e, exit, cantKey);
+        }
+
+        /** 触发键盘退出列表，退出列表焦点 */
+        function keyListExitHandler(e) {
+          if (e.target === cover) return; // 被封面触发直接返回
+
+          if (disabledEsc && isEscapeEvent(e)) return;
+          for (var i = 0; i < keyExits.length; ++i) {
+            var isOK = keyExitHandler(e, keyExits[i]);
+            if (isOK) break;
+          }
+        }
+        function clickListExitHandler_wild(exit) {
+          return function (e) {
+            clickExitHandler(e, exit);
+          };
+        }
+        function focusListExitHandler_wild(exit) {
+          return function (e) {
+            focusExitHandler(e, exit);
+          };
+        }
+
+        /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
+        |             - END -             |
+        |          EXIT HANDLERS          |
+        +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
       }
     }
 
@@ -1775,7 +1379,7 @@
     function _addEntryListeners() {
       if (!entryListeners.isEmpty) return;
       var _loop3 = function _loop3() {
-        var entry = _step8.value;
+        var entry = entries[i];
         var origin = entry.node,
           on = entry.on,
           key = entry.key,
@@ -1789,48 +1393,53 @@
         var node = element(origin);
         types.forEach(function (type) {
           if (node && allTypes.includes(type)) {
-            var handler = type === "keydown" ? entryKeyHandler : entryNotKeyHandler;
-            entryListeners.push(node, type, handler); // 保存事件信息
+            /** 是否是键盘事件 */
+            var isKey = type === "keydown";
+            /** 如果是键盘事件，则判断键位是否匹配，如果是非键盘事件，则直接返回 true */
+            var ifKey = isKey ? function (e) {
+              return key === null || key === void 0 ? void 0 : key(e, list.prevI, list.curI);
+            } : function (_) {
+              return true;
+            };
+            entryListeners.push(node, type, toggleHandler(ifKey, isKey)); // 保存事件信息
           }
         });
 
-        function entryKeyHandler(e) {
-          if (key !== null && key !== void 0 && key(e, activeIndex) && (isFun(ef) ? ef({
-            e: e,
-            prev: list.data[prevActive],
-            cur: list.data[activeIndex],
-            prevI: prevActive,
-            curI: activeIndex
-          }) : true)) toggleEntryAndExit(e, true);
-        }
-        function entryNotKeyHandler(e) {
-          if (!(isFun(ef) ? ef({
-            e: e,
-            prev: list.data[prevActive],
-            cur: list.data[activeIndex],
-            prevI: prevActive,
-            curI: activeIndex
-          }) : true)) return;
-          toggleEntryAndExit(e);
+        function toggleHandler(ifKey, isKey) {
+          return function (e) {
+            if ((isFun(ef) ? ef({
+              e: e,
+              prev: list.prev,
+              cur: list.cur,
+              prevI: list.prevI,
+              curI: list.curI
+            }) : true) && ifKey(e)) toggleEntryAndExit(e, isKey);
+          };
         }
         function toggleEntryAndExit(e, isKey) {
+          /** 是否执行 */
+          var processed = 0;
           if (trappedList) {
             if (isFun(onExit)) {
-              var _getKeyNodes5 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-                _list3 = _getKeyNodes5.subNodes,
-                _cover3 = _getKeyNodes5.coverNode,
-                root = _getKeyNodes5.rootNode;
-              isKey && e.preventDefault();
-              exitHandler(e, onExit, target, false, _cover3, _list3, root);
+              // 若存在 onExit，则表示该入口同时是出口，是开关
+              var _getKeyNodes6 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
+                _list = _getKeyNodes6.list,
+                _cover3 = _getKeyNodes6.cover,
+                _root2 = _getKeyNodes6.root;
+              exitHandler(e, onExit, target, false, _cover3, _list, _root2);
+              processed = !processed;
             }
           } else {
-            isKey && e.preventDefault();
             entryHandler(e, on, target, delay);
             if (removeListenersEachEnter && !manual) entryListeners.removeListeners();
+            processed = !processed;
           }
+
+          // 如果是键盘事件，并且已执行，则阻止默认行为
+          if (isKey && processed) e.preventDefault();
         }
       };
-      for (var _iterator8 = _createForOfIteratorHelperLoose(entries), _step8; !(_step8 = _iterator8()).done;) {
+      for (var i = 0; i < entries.length; ++i) {
         _loop3();
       }
 
