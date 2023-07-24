@@ -159,29 +159,29 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
   return exits;
 };
 
-/** 获取聚焦或失焦时延迟的类型 */
-const getDelayType = function(delay, processor) {
-  const isFunctionDelay = isFun(delay);
-  const delayRes = isFunctionDelay && delay(processor);
-  const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
-  const callbackDelay = isFunctionDelay && !promiseDelay;
-  const commonDelay = (delay === true) && !promiseDelay && !callbackDelay;
-  return {
-    promiseDelay,
-    callbackDelay,
-    commonDelay,
-    delayRes,
-  };
-};
-
 /** 延迟执行某些操作 */
 const delayToProcess = function(delay, processor) {
 
-  const { promiseDelay, callbackDelay, commonDelay, delayRes } = !!delay ? getDelayType(delay, processor) : {};
+  const { promiseDelay, callbackDelay, commonDelay, delayRes } = getDelayType();
   if (promiseDelay) delayRes.then(processor);
-  else if (callbackDelay) {}
+  else if (callbackDelay) {} // 已执行完毕
   else if (commonDelay) processor();
-  else return true;
+
+  /** 获取聚焦或失焦时延迟的类型 */
+  function getDelayType() {
+
+    const isFunctionDelay = isFun(delay);
+    const delayRes = isFunctionDelay && delay(processor);
+    const promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
+    const callbackDelay = isFunctionDelay && !promiseDelay;
+    const commonDelay = !promiseDelay && !callbackDelay; // 立即执行
+    return {
+      promiseDelay,
+      callbackDelay,
+      commonDelay,
+      delayRes,
+    };
+  }
 };
 
 /** 获取出口或者入口的目标 */
@@ -589,9 +589,7 @@ const focusNoJutsu = (...props) => {
     if (trappedCover || trappedList) return;
 
     Promise.resolve(onEnter?.(e)).then(_ => {
-      const isImmediate = !delay;
-      if (isImmediate) findNodesToLoadListenersAndFocus();
-      else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+      delayToProcess(delay, findNodesToLoadListenersAndFocus);
     })
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
@@ -651,8 +649,7 @@ const focusNoJutsu = (...props) => {
 
       Promise.resolve(on?.(e)).then(_ => {
         delay = delay ?? delayToBlur;
-        const isImmediate = delayToProcess(delay, focusThenRemoveListeners);
-        if (isImmediate) focusThenRemoveListeners();
+        delayToProcess(delay, focusThenRemoveListeners);
       });
 
       function focusThenRemoveListeners() {
@@ -686,8 +683,7 @@ const focusNoJutsu = (...props) => {
   
           delay = delay ?? delayToBlur;
           const focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
-          const isImmediate = delayToProcess(delay, focusTriggerThenRemoveListeners);
-          if (isImmediate) focusTriggerThenRemoveListeners();
+          delayToProcess(delay, focusTriggerThenRemoveListeners);
         }
       });
 
