@@ -755,10 +755,13 @@ const focusNoJutsu = (...props) => {
       }
 
       listListeners.push(root, "keydown", e => {
-        // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
-        keyListMoveHandler(e);
+        let exited = false;
         // 列表键盘出口
-        if (hasKeyExits) keyListExitHandler(e);
+        if (hasKeyExits)
+          exited = keyListExitHandler(e);
+        // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
+        if (!exited) // 退出的优先级高于列表移动
+          keyListMoveHandler(e);
       });
 
       if (enabledTabSequence || hasClickExits) {
@@ -989,8 +992,8 @@ const focusNoJutsu = (...props) => {
 
         if (condition(e, node, exit.key)) // 未设置点击目标
           return false;
-        exitHandler(e, on, target, delay, cover, list, root, exit.if);
-        return true;
+        const res = exitHandler(e, on, target, delay, cover, list, root, exit.if);
+        return res !== false;
       }
 
       function clickExitHandler(e, exit) {
@@ -1036,7 +1039,7 @@ const focusNoJutsu = (...props) => {
 
         for (let i = 0; i < keyExits.length; ++ i) {
           const isOK = keyExitHandler(e, keyExits[i]);
-          if (isOK) break;
+          if (isOK) return true;
         }
       }
 
