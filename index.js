@@ -135,12 +135,13 @@ const splitExits = function(exits, root) {
 }
 
 /** 获取（生成）出口 */
-const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
+const getExits = function(exit, onEscape, enabledCover, cover, trigger, list, head, tail) {
 
   let tempExits = [].concat(exit).filter(o => o != null)
     .map(ele => isObj(ele) ? ele : { node: ele })
     .map(e => ({
       ...e,
+      node: isFun(e.node) ? e.node({ list, head, tail }) : e.node,
       // undefined 表示用户没有主动设置
       type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
     }))
@@ -476,7 +477,7 @@ const focusNoJutsu = (...props) => {
     exit(tempExit) {
 
       const {
-        list: newList,
+        list: newList, head, tail,
         cover,
         root,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
@@ -486,7 +487,7 @@ const focusNoJutsu = (...props) => {
         const target = element(originTarget);
         return toExit(target, on);
       } else {
-        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
+        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, newList, head, tail);
         for (let i = 0; i < exits.length; ++ i) {
           const { on, type, target } = exits[i];
           const invokeType = "invoke";
@@ -731,7 +732,7 @@ const focusNoJutsu = (...props) => {
         focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
 
       /** 出口们，列表的出口们，list 的出口们 */
-      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
+      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, list, head, tail);
       const {
         keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
         clickExits_wild, focusExits_wild,
