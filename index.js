@@ -105,7 +105,7 @@ const pickNodesAry = function(acc, cur) {
 /** 获取分割的出口 */
 const splitExits = function(exits, root) {
   /** 生效的节点是否在根元素内部（列表中） */
-  const isInnerRoot = node => (node != null && root.contains(element(node))) || node == null;
+  const isInnerRoot = node => isFun(node) || (node != null && root.contains(element(node))) || node == null;
 
   const [keyExits, clickExits, focusExits, clickExits_wild, focusExits_wild, outListExits] = exits.reduce((acc, e) => {
     let [key, click, focus, click_wild, focus_wild, outList] = acc;
@@ -135,13 +135,12 @@ const splitExits = function(exits, root) {
 }
 
 /** 获取（生成）出口 */
-const getExits = function(exit, onEscape, enabledCover, cover, trigger, list, head, tail) {
+const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
 
   let tempExits = [].concat(exit).filter(o => o != null)
     .map(ele => isObj(ele) ? ele : { node: ele })
     .map(e => ({
       ...e,
-      node: isFun(e.node) ? e.node({ list, head, tail }) : e.node,
       // undefined 表示用户没有主动设置
       type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
     }))
@@ -334,7 +333,7 @@ const focusNoJutsu = (...props) => {
     /** 移动的时候触发 */
     onMove,
     /** cover: 封面，默认情况，触发入口后首先聚焦封面，而不是子元素 */
-    cover,
+    cover: origin_cover,
     /** 初始的列表中聚焦元素的序号 */
     initialActive,
     /** 矫正列表的焦点 */
@@ -382,11 +381,11 @@ const focusNoJutsu = (...props) => {
     enterKey: coverEnterKey,
     onEnter: onEnterCover,
     exit: exitCover,
-  } = isObj(cover) ? cover : {};
+  } = isObj(origin_cover) ? origin_cover : {};
   /** 是否已经打开封面选项 */
-  const enabledCover = cover != null && cover !== false && coverNode !== false;
+  const enabledCover = origin_cover != null && origin_cover !== false && coverNode !== false;
   /** 封面即根元素 */
-  const coverIsRoot = enabledCover && (cover === true || coverNode === true || coverNode == null);
+  const coverIsRoot = enabledCover && (origin_cover === true || coverNode === true || coverNode == null);
   /** 退出封面，封面的出口们 */
   const exitsCover = [].concat(exitCover) // 转为数组
     .filter(e => e != null) // 过滤空值
@@ -401,6 +400,10 @@ const focusNoJutsu = (...props) => {
 
   /** 列表 */
   const list = new TabList();
+  /** 根元素 */
+  let root = null;
+  /** 封面 */
+  let cover = null;
 
   list.recordPrev(null, initialActive ?? -1);
 
@@ -445,9 +448,11 @@ const focusNoJutsu = (...props) => {
     if (hasImmediateEntry) {
 
       const {
-        root, list: newList, cover,
+        root: newRoot, list: newList, cover: newCover,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
       list.update(newList);
+      root = newRoot;
+      cover = newCover;
 
       loadListRelatedListeners(root, list, cover);
     }
@@ -477,7 +482,7 @@ const focusNoJutsu = (...props) => {
     exit(tempExit) {
 
       const {
-        list: newList, head, tail,
+        list: newList,
         cover,
         root,
       } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
@@ -487,7 +492,7 @@ const focusNoJutsu = (...props) => {
         const target = element(originTarget);
         return toExit(target, on);
       } else {
-        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, newList, head, tail);
+        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
         for (let i = 0; i < exits.length; ++ i) {
           const { on, type, target } = exits[i];
           const invokeType = "invoke";
@@ -591,16 +596,21 @@ const focusNoJutsu = (...props) => {
 
     Promise.resolve(onEnter?.(e)).then(_ => {
       delayToProcess(delay, findNodesToLoadListenersAndFocus);
-    })
+    });
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
     function findNodesToLoadListenersAndFocus() {
-      const {
-        root,
-        list: newList,
-        cover,
-      } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
-      list.update(newList);
+      if (list.isEmpty()) { // 第一次加载
+        const {
+          root: newRoot,
+          list: newList,
+          cover: newCover,
+        } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
+        list.update(newList);
+        root = newRoot;
+        cover = newCover;
+      }
+
 
       if (!manual)
         loadListRelatedListeners(root, list, cover);
@@ -732,7 +742,7 @@ const focusNoJutsu = (...props) => {
         focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
 
       /** 出口们，列表的出口们，list 的出口们 */
-      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, list, head, tail);
+      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
       const {
         keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
         clickExits_wild, focusExits_wild,
@@ -987,7 +997,9 @@ const focusNoJutsu = (...props) => {
 
       function exitHandlerWithCondition(e, exit, condition) {
         const { node: origin_node, on, target: origin_target, delay } = exit;
-        const node = element(origin_node);
+        const { data: list, head, tail } = listInfo;
+        const stringOrNode = isFun(origin_node) ? origin_node({ list, head, tail }) : origin_node;
+        const node = element(stringOrNode);
         const target = element(origin_target);
 
         if (condition(e, node, exit.key)) // 未设置点击目标
