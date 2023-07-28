@@ -84,12 +84,8 @@ const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, cover
     focused = true;
   }
 
-  if (needToPreventDefault) e.preventDefault();
-
-  if (focused) {
-    listPreventDefault && e.preventDefault();
-    listStopPropagation && e.stopPropagation();
-  }
+  if (needToPreventDefault || (focused && listPreventDefault)) e.preventDefault();
+  if (focused && listStopPropagation) e.stopPropagation();
 };
 
 /** 获取关键节点 */
@@ -152,12 +148,14 @@ const splitExits = function(exits, root) {
 }
 
 /** 获取（生成）出口 */
-const getExits = function(exit, onEscape, enabledCover, cover, trigger) {
+const getExits = function(exit, onEscape, enabledCover, cover, trigger, delayToBlur) {
 
   let tempExits = [].concat(exit).filter(o => o != null)
     .map(ele => isObj(ele) ? ele : { node: ele })
     .map(e => ({
       ...e,
+      preventDefault: e.preventDefault ?? true,
+      delay: e.delay ?? delayToBlur,
       // undefined 表示用户没有主动设置
       type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
     }))
@@ -383,6 +381,7 @@ const focusNoJutsu = (...props) => {
     .map(ele => isObj(ele) ? ele : { node: ele }) // 元素转为对象，并且默认元素的值被看作对象的 node 属性
     .map(entry => ({ // 对元素的属性进行默认处理
       ...entry,
+      preventDefault: entry.preventDefault ?? true,
       delay: entry.delay ?? delayToFocus,
       type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
       onExit: entry.onExit === true ? entry.on : entry.onExit, // 这个入口是开关吗
@@ -516,7 +515,7 @@ const focusNoJutsu = (...props) => {
         const target = element(originTarget);
         return toExit(target, on);
       } else {
-        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
+        const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, delayToBlur);
         for (let i = 0; i < exits.length; ++ i) {
           const { on, type, target } = exits[i];
           const invokeType = "invoke";
@@ -613,10 +612,13 @@ const focusNoJutsu = (...props) => {
   return Return;
 
   /** 入口 handler */
-  function entryHandler(e, onEnter, target, delay) {
+  function entryHandler(e, onEnter, target, delay, preventDefault, stopPropagation) {
 
     // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
     if (trappedCover || trappedList) return;
+
+    preventDefault && e.preventDefault?.();
+    stopPropagation && e.stopPropagation?.();
 
     Promise.resolve(onEnter?.(e)).then(_ => {
       delayToProcess(delay, findNodesToLoadListenersAndFocus);
@@ -662,17 +664,18 @@ const focusNoJutsu = (...props) => {
   }
 
   /** 出口 handler */
-  function exitHandler(e, on, target, delay, cover, listData, root, ef) {
+  function exitHandler(e, on, target, delay, cover, listData, root, ef, preventDefault, stopPropagation) {
 
     if (!trappedList || 
       !(isFun(ef) ? ef({ e, prev: list.prev, cur: list.cur, prevI: list.prevI, curI: list.curI }) : true))
       return false;
 
+    preventDefault && e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
+    stopPropagation && e.stopPropagation?.();
+
     list.recordSequenceByIdx(-1);
 
     trappedList = false;
-
-    e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
 
     const gotTarget = getTarget(target, cover, listData, root, enabledCover, list.curI, _trigger, e);
 
@@ -683,7 +686,6 @@ const focusNoJutsu = (...props) => {
     function exitListWithTarget() {
 
       Promise.resolve(on?.(e)).then(_ => {
-        delay = delay ?? delayToBlur;
         delayToProcess(delay, focusThenRemoveListeners);
       });
 
@@ -716,7 +718,6 @@ const focusNoJutsu = (...props) => {
           focus(cover);
         } else {
   
-          delay = delay ?? delayToBlur;
           const focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
           delayToProcess(delay, focusTriggerThenRemoveListeners);
         }
@@ -766,7 +767,7 @@ const focusNoJutsu = (...props) => {
         focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList, listPreventDefault, listStopPropagation);
 
       /** 出口们，列表的出口们，list 的出口们 */
-      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
+      const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, delayToBlur);
       const {
         keyExits, clickExits, focusExits, hasClickExits, hasFocusExits, hasKeyExits,
         clickExits_wild, focusExits_wild,
@@ -1013,14 +1014,14 @@ const focusNoJutsu = (...props) => {
 
       function outListExitHandler(e) {
         for (let i = 0; i < outListExits.length; ++ i) {
-          const { on, target: origin_target, delay } = outListExits[i];
+          const { on, target: origin_target, delay, preventDefault, stopPropagation } = outListExits[i];
           const target = element(origin_target);
-          return exitHandler(e, on, target, delay, cover, list, root, outListExits[i].if);
+          return exitHandler(e, on, target, delay, cover, list, root, outListExits[i].if, preventDefault, stopPropagation);
         }
       }
 
       function exitHandlerWithCondition(e, exit, condition) {
-        const { node: origin_node, on, target: origin_target, delay } = exit;
+        const { node: origin_node, on, target: origin_target, delay, preventDefault, stopPropagation } = exit;
         const { data: list, head, tail } = listInfo;
         const stringOrNode = isFun(origin_node) ? origin_node({ list, head, tail }) : origin_node;
         const node = element(stringOrNode);
@@ -1028,7 +1029,7 @@ const focusNoJutsu = (...props) => {
 
         if (condition(e, node, exit.key)) // 未设置点击目标
           return false;
-        const res = exitHandler(e, on, target, delay, cover, list, root, exit.if);
+        const res = exitHandler(e, on, target, delay, cover, list, root, exit.if, preventDefault, stopPropagation);
         return res !== false;
       }
 
@@ -1101,7 +1102,7 @@ const focusNoJutsu = (...props) => {
 
     for (let i = 0; i < entries.length; ++ i) {
       const entry = entries[i];
-      const { node: origin, on, key, type, target, delay, onExit } = entry;
+      const { node: origin, on, key, type, target, delay, onExit, preventDefault, stopPropagation } = entry;
       const ef = entry.if;
       const types = [].concat(type);
       const allTypes = ["keydown", "focus", "click"];
@@ -1114,41 +1115,34 @@ const focusNoJutsu = (...props) => {
           const isKey = type === "keydown";
           /** 如果是键盘事件，则判断键位是否匹配，如果是非键盘事件，则直接返回 true */
           const ifKey = isKey ? e => key?.(e, list.prevI, list.curI) : _ => true;
-          entryListeners.push(node, type, toggleHandler(ifKey, isKey)); // 保存事件信息
+          entryListeners.push(node, type, toggleHandler(ifKey)); // 保存事件信息
         }
       });
       
-      function toggleHandler(ifKey, isKey) {
+      function toggleHandler(ifKey) {
         return e => {
           if (
             (isFun(ef)
               ? ef({ e, prev: list.prev, cur: list.cur, prevI: list.prevI, curI: list.curI })
               : true) &&
             ifKey(e))
-            toggleEntryAndExit(e, isKey);
+            toggleEntryAndExit(e);
         }
       }
 
-      function toggleEntryAndExit(e, isKey) {
+      function toggleEntryAndExit(e) {
 
-        /** 是否执行 */
-        let processed = 0;
         if (trappedList) {
           if (isFun(onExit)) { // 若存在 onExit，则表示该入口同时是出口，是开关
             const { list, cover, root } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
-            exitHandler(e, onExit, target, false, cover, list, root);
-            processed = !processed;
+            exitHandler(e, onExit, target, false, cover, list, root, null, preventDefault, stopPropagation);
           }
         }
         else {
-          entryHandler(e, on, target, delay);
+          entryHandler(e, on, target, delay, preventDefault, stopPropagation);
           if (removeListenersEachEnter && !manual)
             entryListeners.removeListeners();
-          processed = !processed;
         }
-
-        // 如果是键盘事件，并且已执行，则阻止默认行为
-        if (isKey && processed) e.preventDefault();
       }
     }
 
