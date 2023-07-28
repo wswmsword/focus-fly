@@ -399,3 +399,38 @@ export function initBagel_35(container, dialog, first, last, open, close) {
     // removeListenersEachExit: false,
   });
 }
+
+export function initBagel_36(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: ({ tail }) => tail,
+  });
+}
+
+export function initBagel_37(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2) {
+  return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: {
+      node: focusG,
+      key: (e) => e.key === "Tab" && !e.shiftKey,
+      type: "keydown",
+      target: walk2,
+    },
+  });
+}
+
+export function initBagel_38(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2) {
+  dialog.addEventListener("click", function() {
+    walk2.focus();
+  });
+  return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: {
+      node: focusG,
+      stopPropagation: true,
+    },
+  });
+}

@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -804,6 +804,58 @@ describe("options", function() {
       walk2.focus();
       await wait(4);
       expect(open).toHaveFocus();
+    });
+
+    // 函数出口
+    it("function node", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      const bagel = initBagel_36(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+      await user.click(focusG);
+      expect(open).toHaveFocus();
+
+      bagel.updateList([focusA, focusB, focusC]); // 更新列表
+      await user.click(open);
+      expect(focusG).toHaveFocus();
+      await user.click(focusC);
+      expect(open).toHaveFocus();
+    });
+
+    // 出口的优先级比列表移动高
+    it("the exit has higher priority than list-moving", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+      initBagel_37(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+
+      await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();await user.tab();
+
+      expect(focusG).toHaveFocus();
+      await user.tab(); // exit
+      expect(walk2).toHaveFocus();
+
+      await user.tab({ shift: true }); // correction
+      expect(focusA).not.toHaveFocus();
+      expect(focusG).toHaveFocus();
+    });
+
+    // 阻止事件冒泡
+    it("stopPropagation", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+      initBagel_38(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2);
+
+      await user.click(dialog);
+      expect(walk2).toHaveFocus();
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+
+      await user.click(focusG); // stopPropagation
+      expect(open).toHaveFocus();
+      expect(walk2).not.toHaveFocus();
     });
   });
 
