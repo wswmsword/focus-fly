@@ -13,81 +13,6 @@ const tickFocus = function(e) {
   else focus(e);
 };
 
-/** 手动聚焦下一个元素 */
-const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList, listPreventDefault, listStopPropagation) => e => {
-  if (e.target === coverNode) return;
-  if (!trappedList()) return;
-
-  const [index_, setIndex] = useActiveIndex();
-  const index = Math.max(0, index_);
-  const itemsLen = subNodes.length;
-  let focused = false;
-  if ((isNext ?? isTabForward)(e)) {
-    const incresedI = index + 1;
-    let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
-    nextI %= itemsLen;
-    onNext?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    setIndex(nextI);
-    focus(subNodes[nextI]);
-    focused = true;
-  }
-  else if ((isPrev ?? isTabBackward)(e)) {
-    const decresedI = index - 1;
-    let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
-    nextI = (nextI + itemsLen) % itemsLen;
-    onPrev?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
-    setIndex(nextI);
-    focus(subNodes[nextI]);
-    focused = true;
-  }
-
-  if (focused) {
-    listPreventDefault && e.preventDefault();
-    listStopPropagation && e.stopPropagation();
-  }
-};
-
-/** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, coverNode, trappedList, listPreventDefault, listStopPropagation) => e => {
-  const head = list[0];
-  const tail = list.at(-1);
-  const current = e.target;
-  if (current === coverNode) return;
-  if (!trappedList()) return;
-
-  let needToPreventDefault = false;
-  let focused = false;
-  if (isTabForward(e)) {
-    onNext?.({ e });
-    if (current === tail) {
-      needToPreventDefault = true;
-      if (!isClamp) focus(head);
-    }
-    if (current === rootNode) {
-      needToPreventDefault = true;
-      focus(head);
-    }
-    focused = true;
-  }
-  else if (isTabBackward(e)) {
-    onPrev?.({ e });
-    if (current === head) {
-      needToPreventDefault = true;
-      if (!isClamp) focus(tail);
-    }
-    if (current === rootNode) {
-      needToPreventDefault = true;
-      focus(tail);
-    }
-    focused = true;
-  }
-
-  if (needToPreventDefault || (focused && listPreventDefault)) e.preventDefault();
-  if (focused && listStopPropagation) e.stopPropagation();
-};
-
 /** 获取关键节点 */
 const getKeyNodes = function(originRoot, originList, originCover, coverIsRoot) {
   const list = originList.map(item => element(item)).filter(item => item != null);
@@ -762,9 +687,7 @@ const focusNoJutsu = (...props) => {
       const isTrappedList = () => hasNoEntry ? true : trappedList;
 
       // 在焦点循环中触发聚焦
-      const keyListMoveHandler = enabledTabSequence ?
-        focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList, listPreventDefault, listStopPropagation) :
-        focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList, listPreventDefault, listStopPropagation);
+      const keyListMoveHandler = enabledTabSequence ? focusNextListItemBySequence : focusNextListItemByRange;
 
       /** 出口们，列表的出口们，list 的出口们 */
       const exits = getExits(exit, onEscape, enabledCover, cover, _trigger, delayToBlur);
@@ -948,6 +871,81 @@ const focusNoJutsu = (...props) => {
             onMove?.({ e, prev, cur, prevI, curI });
         }
       }
+
+      /** 手动聚焦下一个元素 */
+      function focusNextListItemBySequence(e) {
+        if (e.target === cover) return;
+        if (!isTrappedList()) return;
+
+        const [index_, setIndex] = useActiveIndex();
+        const index = Math.max(0, index_);
+        const itemsLen = list.length;
+        let focused = false;
+        if ((isNext ?? isTabForward)(e)) {
+          const incresedI = index + 1;
+          let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
+          nextI %= itemsLen;
+          onNext?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
+          onMove?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
+          setIndex(nextI);
+          focus(list[nextI]);
+          focused = true;
+        }
+        else if ((isPrev ?? isTabBackward)(e)) {
+          const decresedI = index - 1;
+          let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
+          nextI = (nextI + itemsLen) % itemsLen;
+          onPrev?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
+          onMove?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
+          setIndex(nextI);
+          focus(list[nextI]);
+          focused = true;
+        }
+
+        if (focused) {
+          listPreventDefault && e.preventDefault();
+          listStopPropagation && e.stopPropagation();
+        }
+      };
+
+      /** 按下 tab，以浏览器的行为聚焦下个元素 */
+      function focusNextListItemByRange(e) {
+        const head = list[0];
+        const tail = list.at(-1);
+        const current = e.target;
+        if (current === cover) return;
+        if (!isTrappedList()) return;
+
+        let needToPreventDefault = false;
+        let focused = false;
+        if (isTabForward(e)) {
+          onNext?.({ e });
+          if (current === tail) {
+            needToPreventDefault = true;
+            if (!isClamp) focus(head);
+          }
+          if (current === root) {
+            needToPreventDefault = true;
+            focus(head);
+          }
+          focused = true;
+        }
+        else if (isTabBackward(e)) {
+          onPrev?.({ e });
+          if (current === head) {
+            needToPreventDefault = true;
+            if (!isClamp) focus(tail);
+          }
+          if (current === root) {
+            needToPreventDefault = true;
+            focus(tail);
+          }
+          focused = true;
+        }
+
+        if (needToPreventDefault || (focused && listPreventDefault)) e.preventDefault();
+        if (focused && listStopPropagation) e.stopPropagation();
+      };
 
       /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
       |         COVER HANDLERS          |
