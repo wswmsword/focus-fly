@@ -14,13 +14,14 @@ const tickFocus = function(e) {
 };
 
 /** 手动聚焦下一个元素 */
-const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) => e => {
+const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList, listPreventDefault, listStopPropagation) => e => {
   if (e.target === coverNode) return;
   if (!trappedList()) return;
 
   const [index_, setIndex] = useActiveIndex();
   const index = Math.max(0, index_);
   const itemsLen = subNodes.length;
+  let focused = false;
   if ((isNext ?? isTabForward)(e)) {
     const incresedI = index + 1;
     let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
@@ -29,7 +30,7 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, 
     onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
     focus(subNodes[nextI]);
-    e.preventDefault();
+    focused = true;
   }
   else if ((isPrev ?? isTabBackward)(e)) {
     const decresedI = index - 1;
@@ -39,39 +40,55 @@ const focusNextListItemBySequence = (subNodes, useActiveIndex, isClamp, isNext, 
     onMove?.({ e, prev: subNodes[index], cur: subNodes[nextI], prevI: index, curI: nextI });
     setIndex(nextI);
     focus(subNodes[nextI]);
-    e.preventDefault();
+    focused = true;
+  }
+
+  if (focused) {
+    listPreventDefault && e.preventDefault();
+    listStopPropagation && e.stopPropagation();
   }
 };
 
 /** 按下 tab，以浏览器的行为聚焦下个元素 */
-const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) => e => {
+const focusNextListItemByRange = (list, isClamp, onNext, onPrev, rootNode, coverNode, trappedList, listPreventDefault, listStopPropagation) => e => {
   const head = list[0];
   const tail = list.at(-1);
   const current = e.target;
   if (current === coverNode) return;
   if (!trappedList()) return;
 
+  let needToPreventDefault = false;
+  let focused = false;
   if (isTabForward(e)) {
     onNext?.({ e });
     if (current === tail) {
-      e.preventDefault();
+      needToPreventDefault = true;
       if (!isClamp) focus(head);
     }
     if (current === rootNode) {
-      e.preventDefault();
-      focus(head)
+      needToPreventDefault = true;
+      focus(head);
     }
+    focused = true;
   }
   else if (isTabBackward(e)) {
     onPrev?.({ e });
     if (current === head) {
-      e.preventDefault();
+      needToPreventDefault = true;
       if (!isClamp) focus(tail);
     }
     if (current === rootNode) {
-      e.preventDefault();
+      needToPreventDefault = true;
       focus(tail);
     }
+    focused = true;
+  }
+
+  if (needToPreventDefault) e.preventDefault();
+
+  if (focused) {
+    listPreventDefault && e.preventDefault();
+    listStopPropagation && e.stopPropagation();
   }
 };
 
@@ -348,6 +365,10 @@ const focusNoJutsu = (...props) => {
     removeListenersEachEnter,
     /** 每次退出列表是否添加入口监听事件 */
     addEntryListenersEachExit = true,
+    /** 阻止（列表移动）冒泡或捕获 */
+    stopPropagation: listStopPropagation = false,
+    /** 阻止（列表移动）默认行为 */
+    preventDefault,
     /** 手动添加和移除监听事件，入口、列表、出口的监听事件，`removeListenersEachExit` 和 `removeListenersEachEnter` 将失效 */
     manual,
     /** 用于抹平 Safari 不同于其它浏览器，点击后 button 之类的元素不会被聚焦的问题 */
@@ -425,6 +446,9 @@ const focusNoJutsu = (...props) => {
 
   /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
   const enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
+
+  /** 移动列表，是否阻止默认行为 */
+  const listPreventDefault = preventDefault ?? enabledTabSequence;
 
   /** 进入了列表 */
   let trappedList = false;
@@ -738,8 +762,8 @@ const focusNoJutsu = (...props) => {
 
       // 在焦点循环中触发聚焦
       const keyListMoveHandler = enabledTabSequence ?
-        focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList) :
-        focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
+        focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList, listPreventDefault, listStopPropagation) :
+        focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList, listPreventDefault, listStopPropagation);
 
       /** 出口们，列表的出口们，list 的出口们 */
       const exits = getExits(exit, onEscape, enabledCover, cover, _trigger);
