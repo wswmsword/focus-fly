@@ -13,19 +13,33 @@ const tickFocus = function(e) {
   else focus(e);
 };
 
-/** 获取关键节点 */
-const getKeyNodes = function(originRoot, originList, originCover, coverIsRoot) {
-  const list = originList.map(item => element(item)).filter(item => item != null);
+/** 获取根节点 */
+const getRootNode = function(rootStr, listHead, listTail) {
+  return element(rootStr) ?? findLowestCommonAncestorNode(listHead, listTail);
+};
+
+/** 获取列表节点 */
+const getListNodes = function(listAry) {
+  const list = listAry.map(item => element(item)).filter(item => item != null);
   const head = list[0];
   const tail = list.slice(-1)[0];
-  const root = element(originRoot) ?? findLowestCommonAncestorNode(head, tail);
-  const cover = coverIsRoot ? root : element(originCover);
+  return { list, head, tail };
+}
+
+/** 获取封面节点 */
+const getCoverNode = function(coverStr, coverIsRoot, root) {
+  return coverIsRoot ? root : element(coverStr);
+}
+
+/** 获取关键节点 */
+const getKeyNodes = function(originRoot, originList, originCover, coverIsRoot) {
+  const { list, head, tail } = getListNodes(originList);
+  const root = getRootNode(originRoot, head, tail);
+  const cover = getCoverNode(originCover, coverIsRoot, root);
 
   return {
     root,
-    list,
-    head,
-    tail,
+    list, head, tail,
     cover,
   };
 };
@@ -551,17 +565,17 @@ const focusNoJutsu = (...props) => {
 
     /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
     function findNodesToLoadListenersAndFocus() {
-      if (list.isEmpty()) { // 第一次加载
-        const {
-          root: newRoot,
-          list: newList,
-          cover: newCover,
-        } = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot);
+
+      if (list.isEmpty()) {
+        const { list: newList } = getListNodes(subNodes);
         list.update(newList);
-        root = newRoot;
-        cover = newCover;
       }
 
+      if (root == null)
+        root = getRootNode(rootNode, list.head, list.tail);
+
+      if (cover == null && enabledCover)
+        cover = getCoverNode(coverNode, coverIsRoot, root);
 
       if (!manual)
         loadListRelatedListeners(root, list, cover);
