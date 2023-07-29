@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38, initBagel_39, initBagel_40, initBagel_1_2 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -390,7 +390,7 @@ describe("focus-bagel", function() {
   // 通过 Return.addForward 添加转发，可以转发焦点
   it("should forward focus by Return.addForward", async function() {
     const { container, dialog, first, last, open, close, walk2, walk1 } = getRangeModalDom();
-    const bagel = initBagel(container, dialog, first, last, open, close);
+    const bagel = initBagel_1_2(container, dialog, first, last, open, close);
     bagel.addForward("f.f", {
       node: dialog,
       key: e => e.key === "Tab",
@@ -410,7 +410,7 @@ describe("focus-bagel", function() {
   // 移除转发
   it("should remove forward by Return.removeForward", async function() {
     const { container, dialog, first, last, open, close, walk2, walk1 } = getRangeModalDom();
-    const bagel = initBagel(container, dialog, first, last, open, close);
+    const bagel = initBagel_1_2(container, dialog, first, last, open, close);
     bagel.addForward("f.f", {
       node: dialog,
       key: e => e.key === "Tab",
@@ -857,6 +857,19 @@ describe("options", function() {
       expect(open).toHaveFocus();
       expect(walk2).not.toHaveFocus();
     });
+
+    // 出口首先移除事件，然后聚焦目标元素，防止焦点矫正导致的聚焦目标错误
+    it("remove listeners before focusing target", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2 } = getSequenceModalDom();
+      initBagel_39(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk2);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+
+      await user.click(focusG);
+      expect(dialog).toHaveFocus();
+      expect(focusG).not.toHaveFocus();
+    });
   });
 
   describe("allowSafariToFocusAfterMousedown", function() {
@@ -1045,6 +1058,23 @@ describe("Returns", function() {
 
       curI = bagel.i();
       expect(curI).toBe(3);
+    });
+  });
+
+  // 更新列表相关，例如无限滚动
+  describe("updateList", function() {
+
+    // 调用 updateList 后通过入口进入列表
+    it("entry after updateList", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+      const bagel = initBagel_40(dialog, open, focusA, focusB, focusC);
+      bagel.updateList([focusA, focusB, focusC, focusD, focusE, focusF, focusG]);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+
+      await user.click(focusG);
+      expect(open).toHaveFocus();
     });
   });
 });

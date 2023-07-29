@@ -17,6 +17,15 @@ export function initBagel_1_1(container, dialog, first, last, open, close) {
   });
 }
 
+export function initBagel_1_2(container, dialog, first, last, open, close) {
+
+  return focusBagel(dialog, [first, last], {
+    entry: open,
+    exit: close,
+    delayToFocus: true,
+  });
+}
+
 export function initBagel_2(container, dialog, first, last, open, close) {
 
   return focusBagel(dialog, [first, last], { entry: { type: "invoke" } });
@@ -432,5 +441,24 @@ export function initBagel_38(dialog, open, focusA, focusB, focusC, focusD, focus
       node: focusG,
       stopPropagation: true,
     },
+  });
+}
+
+export function initBagel_39(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  return focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    entry: open,
+    exit: {
+      node: focusG,
+      target: dialog,
+    },
+  });
+}
+
+export function initBagel_40(dialog, open, focusA, focusB, focusC) {
+  return focusBagel(dialog, [focusA, focusB, focusC], {
+    sequence: true,
+    entry: open,
+    exit: ({ tail }) => tail,
   });
 }
