@@ -615,14 +615,14 @@ const focusNoJutsu = (...props) => {
       });
 
       function focusThenRemoveListeners() {
-        focus(gotTarget);
-        enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
         if (!manual) {
           if (gotTarget !== cover)
             removeListRelatedListeners();
           if (addEntryListenersEachExit)
             addEntryListeners();
         }
+        enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+        focus(gotTarget);
       }
     }
 
@@ -650,13 +650,13 @@ const focusNoJutsu = (...props) => {
 
       function focusThenRemoveListeners(focusTarget) {
         return _ => {
-          focusTarget && focus(focusTarget);
-          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           if (!manual) {
             removeListRelatedListeners();
             if (addEntryListenersEachExit)
               addEntryListeners();
           }
+          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+          focusTarget && focus(focusTarget);
         }
       }
     }
