@@ -212,6 +212,8 @@ class TabList {
   curI = -1;
   _prev = null;
   _cur = null;
+  rangeBeforePrevCallback = false; // 范围模式下，当前是否在调用钩子回调（onMove、onPrev）之前
+  rangeBeforeNextCallback = false; // 范围模式下，当前是否在调用钩子回调（onMove、onNext）之前
   get prev() {
     return this._prev || this.data[this.prevI] || null; // _prev 可能由于 dom 未加载而为 null，为 null 则通过 prevI 取值
   };
@@ -237,11 +239,14 @@ class TabList {
     return !!this.data[i];
   };
   record(cur, curI) {
+    this.recordPrev(this.cur, this.curI);
+    this.recordCur(cur, curI);
+  };
+  recordSequnce(cur, curI) {
     if (this.curI === curI // this.curI 和 curI 必须不同
       || (this.curI < 0 && curI < 0)) // curI 为 -1 后，不会再次更新新的 -1
       return;
-    this.recordPrev(this.cur, this.curI);
-    this.recordCur(cur, curI);
+    this.record(cur, curI);
   };
   recordPrev(prev, prevI) {
     this.prevI = prevI < 0 ? -1 : prevI;
@@ -252,7 +257,10 @@ class TabList {
     this.cur = cur || null;
   };
   recordSequenceByIdx(curI) {
-    this.record(this.data[curI], curI);
+    this.recordSequnce(this.data[curI], curI);
+  };
+  recordRange(cur) {
+    this.record(cur, -1);
   };
 }
 
@@ -588,16 +596,23 @@ const focusNoJutsu = (...props) => {
       const { prev, head, curI } = listInfo;
       const defaultTarget = prev || head;
       const gotTarget = getTarget(target, cover, list, rootNode, enabledCover, curI, defaultTarget, e);
-      const targetIdx = list.indexOf(gotTarget);
-      if (targetIdx > -1) {
-        if (enabledTabSequence) { // onMove 仅支持打开 sequence 后
+      if (enabledTabSequence) { // 序列模式
+        const targetIdx = list.indexOf(gotTarget);
+        if (targetIdx > -1) {
           listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
           const { cur, curI } = listInfo;
           onMove?.({ e, prev: null, cur, prevI: -1, curI });
+          trappedList = true;
         }
-        trappedList = true;
+      } else { // 范围模式
+        if (rootNode.contains(gotTarget) && gotTarget !== cover) {
+          listInfo.recordRange(gotTarget);
+          const { cur, curI } = listInfo;
+          onMove?.({ e, prev: null, cur, prevI: -1, curI });
+          trappedList = true;
+        }
       }
-      if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
+      if (enabledCover && (gotTarget === cover || trappedList === true)) trappedCover = true;
       tickFocus(gotTarget);
     }
   }
@@ -612,7 +627,8 @@ const focusNoJutsu = (...props) => {
     preventDefault && e.preventDefault?.(); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
     stopPropagation && e.stopPropagation?.();
 
-    list.recordSequenceByIdx(-1);
+    if (enabledTabSequence) list.recordSequenceByIdx(-1);
+    else list.recordRange(null);
 
     trappedList = false;
 
@@ -696,6 +712,9 @@ const focusNoJutsu = (...props) => {
     /** 添加焦点需要的事件监听器 */
     function addListRelatedListeners() {
 
+      /** 是否是来自默认封面出口的聚焦 */
+      let focusFromDefaultExitCover = false;
+
       const useActiveIndex = () => [listInfo.curI, listInfo.recordSequenceByIdx.bind(listInfo)];
 
       const isTrappedList = () => hasNoEntry ? true : trappedList;
@@ -736,14 +755,12 @@ const focusNoJutsu = (...props) => {
           keyListMoveHandler(e);
       });
 
-      if (enabledTabSequence || hasClickExits) {
-        listListeners.push(root, "click", e => {
-          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
-          enabledTabSequence && clickListItemHandler(e);
-          // 列表点击出口
-          hasClickExits && clickListExitHandler(e);
-        });
-      }
+      listListeners.push(root, "click", e => {
+        // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
+        clickListItemHandler(e);
+        // 列表点击出口
+        hasClickExits && clickListExitHandler(e);
+      });
 
       // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
       listListeners.push(root, "mousedown", mousedownListItemHandler);
@@ -782,8 +799,16 @@ const focusNoJutsu = (...props) => {
 
       function focusTrapListHandler(e) {
 
+        const target = e.target;
+
+        // 默认封面退出
+        if (focusFromDefaultExitCover) {
+          focusFromDefaultExitCover = false;
+          return;
+        }
+
         // 进入封面（封面在列表中）
-        if (enabledCover && e.target === cover) { // TODO: 保留确认，或是否需要添加 `&& trappedList` 条件
+        if (enabledCover && target === cover) { // TODO: 保留确认，或是否需要添加 `&& trappedList` 条件
           trappedCover = true;
           return ;
         }
@@ -794,15 +819,31 @@ const focusNoJutsu = (...props) => {
           return ;
         }
 
+        // 调用范围模式下的 onPrev、onNext、onMove
+        if (listInfo.rangeBeforePrevCallback || listInfo.rangeBeforeNextCallback) {
+          listInfo.recordRange(target);
+          listInfo.rangeBeforePrevCallback = false;
+          listInfo.rangeBeforeNextCallback = false;
+          const { cur, prev } = listInfo;
+          (listInfo.rangeBeforePrevCallback ? onNext : onPrev)?.({ e, prev, cur, prevI: -1, curI: -1 });
+          onMove?.({ e, prev, cur, prevI: -1, curI: -1 });
+        }
+
         // 纠正外部聚焦进来的焦点
-        if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+        if (correctionTarget !== false && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
         {
           const defaultLast = listInfo.prev || listInfo.head;
           const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI }) ?? defaultLast;
           const gotCorrectionTarget = element(originGotCorrectionTarget);
-          const targetIndex = list.findIndex(item => item === gotCorrectionTarget);
-          if (targetIndex > -1) {
-            listInfo.recordSequenceByIdx(targetIndex);
+
+          if (enabledTabSequence) { // 序列模式
+            const targetIndex = list.findIndex(item => item === gotCorrectionTarget);
+            if (targetIndex > -1) {
+              listInfo.recordSequenceByIdx(targetIndex);
+              onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+            }
+          } else { // 范围模式
+            listInfo.recordRange(gotCorrectionTarget);
             onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
           }
 
@@ -814,7 +855,7 @@ const focusNoJutsu = (...props) => {
       }
 
       function blurTrapListHandler(e) {
-        // 用于保护可切换的入口能够被触发
+        // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发
         if (toggles.has(e.relatedTarget)) return;
 
         tick(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
@@ -832,7 +873,8 @@ const focusNoJutsu = (...props) => {
           let isOutList = null;
           if (isActiveCover || isOutRootNode) {
             isOutList = outListExitHandler(e);
-            listInfo.recordSequenceByIdx(-1);
+            if (enabledTabSequence) listInfo.recordSequenceByIdx(-1);
+            else listInfo.recordRange(null);
           }
           if (isOutList === false) return; // 不符合 outlist 退出列表的条件
 
@@ -867,22 +909,43 @@ const focusNoJutsu = (...props) => {
 
       /** 点击聚焦列表某一单项 */
       function clickListItemHandler(e) {
-        const targetIndex = list.findIndex(item => item.contains(e.target));
-        if (targetIndex > -1) {
-          const { prev: prevBeforeRecord, prevI: prevIBeforeRecord, curI: curIBeforeRecord } = listInfo;
-          listInfo.recordSequenceByIdx(targetIndex);
 
-          let { prev, prevI, cur, curI } = listInfo;
-          if (curIBeforeRecord < 0) { // 从外部进入
-            if (prevIBeforeRecord !== targetIndex) { // 上一次进入 和 本次进入 的元素不同
+        const target = e.target;
+
+        if (enabledTabSequence) { // 序列模式
+
+          const targetIndex = list.findIndex(item => item.contains(target));
+          if (targetIndex > -1) {
+            const { prev: prevBeforeRecord, prevI: prevIBeforeRecord, curI: curIBeforeRecord } = listInfo;
+            listInfo.recordSequenceByIdx(targetIndex);
+  
+            let { prev, prevI, cur, curI } = listInfo;
+            if (curIBeforeRecord < 0) { // 从外部进入
+              if (prevIBeforeRecord !== targetIndex) { // 上一次进入 和 本次进入 的元素不同
+                prev = prevBeforeRecord;
+                prevI = prevIBeforeRecord;
+              }
+            }
+  
+            onClick?.({ e, prev, cur, prevI, curI });
+            if (curIBeforeRecord !== curI) // 从外部进入 或者 列表内的移动
+              onMove?.({ e, prev, cur, prevI, curI });
+          }
+        } else { // 范围模式
+
+          const { prev: prevBeforeRecord, cur: curBeforeRecord } = listInfo;
+          listInfo.recordRange(target);
+
+          let { prev, cur } = listInfo;
+          if (curBeforeRecord == null) { // 外部进入
+            if (prevBeforeRecord !== target) {
               prev = prevBeforeRecord;
-              prevI = prevIBeforeRecord;
             }
           }
 
-          onClick?.({ e, prev, cur, prevI, curI });
-          if (curIBeforeRecord !== curI) // 从外部进入 或者 列表内的移动
-            onMove?.({ e, prev, cur, prevI, curI });
+          onClick?.({ e, prev, cur, prevI: -1, curI: -1 });
+          if (curBeforeRecord !== cur) // 从外部进入 或者 列表内的移动
+            onMove?.({ e, prev, cur, prevI: -1, curI: -1 });
         }
       }
 
@@ -933,7 +996,8 @@ const focusNoJutsu = (...props) => {
         let needToPreventDefault = false;
         let focused = false;
         if (isTabForward(e)) {
-          onNext?.({ e });
+          listInfo.recordRange(current);
+          listInfo.rangeBeforeNextCallback = true;
           if (current === tail) {
             needToPreventDefault = true;
             if (!isClamp) focus(head);
@@ -945,7 +1009,8 @@ const focusNoJutsu = (...props) => {
           focused = true;
         }
         else if (isTabBackward(e)) {
-          onPrev?.({ e });
+          listInfo.recordRange(current);
+          listInfo.rangeBeforePrevCallback = true;
           if (current === head) {
             needToPreventDefault = true;
             if (!isClamp) focus(tail);
@@ -989,8 +1054,11 @@ const focusNoJutsu = (...props) => {
             listInfo.recordSequenceByIdx(Math.max(0, listInfo.prevI));
             focus(listInfo.cur);
             onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
-          } else
-            focus(listInfo.data[0]);
+          } else {
+            listInfo.recordRange(listInfo.prev == null ? listInfo.head : listInfo.prev);
+            focus(listInfo.cur);
+            onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: -1 });
+          }
           return;
         }
 
@@ -1007,6 +1075,7 @@ const focusNoJutsu = (...props) => {
         // 默认出口，默认行为，默认的行为的场景是包含子元素的长列表
         if (isDefaultExitCover &&
           isTabForward(e)) { // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
+          focusFromDefaultExitCover = true;
           focus(tail);
           return;
         }
