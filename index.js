@@ -836,22 +836,30 @@ const focusNoJutsu = (...props) => {
           const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI }) ?? defaultLast;
           const gotCorrectionTarget = element(originGotCorrectionTarget);
 
-          if (enabledTabSequence) { // 序列模式
-            const targetIndex = list.findIndex(item => item === gotCorrectionTarget);
-            if (targetIndex > -1) {
-              listInfo.recordSequenceByIdx(targetIndex);
-              onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
-            }
-          } else { // 范围模式
-            listInfo.recordRange(gotCorrectionTarget);
-            onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
-          }
+          onMoveTargetFromOuter(gotCorrectionTarget);
 
           trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
           tickFocus(gotCorrectionTarget);
         }
 
+        // 关闭焦点纠正，同时从外部进来了焦点
+        if (correctionTarget === false && trappedList === false && isMouseDown === false)
+          onMoveTargetFromOuter(target)
+
         trappedList = true; // 无论列表的类型是序列还是范围，被聚焦后都被定义为“已陷入列表”（这里主要用于范围列表模式）
+
+        function onMoveTargetFromOuter(target) {
+          if (enabledTabSequence) { // 序列模式
+            const targetIndex = list.findIndex(item => item === target);
+            if (targetIndex > -1) {
+              listInfo.recordSequenceByIdx(targetIndex);
+              onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+            }
+          } else { // 范围模式
+            listInfo.recordRange(target);
+            onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+          }
+        }
       }
 
       function blurTrapListHandler(e) {
