@@ -669,15 +669,9 @@ const focusNoJutsu = (...props) => {
           removeListenersWithoutFocus();
           return ;
         }
-        if (enabledCover) {
 
-          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
-          focus(cover);
-        } else {
-  
-          const focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
-          delayToProcess(delay, focusTriggerThenRemoveListeners);
-        }
+        const focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
+        delayToProcess(delay, focusTriggerThenRemoveListeners);
       });
 
       function focusThenRemoveListeners(focusTarget) {
