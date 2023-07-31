@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38, initBagel_39, initBagel_40, initBagel_1_2 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38, initBagel_39, initBagel_40, initBagel_1_2, initBagel_20_2, initBagel_20_3, initBagel_15_1 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -583,17 +583,20 @@ describe("cover", function() {
     expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
   });
 
-    // 在封面按下 Tab，进入列表最后一个元素的后一个元素（进入列表，退出至封面）
-    it("should focus element after last list element after pressing Tab at cover", async function() {
-      const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
-      initBagel_15(container, dialog, first, last, open, close);
-  
-      await user.click(open);
-      await user.keyboard("{Enter}");
-      await user.click(close);
-      await user.tab();
-      expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
-    });
+  // 在封面按下 Tab，进入列表最后一个元素的后一个元素（进入列表，退出至封面）
+  it("should focus element after last list element after pressing Tab at cover", async function() {
+    const { container, dialog, first, last, open, close, cover } = getCoverModalDom();
+    initBagel_15(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    await user.keyboard("{Enter}");
+    expect(focusA).toHaveFocus();
+    await user.click(close);
+    expect(cover).toHaveFocus();
+    await wait(10);
+    await user.tab();
+    expect(close).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
+  });
 
   // 添加封面后正常循环聚焦
   it("should loop focus around list by forward and backward tab", async function() {
@@ -668,6 +671,28 @@ describe("cover", function() {
     expect(open).toHaveFocus();
   });
 
+  // 进入封面后，聚焦上一次聚焦的列表元素，如果是第一次，则聚焦列表第一个元素
+  it("should focus last focused item when enabled sequence mode", async function() {
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, cover } = getCoverModalDom();
+    initBagel_15_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(cover).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    expect(focusA).toHaveFocus();
+
+    await user.tab(); // focusB
+    await user.tab(); // focusC
+    expect(focusC).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(cover).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    expect(focusC).toHaveFocus();
+  });
+
 });
 
 // 选项参数
@@ -724,7 +749,7 @@ describe("options", function() {
       expect(open).toHaveFocus();
 
       await user.click(walk1);
-      expect(first).toHaveFocus();
+      expect(close).toHaveFocus();
       await user.click(close);
       expect(open).toHaveFocus();
     });
@@ -954,7 +979,7 @@ describe("options", function() {
 
   describe("correctionTarget", function() {
 
-    // 可以通过 tab 触发矫正
+    // 可以通过 tab 触发矫正，序列模式
     it("should correction by tab in default sequence-list mode", async function() {
       const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1 } = getSequenceModalDom();
       initBagel_20_1(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
@@ -976,6 +1001,56 @@ describe("options", function() {
       await user.tab();
       expect(focusF).toHaveFocus(); // correction
 
+    });
+
+    // 可以通过 tab 触发矫正，范围模式
+    it("should correction by tab in range-list mode", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1, walk2 } = getSequenceModalDom();
+      initBagel_20_2(dialog, open, focusA, focusG);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+
+      await user.tab();
+      expect(focusB).toHaveFocus();
+
+      await user.click(walk2);
+      expect(walk2).toHaveFocus();
+      await user.tab({ shift: true }); // correct to focusB
+      expect(focusB).toHaveFocus();
+
+      await user.tab();
+      await user.tab();
+      await user.tab();
+      await user.click(walk1);
+      await user.tab(); // correct to focusE
+      expect(focusE).toHaveFocus();
+    });
+
+    // 关闭 correctionTarget 后依然可以触发 onMove
+    it("should onMove when disabled correctionTarget", async function() {
+      const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG, walk1, walk2 } = getSequenceModalDom();
+      initBagel_20_3(dialog, open, focusA, focusG);
+
+      await user.click(open);
+      expect(focusA).toHaveFocus();
+      expect(focusA).toHaveClass("selected");
+
+      await user.tab();
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+      expect(focusA).not.toHaveClass("selected");
+
+      await user.tab();
+      await user.tab({ shift: true });
+      expect(focusB).toHaveFocus();
+      expect(focusB).toHaveClass("selected");
+      expect(focusC).not.toHaveClass("selected");
+
+      await user.click(focusG);
+      expect(open).toHaveFocus();
+      expect(focusG).not.toHaveClass("selected");
+      expect(focusB).not.toHaveClass("selected");
     });
   });
 
