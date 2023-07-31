@@ -248,6 +248,11 @@ class TabList {
       return;
     this.record(cur, curI);
   };
+  recordRange(cur) {
+    if (this.cur === cur || (this.cur == null && cur == null))
+      return;
+    this.record(cur, -1);
+  };
   recordPrev(prev, prevI) {
     this.prevI = prevI < 0 ? -1 : prevI;
     this.prev = prev || null;
@@ -258,9 +263,6 @@ class TabList {
   };
   recordSequenceByIdx(curI) {
     this.recordSequnce(this.data[curI], curI);
-  };
-  recordRange(cur) {
-    this.record(cur, -1);
   };
 }
 
@@ -651,7 +653,7 @@ const focusNoJutsu = (...props) => {
           if (addEntryListenersEachExit)
             addEntryListeners();
         }
-        enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+        onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
         focus(gotTarget);
       }
     }
@@ -669,7 +671,7 @@ const focusNoJutsu = (...props) => {
         }
         if (enabledCover) {
 
-          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           focus(cover);
         } else {
   
@@ -685,7 +687,7 @@ const focusNoJutsu = (...props) => {
             if (addEntryListenersEachExit)
               addEntryListeners();
           }
-          enabledTabSequence && onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
+          onMove?.({ e, prev: list.prev, cur: null, prevI: list.prevI, curI: -1 });
           focusTarget && focus(focusTarget);
         }
       }
