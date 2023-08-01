@@ -795,7 +795,10 @@ const focusNoJutsu = (...props) => {
 
       function focusTrapListHandler(e) {
 
+        /** 当前焦点 */
         const target = e.target;
+        /** 前一个焦点 */
+        const relatedTarget = e.relatedTarget;
 
         // 默认封面退出
         if (focusFromDefaultExitCover) {
@@ -815,7 +818,7 @@ const focusNoJutsu = (...props) => {
           return ;
         }
 
-        // 调用范围模式下的 onPrev、onNext、onMove
+        // 调用范围模式下的 onPrev、onNext、onMove，此时焦点正在列表内移动
         if (listInfo.rangeBeforePrevCallback || listInfo.rangeBeforeNextCallback) {
           listInfo.recordRange(target);
           listInfo.rangeBeforePrevCallback = false;
@@ -823,37 +826,44 @@ const focusNoJutsu = (...props) => {
           const { cur, prev } = listInfo;
           (listInfo.rangeBeforePrevCallback ? onNext : onPrev)?.({ e, prev, cur, prevI: -1, curI: -1 });
           onMove?.({ e, prev, cur, prevI: -1, curI: -1 });
+          return ;
         }
 
-        // 纠正外部聚焦进来的焦点
-        if (correctionTarget !== false && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+        // 纠正外部聚焦进来的焦点。如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+        if (correctionTarget !== false &&
+          trappedList === false &&
+          isMouseDown === false &&
+          (relatedTarget == null || // 上一个焦点为空
+            !root.contains(relatedTarget))) // 上一个焦点在根节点 root 以外的区域
         {
           const defaultLast = listInfo.prev || listInfo.head;
           const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI, e }) ?? defaultLast;
           const gotCorrectionTarget = element(originGotCorrectionTarget);
 
           onMoveTargetFromOuter(gotCorrectionTarget);
-
-          trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
           tickFocus(gotCorrectionTarget);
         }
 
         // 关闭焦点纠正，同时从外部进来了焦点
-        if (correctionTarget === false && trappedList === false && isMouseDown === false)
+        if (correctionTarget === false &&
+          trappedList === false &&
+          isMouseDown === false &&
+          (relatedTarget == null || !root.contains(relatedTarget)))
           onMoveTargetFromOuter(target)
 
-        trappedList = true; // 无论列表的类型是序列还是范围，被聚焦后都被定义为“已陷入列表”（这里主要用于范围列表模式）
-
+        /** 矫正时的 onMove 调用 */
         function onMoveTargetFromOuter(target) {
           if (enabledTabSequence) { // 序列模式
             const targetIndex = list.findIndex(item => item === target);
             if (targetIndex > -1) {
               listInfo.recordSequenceByIdx(targetIndex);
               onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+              trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
             }
           } else { // 范围模式
             listInfo.recordRange(target);
             onMove?.({ e, prev: null, cur: listInfo.cur, prevI: -1, curI: listInfo.curI });
+            trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
           }
         }
       }

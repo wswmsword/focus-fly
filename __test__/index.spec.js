@@ -593,9 +593,8 @@ describe("cover", function() {
     expect(focusA).toHaveFocus();
     await user.click(close);
     expect(cover).toHaveFocus();
-    await wait(10);
     await user.tab();
-    expect(close).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
+    expect(first).toHaveFocus(); // 这里理论上应该匹配 `#walk2`，可能是 JSDom 的问题，这里没有体现 tab 在浏览器的默认行为
   });
 
   // 添加封面后正常循环聚焦
