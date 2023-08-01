@@ -829,7 +829,7 @@ const focusNoJutsu = (...props) => {
         if (correctionTarget !== false && trappedList === false && isMouseDown === false) // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
         {
           const defaultLast = listInfo.prev || listInfo.head;
-          const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI }) ?? defaultLast;
+          const originGotCorrectionTarget = correctionTarget?.({ list, cover, root, last: listInfo.prev, lastI: listInfo.prevI, e }) ?? defaultLast;
           const gotCorrectionTarget = element(originGotCorrectionTarget);
 
           onMoveTargetFromOuter(gotCorrectionTarget);
