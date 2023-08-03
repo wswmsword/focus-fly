@@ -2,7 +2,7 @@ const menuBtn = document.getElementById("menu_btn");
 const menuBody = document.getElementById("menu");
 
 // 5～28 行为焦点管理和控制的部分，包含了触发入口和出口时的行为——切换菜单状态，toggleMenu
-focusNoJutsu(menuBody, ["#hot_anchor", "#player_anchor"], { // L:5
+focusNoJutsu(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   onEscape: toggleMenu,
   entry: {
     node: menuBtn,
@@ -10,12 +10,12 @@ focusNoJutsu(menuBody, ["#hot_anchor", "#player_anchor"], { // L:5
     onExit: true,
   },
   exit: [{
-    node: "#hot_anchor",
+    node: ({ head }) => head,
     type: "keydown",
     key: e => e.key === "Tab" && e.shiftKey,
     on: toggleMenu,
   }, {
-    node: "#player_anchor",
+    node: ({ tail }) => tail,
     type: "keydown",
     key: e => e.key === "Tab" && !e.shiftKey,
     on: toggleMenu,

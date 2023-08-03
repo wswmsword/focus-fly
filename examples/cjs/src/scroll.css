@@ -1,0 +1,147 @@
+/* https://css-tricks.com/an-auto-filling-css-grid-with-max-columns/ */
+:root {
+  /**
+   * User input values.
+   */
+  --grid-layout-gap: 18px;
+  --grid-column-count: 3;
+  --grid-item--min-width: 150px;
+
+  /**
+   * Calculated values.
+   */
+  --gap-count: calc(var(--grid-column-count) - 1);
+  --total-gap-width: calc(var(--gap-count) * var(--grid-layout-gap));
+  --grid-item--max-width: calc((100% - var(--total-gap-width)) / var(--grid-column-count));
+}
+
+#scroll_wrapper {
+  height: 600px;
+  border: 1px solid rgb(227, 227, 227);
+  border-radius: 9px;
+  box-sizing: border-box;
+  transform: translateZ(0);
+}
+
+#scroll_content {
+  overflow-y: scroll;
+  padding: 18px;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+#scroll_items {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(var(--grid-item--min-width), var(--grid-item--max-width)), 1fr));
+  grid-gap: var(--grid-layout-gap);
+  position: relative;
+}
+
+.scroll_item {
+  height: 220px;
+  background-color: rgb(240, 240, 240);
+  border-radius: 6px;
+  flex-basis: 160px;
+  flex-grow: 1;
+  /* cursor: pointer; */
+  transition: background-color .3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* .scroll_item:hover {
+  background-color: rgb(217, 217, 217);
+  transition: background-color .1s;
+} */
+
+.item_top, .item_bottom, .item_center {
+  width: 80%;
+  height: 101px;
+  background-color: rgb(223, 223, 223);
+  border-radius: 4px;
+}
+
+.item_bottom, .item_center {
+  height: 30px;
+}
+
+.item_center {
+  display: flex;
+  background-color: transparent;
+  gap: 8px;
+}
+
+.item_avator {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgb(223, 223, 223);
+}
+
+.item_avator_right {
+  flex-grow: 1;
+  background-color: rgb(223, 223, 223);
+  border-radius: 4px;
+}
+
+/* .item_top:hover, .item_bottom:hover, .item_center:hover {
+  background-color: rgb(181, 181, 181);
+} */
+
+.scroll_canvas {
+  transform: translate(0);
+}
+
+.scroll_btn {
+  border: 0;
+  font-size: 15px;
+  height: 33px;
+  padding: 0px 8px;
+  border-radius: 5px;
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+  color: #767676;
+  font-weight: bold;
+}
+
+.scroll_btn:hover {
+  color: #333;
+  border: 1px solid #333;
+}
+
+.scroll_btn:active {
+  color: #262626;
+  border: 1px solid #262626;
+  background-color: #dadada;
+}
+
+.scroll_type_btn, .scroll_top_btn {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+}
+
+.scroll_top_btn {
+  left: auto;
+  right: 18px;
+}
+
+.more_wrapper {
+  margin-top: 18px;
+}
+
+.more_btn {
+  margin: 0 auto;
+  display: block;
+  height: 33px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.hidden {
+  display: none;
+}

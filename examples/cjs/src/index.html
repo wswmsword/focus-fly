@@ -117,6 +117,9 @@ function closeDialog() {
   entry.ariaExpanded = false;
 }</code>
         </pre>
+
+        <p>查看<a href="https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/esm/src/dialog.js">完整的对话框源码</a>。</p>
+
       </details>
 
       <h2 id="h-nav" tabindex="-1">导航栏</h2>
@@ -133,7 +136,7 @@ function closeDialog() {
               <li>
                 <a class="menu_link" href="#h-hot" id="hot_anchor">
                   <div class="title">热身</div>
-                  <div class="desc">热身可以减少运动损伤、提高身体肌肉体温、提高内脏器官的功能水平</div>
+                  <div class="desc">想度过一个美好的夜晚吗？先热身</div>
                 </a>
               </li>
               <li>
@@ -145,19 +148,25 @@ function closeDialog() {
               <li>
                 <a class="menu_link" href="#h-nav">
                   <div class="title">导航栏</div>
-                  <div class="desc">导航栏总是在页面的顶部，然而最近出现了很多在界面左侧的导航栏</div>
+                  <div class="desc">有的在顶部，有的在侧边，每一个导航栏都是特别的</div>
                 </a>
               </li>
               <li>
                 <a class="menu_link" href="#h-tabs">
                   <div class="title">选项卡</div>
-                  <div class="desc">切换选项卡，展示相应面板，切换自动切换和手动切换</div>
+                  <div class="desc">切换选项卡，展示相应面板，切换方式分为自动与手动</div>
                 </a>
               </li>
               <li>
                 <a class="menu_link" href="#h-player" id="player_anchor">
                   <div class="title">播放列表</div>
                   <div class="desc">音乐平台 Spotify 的网页有很好的键盘体验，其中一个例子是播放列表</div>
+                </a>
+              </li>
+              <li>
+                <a class="menu_link" href="#h-scroll" id="scroll_anchor">
+                  <div class="title">滚动加载</div>
+                  <div class="desc">深不见底线的滚动加载</div>
                 </a>
               </li>
             </ul>
@@ -178,11 +187,7 @@ function closeDialog() {
       <details>
         <summary id="navigation_code">查看源码。</summary>
         <pre>
-<code>const menuBtn = document.getElementById("menu_btn");
-const menuBody = document.getElementById("menu");
-
-// 5～28 行为焦点管理和控制的部分，包含了触发入口和出口时的行为——切换菜单状态，toggleMenu
-focusNoJutsu(menuBody, ["#hot_anchor", "#player_anchor"], { // L:5
+<code>focusNoJutsu(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   onEscape: toggleMenu,
   entry: {
     node: menuBtn,
@@ -190,12 +195,12 @@ focusNoJutsu(menuBody, ["#hot_anchor", "#player_anchor"], { // L:5
     onExit: true,
   },
   exit: [{
-    node: "#hot_anchor",
+    node: ({ head }) => head,
     type: "keydown",
     key: e => e.key === "Tab" && e.shiftKey,
     on: toggleMenu,
   }, {
-    node: "#player_anchor",
+    node: ({ tail }) => tail,
     type: "keydown",
     key: e => e.key === "Tab" && !e.shiftKey,
     on: toggleMenu,
@@ -213,7 +218,8 @@ function toggleMenu() {
   menuBody.classList.toggle("opened");
   menuBtn.ariaExpanded = menuBtn.classList.contains("opened") ? true : false;
 }</code>
-      </pre>
+        </pre>
+        <p>查看<a href="https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/esm/src/navigation.js">完整的导航栏源码</a>。</p>
       </details>
 
       <h2 id="h-tabs" tabindex="-1">选项卡</h2>
@@ -310,6 +316,7 @@ function onMove({ prev, cur, prevI, curI }) {
   curPanel.classList.remove('is-hidden');
 }</code>
         </pre>
+        <p>查看<a href="https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/esm/src/tabs.js">完整的选项卡源码</a>。</p>
       </details>
 
       <h2 id="h-player" tabindex="-1">播放列表</h2>
@@ -490,7 +497,7 @@ function onMove({ prev, cur, prevI, curI }) {
       </div>
 
       <details>
-        <summary>查看源码。</summary>
+        <summary id="player_code">查看源码。</summary>
         <pre>
 <code>const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 // 3～38 行为播放列表的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
@@ -579,12 +586,179 @@ function onMovePlayer({ cur, prev, curI }) {
     lastSong = initSongBagel(curI, songLastActiveIdx); // 对这首歌的焦点进行管理
   }
 }</code>
-      </pre>
+        </pre>
+        <p>查看<a href="https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/esm/src/player.js">完整的播放列表源码</a>。</p>
       </details>
 
       <!-- <h2>菜单</h2>
 
       <h2>复选框</h2> -->
+
+      <h2 id="h-scroll" tabindex="-1">滚动加载</h2>
+
+      <p>商城首页的商品列表、图片搜索的结果页面，都能看到滚动加载的应用。通常会滚动加载一个列表，例如一个商品列表，商品内会有商品图片、商品详情和“加入购物车”按钮，如果逐个访问，会很耗时；在商品列表的右下角，通常也会提供“回到顶部”按钮用来方便操作，如果不对这个按钮适配键盘，焦点将始终处于不停加载的列表中，而无法通过键盘访问到“回到顶部”按钮。</p>
+
+      <p>假设下面是一个商城首页，通过键盘访问的时候，会有这样的预期。首先 <kbd>Tab</kbd> 聚焦商品列表的最外层，继续 <kbd>Tab</kbd>，焦点将跳过整个商品列表；回到上一步，当焦点处于外层根元素时，按下 <kbd>Enter</kbd>，第一个商品获得焦点，按下 <kbd>Tab</kbd>，焦点会在第一个和最后一个商品之间循环，循环的期间，按下 <kbd>Esc</kbd>，焦点又会回到商品列表最外层；当焦点处于某个商品上时，按下 <kbd>Enter</kbd>，焦点会进入商品内部，聚焦商品图片、商品详情和“加入购物车”按钮，按下 <kbd>Esc</kbd>，焦点又会回到商品上。</p>
+
+      <p>焦点在商品列表的时候，通过滚动（鼠标滚轮或 <kbd>Arrow Down</kbd>）加载更多的商品，按下 <kbd>Left Arrow</kbd>，焦点会从某一商品转移到“禁止滚动加载”按钮上，按下 <kbd>Enter</kbd> 确认按钮后，加载模式将从滚动加载变为按钮点按加载；连续按下 <kbd>Right Arrow</kbd> 两次，焦点会依次转移到商品和“回到顶部”按钮上，确认按钮后，视图将滚动至列表顶部，同时焦点聚焦第一个商品。</p>
+
+      <div id="scroll_wrapper" tabindex="0" aria-label="商城" role="button">
+        <div id="scroll_content">
+          <div id="scroll_items">
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button">
+              <div class="item_top" tabindex="0" aria-label="图片" role="button"></div>
+              <div class="item_center">
+                <div class="item_avator" tabindex="0" aria-label="店家" role="button"></div>
+                <div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div>
+              </div>
+              <div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div>
+            </div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+            <div class="scroll_item" tabindex="0" aria-label="商品" role="button"><div class="item_top" tabindex="0" aria-label="图片" role="button"></div><div class="item_center"><div class="item_avator" tabindex="0" aria-label="店家" role="button"></div><div class="item_avator_right" tabindex="0" aria-label="商品名称" role="button"></div></div><div class="item_bottom" tabindex="0" aria-label="加入购物车" role="button"></div></div>
+          </div>
+          <div class="more_wrapper">
+            <button id="scroll_more" class="button more_btn hidden">加载更多</button>
+          </div>
+          <button id="scroll_type" class="scroll_type_btn scroll_btn">
+            <span class="to_click">禁止滚动加载</span>
+            <span class="to_scroll hidden">打开滚动加载</span>
+          </button>
+          <button id="scroll_top" class="scroll_top_btn scroll_btn">回到顶部</button>
+        </div>
+      </div>
+      <details>
+        <summary id="scroll_code">查看源码。</summary>
+        <p>下面的源码做了一些简化，简化了和业务有关、和焦点控制无关的部分。</p>
+        <pre>
+<code>const scrollContent = document.getElementById("scroll_content");
+const bagel = focusNoJutsu(
+  scrollContent, // 根元素
+  [...document.getElementsByClassName("scroll_item")], // 列表
+  {
+    sequence: true, // 打开序列模式
+    entry: [{
+      node: "#scroll_wrapper", // 从最外层回车进入列表
+      type: "keydown",
+      key: e => e.key === "Enter",
+      if: ({ e: { target: { id } } }) => id === "scroll_wrapper",
+    }, {
+      node: "#scroll_type", // 从切换加载方式按钮按下“右方向键”和“Tab”进入列表
+      type: "keydown",
+      key: ({ key }) => ["ArrowRight", "Tab"].includes(key),
+      stopPropagation: true,
+    }, {
+      node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表，或者点击按钮进入列表
+      type: ["keydown", "click"],
+      key: ({ key }) => ["ArrowLeft", "Tab", "Enter", ' '].includes(key),
+      stopPropagation: true, // 阻止冒泡
+      target({ e, list }) {
+        if (e.key === "Enter" || e.key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
+      },
+      on({ key, type }) {
+        if (key === "Enter" || key === ' ' || type === "click") scrollToTop(); // 点击，或者按下了回车或空格时，滚至顶部
+      },
+    }],
+    exit: [{
+      key: ({ key }) => key === "ArrowLeft", // 按下“左方向键”退出列表
+      target: "#scroll_type", // 从列表退出到“切换加载方式的按钮”
+    }, {
+      key: ({ key }) => key === "ArrowRight", // 按下“右方向键”退出列表
+      target: "#scroll_top", // 从列表退出到“回到顶部”按钮
+    }, {
+      node: ["#scroll_type", "#scroll_top"], // 点击“切换加载”和“回到顶部”，退出列表
+      type: "click",
+      target: false, // 退出后焦点保持原位
+      on({ target }) {
+        if (target.id === "scroll_top") scrollToTop();
+      }
+    }],
+    stopPropagation: true, // 阻止列表的事件冒泡
+    onEscape: true, // 按下 Esc 退出列表
+    onMove: createOrRemoveItemFocus, // 在列表内移动时，调用 createOrRemoveItemFocus
+    removeListenersEachExit: false, // 退出后不移除列表有关的事件
+    correctionTarget({ e: { relatedTarget } }) {
+      if (relatedTarget == null || !scrollContent.contains(relatedTarget))
+        return "#scroll_wrapper"; // 焦点从外部进入列表时，焦点重新矫正到 #scroll_wrapper 上，其它情况，矫正到上一次聚焦的列表元素
+    }
+  }
+);
+
+bagel.addForward("next_wrapper", { // 转发
+  node: "#scroll_wrapper",
+  key: ({ key, shiftKey }) => (key === "Tab" && !shiftKey),
+  target: "#scroll_code",
+});
+
+let lastItemFocus = null;
+/** 创建或移除列表内单个元素的焦点管理 */
+function createOrRemoveItemFocus({ cur }) {
+
+  lastItemFocus?.removeListeners();
+  if (cur && cur.id !== "scroll_more") {
+
+    const itemFirst = cur.getElementsByClassName("item_top")[0];
+    const itemLast = cur.getElementsByClassName("item_bottom")[0];
+    lastItemFocus = focusNoJutsu([itemFirst, itemLast], {
+      entry: {
+        node: cur,
+        type: "keydown",
+        key: e => e.key === "Enter",
+      },
+      exit: {
+        key: e => e.key === "Escape",
+        stopPropagation: true,
+      },
+      delayToFocus: true,
+      stopPropagation: true,
+    });
+  }
+}
+
+const scrollItems = document.getElementById("scroll_items");
+scrollContent.addEventListener("scroll", onScrollBottom); // 滚动至底部，加载
+
+scroll_type.addEventListener("click", function() {
+
+  /** 这里省略了切换加载方式的代码…… */
+
+  if (isClickType) { /** 是否已禁止滚动，这里省略了 isClickType 的计算…… */
+    scrollContent.removeEventListener("scroll", onScrollBottom); // 移除滚动加载
+    bagel.updateList([...document.getElementsByClassName("scroll_item"), document.getElementById("scroll_more")]);
+  }
+  else {
+    scrollContent.addEventListener("scroll", onScrollBottom);  // 滚动至底部，加载
+    bagel.updateList([...document.getElementsByClassName("scroll_item")]);
+  }
+});
+
+// 点击触发“加载更多”
+scroll_more.addEventListener("click", function(e) {
+  const items = generateItems(); /** 生成更多内容，这里省略了代码实现…… */
+  scrollItems.appendChild(items);
+  const newList = [...document.getElementsByClassName("scroll_item"), document.getElementById("scroll_more")];
+  bagel.updateList(newList);
+  e.stopPropagation(); // 阻止冒泡，阻止冒泡至 #scroll_content，因为 #scroll_content 已被 focus-no-jutsu 管理，冒泡后会导致焦点不在上一次聚焦的元素上
+});
+
+function onScrollBottom() {
+  if (isBottom) { /** 是否已经触底，这里省略了 isBottom 的计算方式…… */
+    const items = generateItems();
+    scrollItems.appendChild(items);
+
+    let newList = [...document.getElementsByClassName("scroll_item")];
+    bagel.updateList(newList);
+  }
+}
+</code>
+        </pre>
+        <p>查看<a href="https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/esm/src/scroll.js">完整的滚动加载源码</a>。</p>
+      </details>
     </main>
   </body>
 </html>
