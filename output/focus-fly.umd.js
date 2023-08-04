@@ -1,4 +1,4 @@
-/* 这是一条 banner？没错，这是一条 banner。这是 1.1.0 版本的 focus-fly。 */
+/* 这是一条 banner？没错，这是一条 banner。这是 2.0.0 版本的 focus-fly。 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
