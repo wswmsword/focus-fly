@@ -3,13 +3,13 @@ const focusBagel = require("focus-no-jutsu");
 const dialog = document.getElementById("dialog");
 const mask = document.getElementById("dialog_mask");
 const entry = document.getElementById("open");
-
 // 6～18 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内移动的范围
 focusBagel(dialog, ["#firstFocusBtn", "#close"], { // L:6
   loop: false,
   entry: {
     node: entry,
     on: openDialog,
+    target: ({ list }) => list[0],
   },
   exit: {
     node: ["#close", "#firstFocusBtn", "#confirm"],
@@ -17,7 +17,7 @@ focusBagel(dialog, ["#firstFocusBtn", "#close"], { // L:6
     type: ["click", "outlist"]
   },
   onEscape: true,
-}); // L:18
+}); // L:19
 
 // 下面的两个函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
 

@@ -1,4 +1,3 @@
-
 const scrollContent = document.getElementById("scroll_content");
 const bagel = focusNoJutsu(
   scrollContent, // 根元素
@@ -16,15 +15,15 @@ const bagel = focusNoJutsu(
       key: ({ key }) => ["ArrowRight", "Tab"].includes(key),
       stopPropagation: true,
     }, {
-      node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表，或者点击按钮进入列表
-      type: ["keydown", "click"],
+      node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表
+      type: "keydown",
       key: ({ key }) => ["ArrowLeft", "Tab", "Enter", ' '].includes(key),
       stopPropagation: true, // 阻止冒泡
-      target({ e, list }) {
-        if (e.key === "Enter" || e.key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
+      target({ e: { key }, list }) {
+        if (key === "Enter" || key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
       },
-      on({ key, type }) {
-        if (key === "Enter" || key === ' ' || type === "click") scrollToTop(); // 点击，或者按下了回车或空格时，滚至顶部
+      on({ key }) {
+        if (key === "Enter" || key === ' ') scrollToTop(); // 点击，或者按下了回车或空格时，滚至顶部
       },
     }],
     exit: [{
@@ -110,6 +109,11 @@ scroll_more.addEventListener("click", function(e) {
 
   const newList = [...document.getElementsByClassName("scroll_item"), document.getElementById("scroll_more")];
   bagel.updateList(newList);
+  e.stopPropagation();
+});
+
+scroll_top.addEventListener("click", function(e) {
+  scrollToTop();
   e.stopPropagation();
 });
 

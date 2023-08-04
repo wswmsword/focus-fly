@@ -10,6 +10,7 @@ focusBagel(dialog, ["#firstFocusBtn", "#close"], { // L:6
   entry: {
     node: entry,
     on: openDialog,
+    target: ({ list }) => list[0],
   },
   exit: {
     node: ["#close", "#firstFocusBtn", "#confirm"],
@@ -17,7 +18,7 @@ focusBagel(dialog, ["#firstFocusBtn", "#close"], { // L:6
     type: ["click", "outlist"]
   },
   onEscape: true,
-}); // L:18
+}); // L:19
 
 // 下面的两个函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
 

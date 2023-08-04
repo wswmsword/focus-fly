@@ -84,12 +84,13 @@
 const mask = document.getElementById("dialog_mask");
 const entry = document.getElementById("open");
 
-// 6～18 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内移动的范围
+// 6～19 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内移动的范围
 focusNoJutsu(dialog, ["#firstFocusBtn", "#close"], { // L:6
   loop: false,
   entry: {
     node: entry,
     on: openDialog,
+    target: ({ list }) => list[0],
   },
   exit: {
     node: ["#close", "#firstFocusBtn", "#confirm"],
@@ -97,7 +98,7 @@ focusNoJutsu(dialog, ["#firstFocusBtn", "#close"], { // L:6
     type: ["click", "outlist"]
   },
   onEscape: true,
-}); // L:18
+}); // L:19
 
 // 下面的两个函数和焦点无关，和样式或其它逻辑有关，这些代码在实际开发中，可以和上面的焦点部分分开，或者可以像本例中，把这些代码集成到焦点管理中
 
@@ -111,10 +112,7 @@ function openDialog() {
 
 /** 关闭弹窗，设置关闭样式，设置 ARIA */
 function closeDialog() {
-  dialog.classList.remove("openedDialog");
-  dialog.classList.add("closedDialog");
-  mask.classList.add("closed_mask");
-  entry.ariaExpanded = false;
+  /** 这里的代码省略，代码内容类似上面的 openDialog */
 }</code>
         </pre>
 
@@ -187,12 +185,17 @@ function closeDialog() {
       <details>
         <summary id="navigation_code">查看源码。</summary>
         <pre>
-<code>focusNoJutsu(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
+<code>const menuBtn = document.getElementById("menu_btn");
+const menuBody = document.getElementById("menu");
+
+// 5～29 行为焦点管理和控制的部分，包含了触发入口和出口时的行为——切换菜单状态，toggleMenu
+focusNoJutsu(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   onEscape: toggleMenu,
   entry: {
     node: menuBtn,
     on: toggleMenu,
     onExit: true,
+    target: ({ list }) => list[0],
   },
   exit: [{
     node: ({ head }) => head,
@@ -210,7 +213,7 @@ function closeDialog() {
     on: toggleMenu,
     target: ({ e }) => e?.relatedTarget?.id?.includes("h-") ? false : menuBtn,
   }],
-}); // L:28
+}); // L:29
 
 /** 切换菜单时的样式变化 */
 function toggleMenu() {
@@ -544,20 +547,15 @@ let songLastActiveIdx = 0;
 function initSongBagel(curI, lastActive) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
-  // 47～70 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+  // 47～65 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
   return focusNoJutsu(`#song_${idx}`, list, { // L: 47
     entry: [{
       node: `#song_${idx}`,
       type: "focus",
-      target: ({ list }) => list[lastActive],
     }, {
       node: `#song_${idx}`,
       key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
       type: "keydown",
-    }, {
-      node: `#song_${idx}`,
-      type: "click",
-      target: false,
     }],
     next: e => e.key === "ArrowRight",
     prev: e => e.key === "ArrowLeft",
@@ -568,7 +566,7 @@ function initSongBagel(curI, lastActive) {
     initialActive: songLastActiveIdx,
     correctionTarget: false,
     addEntryListenersEachExit: false,
-  }); // L:70
+  }); // L:65
 }
 
 let lastSong = null;
@@ -634,9 +632,9 @@ function onMovePlayer({ cur, prev, curI }) {
       </div>
       <details>
         <summary id="scroll_code">查看源码。</summary>
-        <p>下面的源码做了一些简化，简化了和业务有关、和焦点控制无关的部分。</p>
+        <p>下面的源码做了一些简化，简化了和业务有关、和焦点控制无关的部分。1～83 行为主要的焦点管理部分，其它的，例如在滚动之后，需要对列表更新，会在相应的滚动加载的地方调用 <code>.updateList()</code>，例如第 122 行。</p>
         <pre>
-<code>const scrollContent = document.getElementById("scroll_content");
+<code>const scrollContent = document.getElementById("scroll_content"); // L:1
 const bagel = focusNoJutsu(
   scrollContent, // 根元素
   [...document.getElementsByClassName("scroll_item")], // 列表
@@ -653,15 +651,15 @@ const bagel = focusNoJutsu(
       key: ({ key }) => ["ArrowRight", "Tab"].includes(key),
       stopPropagation: true,
     }, {
-      node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表，或者点击按钮进入列表
-      type: ["keydown", "click"],
+      node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表
+      type: "keydown",
       key: ({ key }) => ["ArrowLeft", "Tab", "Enter", ' '].includes(key),
       stopPropagation: true, // 阻止冒泡
-      target({ e, list }) {
-        if (e.key === "Enter" || e.key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
+      target({ e: { key }, list }) {
+        if (key === "Enter" || key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
       },
-      on({ key, type }) {
-        if (key === "Enter" || key === ' ' || type === "click") scrollToTop(); // 点击，或者按下了回车或空格时，滚至顶部
+      on({ key }) {
+        if (key === "Enter" || key === ' ') scrollToTop(); // 点击，或者按下了回车或空格时，滚至顶部
       },
     }],
     exit: [{
@@ -718,7 +716,7 @@ function createOrRemoveItemFocus({ cur }) {
       stopPropagation: true,
     });
   }
-}
+} // L:83
 
 const scrollItems = document.getElementById("scroll_items");
 scrollContent.addEventListener("scroll", onScrollBottom); // 滚动至底部，加载
@@ -746,13 +744,18 @@ scroll_more.addEventListener("click", function(e) {
   e.stopPropagation(); // 阻止冒泡，阻止冒泡至 #scroll_content，因为 #scroll_content 已被 focus-no-jutsu 管理，冒泡后会导致焦点不在上一次聚焦的元素上
 });
 
+scroll_top.addEventListener("click", function(e) {
+  scrollToTop();
+  e.stopPropagation();
+});
+
 function onScrollBottom() {
   if (isBottom) { /** 是否已经触底，这里省略了 isBottom 的计算方式…… */
     const items = generateItems();
     scrollItems.appendChild(items);
 
     let newList = [...document.getElementsByClassName("scroll_item")];
-    bagel.updateList(newList);
+    bagel.updateList(newList); // L:122
   }
 }
 </code>

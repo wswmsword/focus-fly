@@ -44,20 +44,15 @@ let songLastActiveIdx = 0;
 function initSongBagel(curI, lastActive) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
-  // 47～70 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
+  // 47～65 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
   return focusNoJutsu(`#song_${idx}`, list, { // L: 47
     entry: [{
       node: `#song_${idx}`,
       type: "focus",
-      target: ({ list }) => list[lastActive],
     }, {
       node: `#song_${idx}`,
       key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
       type: "keydown",
-    }, {
-      node: `#song_${idx}`,
-      type: "click",
-      target: false,
     }],
     next: e => e.key === "ArrowRight",
     prev: e => e.key === "ArrowLeft",
@@ -68,7 +63,7 @@ function initSongBagel(curI, lastActive) {
     initialActive: songLastActiveIdx,
     correctionTarget: false,
     addEntryListenersEachExit: false,
-  }); // L:70
+  }); // L:65
 }
 
 let lastSong = null;
