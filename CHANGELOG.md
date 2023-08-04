@@ -10,13 +10,14 @@
 ### Added
 
 - 添加 Toast 范例
-- 添加无限滚动范例
 - 添加确认弹窗范例
-- 范围列表（tab range）的 onMove，设置 prev 和 active
 - 元素作为开关的其他方式
 - 列表内添加步长选项
 - 支持嵌套
 - 优化矫正的判断，替换 trappedList 的判断方式
+- 修复非矫正的 onMove
+- 属性 key 的字符串快捷方式
+- 添加根元素同时是入口的处理方式
 
 ```json
 {
@@ -33,6 +34,27 @@
   }],
 }
 ```
+
+## [2.0.0] - 2023-08-04
+
+### Added
+
+- 添加列表、入口和出口的 stopPropagation 与 preventDefault 选项；
+- 支持向 exit.node 传入函数；
+- 范围模式下，支持 onMove、onNext、onPrev、onClick；
+- 范围模式下，支持焦点矫正；
+- correctionTarget 入参添加属性 `e` 作为事件对象。
+
+### Changed
+
+- 键盘出口的优先级高于列表移动；
+- 包名由“focus-no-jutsu”改为“focus-fly”。
+
+### Fixed
+
+- 修复出口目标处于列表中时，导致焦点矫正的问题；
+- 修复在进入列表前调用 `focus.updateList` 后，无法进入列表的问题；
+- 修复 correctionTarget 设为 false 后，从外部进入列表以及经过出口时的 onMove 失效问题。
 
 ## [1.1.0] - 2023-07-20
 
