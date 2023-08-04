@@ -1,11 +1,11 @@
-/* 这是一条 banner？没错，这是一条 banner。这是 1.0.0 版本的 focus-no-jutsu。 */
+/* 这是一条 banner？没错，这是一条 banner。这是 1.1.0 版本的 focus-fly。 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, (function () {
-    var current = global.focusNoJutsu;
-    var exports = global.focusNoJutsu = factory();
-    exports.noConflict = function () { global.focusNoJutsu = current; return exports; };
+    var current = global.focusFly;
+    var exports = global.focusFly = factory();
+    exports.noConflict = function () { global.focusFly = current; return exports; };
   })());
 })(this, (function () { 'use strict';
 
@@ -148,110 +148,41 @@
     });else focus(e);
   };
 
-  /** 手动聚焦下一个元素 */
-  var focusNextListItemBySequence = function focusNextListItemBySequence(subNodes, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, coverNode, onMove, trappedList) {
-    return function (e) {
-      if (e.target === coverNode) return;
-      if (!trappedList()) return;
-      var _useActiveIndex = useActiveIndex(),
-        index_ = _useActiveIndex[0],
-        setIndex = _useActiveIndex[1];
-      var index = Math.max(0, index_);
-      var itemsLen = subNodes.length;
-      if ((isNext !== null && isNext !== void 0 ? isNext : isTabForward)(e)) {
-        var incresedI = index + 1;
-        var nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
-        nextI %= itemsLen;
-        onNext === null || onNext === void 0 ? void 0 : onNext({
-          e: e,
-          prev: subNodes[index],
-          cur: subNodes[nextI],
-          prevI: index,
-          curI: nextI
-        });
-        onMove === null || onMove === void 0 ? void 0 : onMove({
-          e: e,
-          prev: subNodes[index],
-          cur: subNodes[nextI],
-          prevI: index,
-          curI: nextI
-        });
-        setIndex(nextI);
-        focus(subNodes[nextI]);
-        e.preventDefault();
-      } else if ((isPrev !== null && isPrev !== void 0 ? isPrev : isTabBackward)(e)) {
-        var decresedI = index - 1;
-        var _nextI = isClamp ? Math.max(0, decresedI) : decresedI;
-        _nextI = (_nextI + itemsLen) % itemsLen;
-        onPrev === null || onPrev === void 0 ? void 0 : onPrev({
-          e: e,
-          prev: subNodes[index],
-          cur: subNodes[_nextI],
-          prevI: index,
-          curI: _nextI
-        });
-        onMove === null || onMove === void 0 ? void 0 : onMove({
-          e: e,
-          prev: subNodes[index],
-          cur: subNodes[_nextI],
-          prevI: index,
-          curI: _nextI
-        });
-        setIndex(_nextI);
-        focus(subNodes[_nextI]);
-        e.preventDefault();
-      }
-    };
-  };
-
-  /** 按下 tab，以浏览器的行为聚焦下个元素 */
-  var focusNextListItemByRange = function focusNextListItemByRange(list, isClamp, onNext, onPrev, rootNode, coverNode, trappedList) {
-    return function (e) {
-      var head = list[0];
-      var tail = list.at(-1);
-      var current = e.target;
-      if (current === coverNode) return;
-      if (!trappedList()) return;
-      if (isTabForward(e)) {
-        onNext === null || onNext === void 0 ? void 0 : onNext({
-          e: e
-        });
-        if (current === tail) {
-          e.preventDefault();
-          if (!isClamp) focus(head);
-        }
-        if (current === rootNode) {
-          e.preventDefault();
-          focus(head);
-        }
-      } else if (isTabBackward(e)) {
-        onPrev === null || onPrev === void 0 ? void 0 : onPrev({
-          e: e
-        });
-        if (current === head) {
-          e.preventDefault();
-          if (!isClamp) focus(tail);
-        }
-        if (current === rootNode) {
-          e.preventDefault();
-          focus(tail);
-        }
-      }
-    };
-  };
-
-  /** 获取关键节点 */
-  var getKeyNodes = function getKeyNodes(originRoot, originList, originCover, coverIsRoot) {
+  /** 获取根节点 */
+  var getRootNode = function getRootNode(rootStr, listHead, listTail) {
     var _element;
-    var list = originList.map(function (item) {
+    return (_element = element(rootStr)) !== null && _element !== void 0 ? _element : findLowestCommonAncestorNode(listHead, listTail);
+  };
+
+  /** 获取列表节点 */
+  var getListNodes = function getListNodes(listAry) {
+    var list = listAry.map(function (item) {
       return element(item);
     }).filter(function (item) {
       return item != null;
     });
     var head = list[0];
     var tail = list.slice(-1)[0];
-    var root = (_element = element(originRoot)) !== null && _element !== void 0 ? _element : findLowestCommonAncestorNode(head, tail);
-    var cover = coverIsRoot ? root : element(originCover);
+    return {
+      list: list,
+      head: head,
+      tail: tail
+    };
+  };
+
+  /** 获取封面节点 */
+  var getCoverNode = function getCoverNode(coverStr, coverIsRoot, root) {
+    return coverIsRoot ? root : element(coverStr);
+  };
+
+  /** 获取关键节点 */
+  var getKeyNodes = function getKeyNodes(originRoot, originList, originCover, coverIsRoot) {
+    var _getListNodes = getListNodes(originList),
+      list = _getListNodes.list,
+      head = _getListNodes.head,
+      tail = _getListNodes.tail;
+    var root = getRootNode(originRoot, head, tail);
+    var cover = getCoverNode(originCover, coverIsRoot, root);
     return {
       root: root,
       list: list,
@@ -276,7 +207,7 @@
   var splitExits = function splitExits(exits, root) {
     /** 生效的节点是否在根元素内部（列表中） */
     var isInnerRoot = function isInnerRoot(node) {
-      return node != null && root.contains(element(node)) || node == null;
+      return isFun(node) || node != null && root.contains(element(node)) || node == null;
     };
     var _exits$reduce = exits.reduce(function (acc, e) {
         var key = acc[0],
@@ -324,7 +255,7 @@
   };
 
   /** 获取（生成）出口 */
-  var getExits = function getExits(exit, onEscape, enabledCover, cover, trigger) {
+  var getExits = function getExits(exit, onEscape, enabledCover, cover, trigger, delayToBlur) {
     var _tempExits$0$on, _tempExits$;
     var tempExits = [].concat(exit).filter(function (o) {
       return o != null;
@@ -333,7 +264,10 @@
         node: ele
       };
     }).map(function (e) {
+      var _e$preventDefault, _e$delay;
       return _extends({}, e, {
+        preventDefault: (_e$preventDefault = e.preventDefault) !== null && _e$preventDefault !== void 0 ? _e$preventDefault : true,
+        delay: (_e$delay = e.delay) !== null && _e$delay !== void 0 ? _e$delay : delayToBlur,
         // undefined 表示用户没有主动设置
         type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(function (t) {
           return t !== '';
@@ -355,29 +289,30 @@
     return exits;
   };
 
-  /** 获取聚焦或失焦时延迟的类型 */
-  var getDelayType = function getDelayType(delay, processor) {
-    var isFunctionDelay = isFun(delay);
-    var delayRes = isFunctionDelay && delay(processor);
-    var promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
-    var callbackDelay = isFunctionDelay && !promiseDelay;
-    var commonDelay = delay === true && !promiseDelay && !callbackDelay;
-    return {
-      promiseDelay: promiseDelay,
-      callbackDelay: callbackDelay,
-      commonDelay: commonDelay,
-      delayRes: delayRes
-    };
-  };
-
   /** 延迟执行某些操作 */
   var delayToProcess = function delayToProcess(delay, processor) {
-    var _ref = !!delay ? getDelayType(delay, processor) : {},
-      promiseDelay = _ref.promiseDelay,
-      callbackDelay = _ref.callbackDelay,
-      commonDelay = _ref.commonDelay,
-      delayRes = _ref.delayRes;
-    if (promiseDelay) delayRes.then(processor);else if (callbackDelay) ; else if (commonDelay) processor();else return true;
+    var _getDelayType = getDelayType(),
+      promiseDelay = _getDelayType.promiseDelay,
+      callbackDelay = _getDelayType.callbackDelay,
+      commonDelay = _getDelayType.commonDelay,
+      delayRes = _getDelayType.delayRes;
+    if (promiseDelay) delayRes.then(processor);else if (callbackDelay) ; // 已执行完毕
+    else if (commonDelay) processor();
+
+    /** 获取聚焦或失焦时延迟的类型 */
+    function getDelayType() {
+      var isFunctionDelay = isFun(delay);
+      var delayRes = isFunctionDelay && delay(processor);
+      var promiseDelay = isFunctionDelay && objToStr(delayRes) === "[object Promise]" && typeof delayRes.then === "function";
+      var callbackDelay = isFunctionDelay && !promiseDelay;
+      var commonDelay = !promiseDelay && !callbackDelay; // 立即执行
+      return {
+        promiseDelay: promiseDelay,
+        callbackDelay: callbackDelay,
+        commonDelay: commonDelay,
+        delayRes: delayRes
+      };
+    }
   };
 
   /** 获取出口或者入口的目标 */
@@ -475,6 +410,9 @@
       this.curI = -1;
       this._prev = null;
       this._cur = null;
+      this.rangeBeforePrevCallback = false;
+      // 范围模式下，当前是否在调用钩子回调（onMove、onPrev）之前
+      this.rangeBeforeNextCallback = false;
     }
     var _proto3 = TabList.prototype;
     _proto3.update = function update(list) {
@@ -490,12 +428,19 @@
       return !!this.data[i];
     };
     _proto3.record = function record(cur, curI) {
+      this.recordPrev(this.cur, this.curI);
+      this.recordCur(cur, curI);
+    };
+    _proto3.recordSequnce = function recordSequnce(cur, curI) {
       if (this.curI === curI // this.curI 和 curI 必须不同
       || this.curI < 0 && curI < 0)
         // curI 为 -1 后，不会再次更新新的 -1
         return;
-      this.recordPrev(this.cur, this.curI);
-      this.recordCur(cur, curI);
+      this.record(cur, curI);
+    };
+    _proto3.recordRange = function recordRange(cur) {
+      if (this.cur === cur || this.cur == null && cur == null) return;
+      this.record(cur, -1);
     };
     _proto3.recordPrev = function recordPrev(prev, prevI) {
       this.prevI = prevI < 0 ? -1 : prevI;
@@ -506,11 +451,13 @@
       this.cur = cur || null;
     };
     _proto3.recordSequenceByIdx = function recordSequenceByIdx(curI) {
-      this.record(this.data[curI], curI);
+      this.recordSequnce(this.data[curI], curI);
     };
     _createClass(TabList, [{
       key: "prev",
-      get: function get() {
+      get:
+      // 范围模式下，当前是否在调用钩子回调（onMove、onNext）之前
+      function get() {
         return this._prev || this.data[this.prevI] || null; // _prev 可能由于 dom 未加载而为 null，为 null 则通过 prevI 取值
       },
       set: function set(v) {
@@ -527,12 +474,12 @@
     }]);
     return TabList;
   }();
-  var focusNoJutsu = function focusNoJutsu() {
-    var _ref2, _entries$;
+  var focusFly = function focusFly() {
+    var _ref, _entries$;
     var offset = 0 - ((arguments.length <= 0 ? undefined : arguments[0]) instanceof Array);
     var rootNode = 0 + offset < 0 || arguments.length <= 0 + offset ? undefined : arguments[0 + offset];
     var subNodes = 1 + offset < 0 || arguments.length <= 1 + offset ? undefined : arguments[1 + offset];
-    var options = (_ref2 = 2 + offset < 0 || arguments.length <= 2 + offset ? undefined : arguments[2 + offset]) !== null && _ref2 !== void 0 ? _ref2 : {};
+    var options = (_ref = 2 + offset < 0 || arguments.length <= 2 + offset ? undefined : arguments[2 + offset]) !== null && _ref !== void 0 ? _ref : {};
     if (!(Array.isArray(subNodes) && subNodes.length > 1)) throw new Error("请至少传入一个数组，数组至少包含两个可聚焦元素，用来表示列表的头和尾。");
     var sequence = options.sequence,
       loop = options.loop,
@@ -544,7 +491,7 @@
       onEscape = options.onEscape,
       onClick = options.onClick,
       onMove = options.onMove,
-      cover = options.cover,
+      origin_cover = options.cover,
       initialActive = options.initialActive,
       correctionTarget = options.correctionTarget,
       delayToFocus = options.delayToFocus,
@@ -554,6 +501,9 @@
       removeListenersEachEnter = options.removeListenersEachEnter,
       _options$addEntryList = options.addEntryListenersEachExit,
       addEntryListenersEachExit = _options$addEntryList === void 0 ? true : _options$addEntryList,
+      _options$stopPropagat = options.stopPropagation,
+      listStopPropagation = _options$stopPropagat === void 0 ? false : _options$stopPropagat,
+      preventDefault = options.preventDefault,
       manual = options.manual,
       _options$allowSafariT = options.allowSafariToFocusAfterMousedown,
       allowSafariToFocusAfterMousedown = _options$allowSafariT === void 0 ? true : _options$allowSafariT;
@@ -569,8 +519,9 @@
       };
     }) // 元素转为对象，并且默认元素的值被看作对象的 node 属性
     .map(function (entry) {
-      var _entry$delay;
+      var _entry$preventDefault, _entry$delay;
       return _extends({}, entry, {
+        preventDefault: (_entry$preventDefault = entry.preventDefault) !== null && _entry$preventDefault !== void 0 ? _entry$preventDefault : true,
         delay: (_entry$delay = entry.delay) !== null && _entry$delay !== void 0 ? _entry$delay : delayToFocus,
         type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(function (t) {
           return t != '';
@@ -590,15 +541,15 @@
     }));
     /** 默认入口，默认情况下，会从出口回到这个入口 */
     var _trigger = element(trigger || ((_entries$ = entries[0]) === null || _entries$ === void 0 ? void 0 : _entries$.node));
-    var _ref3 = isObj(cover) ? cover : {},
-      coverNode = _ref3.node,
-      coverEnterKey = _ref3.enterKey,
-      onEnterCover = _ref3.onEnter,
-      exitCover = _ref3.exit;
+    var _ref2 = isObj(origin_cover) ? origin_cover : {},
+      coverNode = _ref2.node,
+      coverEnterKey = _ref2.enterKey,
+      onEnterCover = _ref2.onEnter,
+      exitCover = _ref2.exit;
     /** 是否已经打开封面选项 */
-    var enabledCover = cover != null && cover !== false && coverNode !== false;
+    var enabledCover = origin_cover != null && origin_cover !== false && coverNode !== false;
     /** 封面即根元素 */
-    var coverIsRoot = enabledCover && (cover === true || coverNode === true || coverNode == null);
+    var coverIsRoot = enabledCover && (origin_cover === true || coverNode === true || coverNode == null);
     /** 退出封面，封面的出口们 */
     var exitsCover = [].concat(exitCover) // 转为数组
     .filter(function (e) {
@@ -620,17 +571,21 @@
 
     /** 列表 */
     var list = new TabList();
+    /** 根元素 */
+    var root = null;
+    /** 封面 */
+    var cover = null;
     list.recordPrev(null, initialActive !== null && initialActive !== void 0 ? initialActive : -1);
-    var _ref4 = isObj(next) ? next : {
+    var _ref3 = isObj(next) ? next : {
         key: next
       },
-      isNext = _ref4.key,
-      onNext = _ref4.on;
-    var _ref5 = isObj(prev) ? prev : {
+      isNext = _ref3.key,
+      onNext = _ref3.on;
+    var _ref4 = isObj(prev) ? prev : {
         key: prev
       },
-      isPrev = _ref5.key,
-      onPrev = _ref5.on;
+      isPrev = _ref4.key,
+      onPrev = _ref4.on;
 
     /** 禁用左上角 esc 出口 */
     var disabledEsc = onEscape === false;
@@ -640,6 +595,9 @@
 
     /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
     var enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
+
+    /** 移动列表，是否阻止默认行为 */
+    var listPreventDefault = preventDefault !== null && preventDefault !== void 0 ? preventDefault : enabledTabSequence;
 
     /** 进入了列表 */
     var trappedList = false;
@@ -658,17 +616,19 @@
       _addEntryListeners();
 
       // 如果有入口不需要延迟，则立即加载列表的监听事件
-      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref6) {
-        var delay = _ref6.delay;
+      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref5) {
+        var delay = _ref5.delay;
         return !delay;
       });
       if (hasImmediateEntry) {
         var _getKeyNodes = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-          root = _getKeyNodes.root,
+          newRoot = _getKeyNodes.root,
           newList = _getKeyNodes.list,
-          _cover = _getKeyNodes.cover;
+          newCover = _getKeyNodes.cover;
         list.update(newList);
-        loadListRelatedListeners(root, list, _cover);
+        root = newRoot;
+        cover = newCover;
+        loadListRelatedListeners(root, list, cover);
       }
     }
     var Return = {
@@ -720,7 +680,7 @@
           var target = element(originTarget);
           return toExit(target, on);
         } else {
-          var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger);
+          var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger, delayToBlur);
           var _loop2 = function _loop2() {
             var _exits$i = exits[i],
               on = _exits$i.on,
@@ -776,13 +736,13 @@
             listData = _getKeyNodes4.list,
             head = _getKeyNodes4.head,
             tail = _getKeyNodes4.tail,
-            _cover2 = _getKeyNodes4.cover;
+            _cover = _getKeyNodes4.cover;
           opts = forward({
             root: _root,
             list: listData,
             head: head,
             tail: tail,
-            cover: _cover2,
+            cover: _cover,
             curI: list.curI,
             prevI: list.prevI
           });
@@ -837,21 +797,25 @@
     return Return;
 
     /** 入口 handler */
-    function entryHandler(e, onEnter, target, delay) {
+    function entryHandler(e, onEnter, target, delay, preventDefault, stopPropagation) {
+      var _e$preventDefault2, _e$stopPropagation;
       // 如果已经在列表或者封面，则不再触发入口；出口不需要该操作，因为不存在从出口退出到出口的子元素的情况，相反，存在入口进入到入口子元素的情况。
       if (trappedCover || trappedList) return;
+      preventDefault && ((_e$preventDefault2 = e.preventDefault) === null || _e$preventDefault2 === void 0 ? void 0 : _e$preventDefault2.call(e));
+      stopPropagation && ((_e$stopPropagation = e.stopPropagation) === null || _e$stopPropagation === void 0 ? void 0 : _e$stopPropagation.call(e));
       Promise.resolve(onEnter === null || onEnter === void 0 ? void 0 : onEnter(e)).then(function (_) {
-        var isImmediate = !delay;
-        if (isImmediate) findNodesToLoadListenersAndFocus();else delayToProcess(delay, findNodesToLoadListenersAndFocus);
+        delayToProcess(delay, findNodesToLoadListenersAndFocus);
       });
 
       /** 寻找节点，加载事件监听器，聚焦 subNodes 或 coverNode */
       function findNodesToLoadListenersAndFocus() {
-        var _getKeyNodes5 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-          root = _getKeyNodes5.root,
-          newList = _getKeyNodes5.list,
-          cover = _getKeyNodes5.cover;
-        list.update(newList);
+        if (list.isEmpty()) {
+          var _getListNodes2 = getListNodes(subNodes),
+            _newList2 = _getListNodes2.list;
+          list.update(_newList2);
+        }
+        if (root == null) root = getRootNode(rootNode, list.head, list.tail);
+        if (cover == null && enabledCover) cover = getCoverNode(coverNode, coverIsRoot, root);
         if (!manual) loadListRelatedListeners(root, list, cover);
         if (target !== false) focusTarget(cover, list, root);
       }
@@ -862,10 +826,10 @@
           curI = listInfo.curI;
         var defaultTarget = prev || head;
         var gotTarget = getTarget(target, cover, list, rootNode, enabledCover, curI, defaultTarget, e);
-        var targetIdx = list.indexOf(gotTarget);
-        if (targetIdx > -1) {
-          if (enabledTabSequence) {
-            // onMove 仅支持打开 sequence 后
+        if (enabledTabSequence) {
+          // 序列模式
+          var targetIdx = list.indexOf(gotTarget);
+          if (targetIdx > -1) {
             listInfo.recordSequenceByIdx(targetIdx); // 只有在聚焦列表元素时才设置，否则会破坏原有 curI
             var cur = listInfo.cur,
               _curI = listInfo.curI;
@@ -876,17 +840,32 @@
               prevI: -1,
               curI: _curI
             });
+            trappedList = true;
           }
-          trappedList = true;
+        } else {
+          // 范围模式
+          if (rootNode.contains(gotTarget) && gotTarget !== cover) {
+            listInfo.recordRange(gotTarget);
+            var _cur = listInfo.cur,
+              _curI2 = listInfo.curI;
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: null,
+              cur: _cur,
+              prevI: -1,
+              curI: _curI2
+            });
+            trappedList = true;
+          }
         }
-        if (enabledCover && (gotTarget === cover || targetIdx > -1)) trappedCover = true;
+        if (enabledCover && (gotTarget === cover || trappedList === true)) trappedCover = true;
         tickFocus(gotTarget);
       }
     }
 
     /** 出口 handler */
-    function exitHandler(e, on, target, delay, cover, listData, root, ef) {
-      var _e$preventDefault;
+    function exitHandler(e, on, target, delay, cover, listData, root, ef, preventDefault, stopPropagation) {
+      var _e$preventDefault3, _e$stopPropagation2;
       if (!trappedList || !(isFun(ef) ? ef({
         e: e,
         prev: list.prev,
@@ -894,34 +873,31 @@
         prevI: list.prevI,
         curI: list.curI
       }) : true)) return false;
-      list.recordSequenceByIdx(-1);
+      preventDefault && ((_e$preventDefault3 = e.preventDefault) === null || _e$preventDefault3 === void 0 ? void 0 : _e$preventDefault3.call(e)); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
+      stopPropagation && ((_e$stopPropagation2 = e.stopPropagation) === null || _e$stopPropagation2 === void 0 ? void 0 : _e$stopPropagation2.call(e));
+      if (enabledTabSequence) list.recordSequenceByIdx(-1);else list.recordRange(null);
       trappedList = false;
-      (_e$preventDefault = e.preventDefault) === null || _e$preventDefault === void 0 ? void 0 : _e$preventDefault.call(e); // 阻止默认行为，例如 tab 到下一个元素，例如 entry button 触发 click 事件
-
       var gotTarget = getTarget(target, cover, listData, root, enabledCover, list.curI, _trigger, e);
       if (gotTarget) return exitListWithTarget();else return exitListWithoutTarget();
 
       /** 退出列表，有 target */
       function exitListWithTarget() {
         Promise.resolve(on === null || on === void 0 ? void 0 : on(e)).then(function (_) {
-          var _delay;
-          delay = (_delay = delay) !== null && _delay !== void 0 ? _delay : delayToBlur;
-          var isImmediate = delayToProcess(delay, focusThenRemoveListeners);
-          if (isImmediate) focusThenRemoveListeners();
+          delayToProcess(delay, focusThenRemoveListeners);
         });
         function focusThenRemoveListeners() {
-          focus(gotTarget);
-          enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
+          if (!manual) {
+            if (gotTarget !== cover) removeListRelatedListeners();
+            if (addEntryListenersEachExit) _addEntryListeners();
+          }
+          onMove === null || onMove === void 0 ? void 0 : onMove({
             e: e,
             prev: list.prev,
             cur: null,
             prevI: list.prevI,
             curI: -1
-          }));
-          if (!manual) {
-            if (gotTarget !== cover) removeListRelatedListeners();
-            if (addEntryListenersEachExit) _addEntryListeners();
-          }
+          });
+          focus(gotTarget);
         }
       }
 
@@ -935,37 +911,23 @@
             removeListenersWithoutFocus();
             return;
           }
-          if (enabledCover) {
-            enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
-              e: e,
-              prev: list.prev,
-              cur: null,
-              prevI: list.prevI,
-              curI: -1
-            }));
-            focus(cover);
-          } else {
-            var _delay2;
-            delay = (_delay2 = delay) !== null && _delay2 !== void 0 ? _delay2 : delayToBlur;
-            var focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
-            var isImmediate = delayToProcess(delay, focusTriggerThenRemoveListeners);
-            if (isImmediate) focusTriggerThenRemoveListeners();
-          }
+          var focusTriggerThenRemoveListeners = focusThenRemoveListeners(_trigger);
+          delayToProcess(delay, focusTriggerThenRemoveListeners);
         });
         function focusThenRemoveListeners(focusTarget) {
           return function (_) {
-            focusTarget && focus(focusTarget);
-            enabledTabSequence && (onMove === null || onMove === void 0 ? void 0 : onMove({
-              e: e,
-              prev: list.prev,
-              cur: null,
-              prevI: list.prevI,
-              curI: -1
-            }));
             if (!manual) {
               removeListRelatedListeners();
               if (addEntryListenersEachExit) _addEntryListeners();
             }
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: list.prev,
+              cur: null,
+              prevI: list.prevI,
+              curI: -1
+            });
+            focusTarget && focus(focusTarget);
           };
         }
       }
@@ -986,6 +948,8 @@
 
       /** 添加焦点需要的事件监听器 */
       function addListRelatedListeners() {
+        /** 是否是来自默认封面出口的聚焦 */
+        var focusFromDefaultExitCover = false;
         var useActiveIndex = function useActiveIndex() {
           return [listInfo.curI, listInfo.recordSequenceByIdx.bind(listInfo)];
         };
@@ -994,10 +958,10 @@
         };
 
         // 在焦点循环中触发聚焦
-        var keyListMoveHandler = enabledTabSequence ? focusNextListItemBySequence(list, useActiveIndex, isClamp, isNext, isPrev, onNext, onPrev, cover, onMove, isTrappedList) : focusNextListItemByRange(list, isClamp, onNext, onPrev, root, cover, isTrappedList);
+        var keyListMoveHandler = enabledTabSequence ? focusNextListItemBySequence : focusNextListItemByRange;
 
         /** 出口们，列表的出口们，list 的出口们 */
-        var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger);
+        var exits = getExits(_exit, onEscape, enabledCover, cover, _trigger, delayToBlur);
         var _splitExits = splitExits(exits, root),
           keyExits = _splitExits.keyExits,
           clickExits = _splitExits.clickExits,
@@ -1023,19 +987,20 @@
           listListeners.push(cover, "blur", blurTrapCoverHandler);
         }
         listListeners.push(root, "keydown", function (e) {
-          // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
-          keyListMoveHandler(e);
+          var exited = false;
           // 列表键盘出口
-          if (hasKeyExits) keyListExitHandler(e);
+          if (hasKeyExits) exited = keyListExitHandler(e);
+          // 列表中移动，监听移动的键盘事件，例如 tab 或其它自定义组合键
+          if (!exited)
+            // 退出的优先级高于列表移动
+            keyListMoveHandler(e);
         });
-        if (enabledTabSequence || hasClickExits) {
-          listListeners.push(root, "click", function (e) {
-            // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
-            enabledTabSequence && clickListItemHandler(e);
-            // 列表点击出口
-            hasClickExits && clickListExitHandler(e);
-          });
-        }
+        listListeners.push(root, "click", function (e) {
+          // 点击聚焦列表单项，只在手动列表时监听点击，因为自动模式不需要记录 list.curI
+          clickListItemHandler(e);
+          // 列表点击出口
+          hasClickExits && clickListExitHandler(e);
+        });
 
         // 由于 click 事件在 focus 之后，这里用来判断是否通过点击进入列表，用于纠错未知进入列表的焦点定位
         listListeners.push(root, "mousedown", mousedownListItemHandler);
@@ -1045,14 +1010,14 @@
         }
 
         // 非列表内的出口
-        focusListExitHandlers_wild.forEach(function (_ref7) {
-          var node = _ref7[0],
-            handler = _ref7[1];
+        focusListExitHandlers_wild.forEach(function (_ref6) {
+          var node = _ref6[0],
+            handler = _ref6[1];
           listListeners.push(node, "focus", handler);
         });
-        clickListExitHandlers_wild.forEach(function (_ref8) {
-          var node = _ref8[0],
-            handler = _ref8[1];
+        clickListExitHandlers_wild.forEach(function (_ref7) {
+          var node = _ref7[0],
+            handler = _ref7[1];
           listListeners.push(node, "click", handler);
         });
         if (cover != null) {
@@ -1071,8 +1036,19 @@
          +~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~*/
 
         function focusTrapListHandler(e) {
+          /** 当前焦点 */
+          var target = e.target;
+          /** 前一个焦点 */
+          var relatedTarget = e.relatedTarget;
+
+          // 默认封面退出
+          if (focusFromDefaultExitCover) {
+            focusFromDefaultExitCover = false;
+            return;
+          }
+
           // 进入封面（封面在列表中）
-          if (enabledCover && e.target === cover) {
+          if (enabledCover && target === cover) {
             // TODO: 保留确认，或是否需要添加 `&& trappedList` 条件
             trappedCover = true;
             return;
@@ -1084,9 +1060,36 @@
             return;
           }
 
-          // 纠正外部聚焦进来的焦点
-          if (correctionTarget !== false && enabledTabSequence && trappedList === false && isMouseDown === false)
-            // 如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+          // 调用范围模式下的 onPrev、onNext、onMove，此时焦点正在列表内移动
+          if (listInfo.rangeBeforePrevCallback || listInfo.rangeBeforeNextCallback) {
+            var _ref8;
+            listInfo.recordRange(target);
+            listInfo.rangeBeforePrevCallback = false;
+            listInfo.rangeBeforeNextCallback = false;
+            var cur = listInfo.cur,
+              _prev2 = listInfo.prev;
+            (_ref8 = listInfo.rangeBeforePrevCallback ? onNext : onPrev) === null || _ref8 === void 0 ? void 0 : _ref8({
+              e: e,
+              prev: _prev2,
+              cur: cur,
+              prevI: -1,
+              curI: -1
+            });
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: _prev2,
+              cur: cur,
+              prevI: -1,
+              curI: -1
+            });
+            return;
+          }
+
+          // 纠正外部聚焦进来的焦点。如果是内部的聚焦，无需纠正，防止嵌套情况的循环问题
+          if (correctionTarget !== false && trappedList === false && isMouseDown === false && (relatedTarget == null ||
+          // 上一个焦点为空
+          !root.contains(relatedTarget)))
+            // 上一个焦点在根节点 root 以外的区域
             {
               var _correctionTarget;
               var defaultLast = listInfo.prev || listInfo.head;
@@ -1095,11 +1098,23 @@
                 cover: cover,
                 root: root,
                 last: listInfo.prev,
-                lastI: listInfo.prevI
+                lastI: listInfo.prevI,
+                e: e
               })) !== null && _correctionTarget !== void 0 ? _correctionTarget : defaultLast;
               var gotCorrectionTarget = element(originGotCorrectionTarget);
+              onMoveTargetFromOuter(gotCorrectionTarget);
+              tickFocus(gotCorrectionTarget);
+            }
+
+          // 关闭焦点纠正，同时从外部进来了焦点
+          if (correctionTarget === false && trappedList === false && isMouseDown === false && (relatedTarget == null || !root.contains(relatedTarget))) onMoveTargetFromOuter(target);
+
+          /** 矫正时的 onMove 调用 */
+          function onMoveTargetFromOuter(target) {
+            if (enabledTabSequence) {
+              // 序列模式
               var targetIndex = list.findIndex(function (item) {
-                return item === gotCorrectionTarget;
+                return item === target;
               });
               if (targetIndex > -1) {
                 listInfo.recordSequenceByIdx(targetIndex);
@@ -1110,15 +1125,25 @@
                   prevI: -1,
                   curI: listInfo.curI
                 });
+                trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
               }
+            } else {
+              // 范围模式
+              listInfo.recordRange(target);
+              onMove === null || onMove === void 0 ? void 0 : onMove({
+                e: e,
+                prev: null,
+                cur: listInfo.cur,
+                prevI: -1,
+                curI: listInfo.curI
+              });
               trappedList = true; // 在下一次 触发 focusin 调用 focusTrapListHandler 之前，设为 true。通过 api 调用的 focus，触发的 focusin 事件会被“同步”调用
-              tickFocus(gotCorrectionTarget);
             }
-          trappedList = true; // 无论列表的类型是序列还是范围，被聚焦后都被定义为“已陷入列表”（这里主要用于范围列表模式）
+          }
         }
 
         function blurTrapListHandler(e) {
-          // 用于保护可切换的入口能够被触发
+          // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发
           if (toggles.has(e.relatedTarget)) return;
           tick(function () {
             // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
@@ -1135,7 +1160,7 @@
             var isOutList = null;
             if (isActiveCover || isOutRootNode) {
               isOutList = outListExitHandler(e);
-              listInfo.recordSequenceByIdx(-1);
+              if (enabledTabSequence) listInfo.recordSequenceByIdx(-1);else listInfo.recordRange(null);
             }
             if (isOutList === false) return; // 不符合 outlist 退出列表的条件
 
@@ -1176,43 +1201,175 @@
 
         /** 点击聚焦列表某一单项 */
         function clickListItemHandler(e) {
-          var targetIndex = list.findIndex(function (item) {
-            return item.contains(e.target);
-          });
-          if (targetIndex > -1) {
-            var prevBeforeRecord = listInfo.prev,
-              prevIBeforeRecord = listInfo.prevI,
-              curIBeforeRecord = listInfo.curI;
-            listInfo.recordSequenceByIdx(targetIndex);
-            var _prev2 = listInfo.prev,
-              prevI = listInfo.prevI,
-              cur = listInfo.cur,
-              curI = listInfo.curI;
-            if (curIBeforeRecord < 0) {
-              // 从外部进入
-              if (prevIBeforeRecord !== targetIndex) {
-                // 上一次进入 和 本次进入 的元素不同
-                _prev2 = prevBeforeRecord;
-                prevI = prevIBeforeRecord;
-              }
-            }
-            onClick === null || onClick === void 0 ? void 0 : onClick({
-              e: e,
-              prev: _prev2,
-              cur: cur,
-              prevI: prevI,
-              curI: curI
+          var target = e.target;
+          if (enabledTabSequence) {
+            // 序列模式
+
+            var targetIndex = list.findIndex(function (item) {
+              return item.contains(target);
             });
-            if (curIBeforeRecord !== curI)
-              // 从外部进入 或者 列表内的移动
-              onMove === null || onMove === void 0 ? void 0 : onMove({
+            if (targetIndex > -1) {
+              var prevBeforeRecord = listInfo.prev,
+                prevIBeforeRecord = listInfo.prevI,
+                curIBeforeRecord = listInfo.curI;
+              listInfo.recordSequenceByIdx(targetIndex);
+              var _prev3 = listInfo.prev,
+                prevI = listInfo.prevI,
+                cur = listInfo.cur,
+                curI = listInfo.curI;
+              if (curIBeforeRecord < 0) {
+                // 从外部进入
+                if (prevIBeforeRecord !== targetIndex) {
+                  // 上一次进入 和 本次进入 的元素不同
+                  _prev3 = prevBeforeRecord;
+                  prevI = prevIBeforeRecord;
+                }
+              }
+              onClick === null || onClick === void 0 ? void 0 : onClick({
                 e: e,
-                prev: _prev2,
+                prev: _prev3,
                 cur: cur,
                 prevI: prevI,
                 curI: curI
               });
+              if (curIBeforeRecord !== curI)
+                // 从外部进入 或者 列表内的移动
+                onMove === null || onMove === void 0 ? void 0 : onMove({
+                  e: e,
+                  prev: _prev3,
+                  cur: cur,
+                  prevI: prevI,
+                  curI: curI
+                });
+            }
+          } else {
+            // 范围模式
+
+            var _prevBeforeRecord = listInfo.prev,
+              curBeforeRecord = listInfo.cur;
+            listInfo.recordRange(target);
+            var _prev4 = listInfo.prev,
+              _cur2 = listInfo.cur;
+            if (curBeforeRecord == null) {
+              // 外部进入
+              if (_prevBeforeRecord !== target) {
+                _prev4 = _prevBeforeRecord;
+              }
+            }
+            onClick === null || onClick === void 0 ? void 0 : onClick({
+              e: e,
+              prev: _prev4,
+              cur: _cur2,
+              prevI: -1,
+              curI: -1
+            });
+            if (curBeforeRecord !== _cur2)
+              // 从外部进入 或者 列表内的移动
+              onMove === null || onMove === void 0 ? void 0 : onMove({
+                e: e,
+                prev: _prev4,
+                cur: _cur2,
+                prevI: -1,
+                curI: -1
+              });
           }
+        }
+
+        /** 手动聚焦下一个元素 */
+        function focusNextListItemBySequence(e) {
+          if (e.target === cover) return;
+          if (!isTrappedList()) return;
+          var _useActiveIndex = useActiveIndex(),
+            index_ = _useActiveIndex[0],
+            setIndex = _useActiveIndex[1];
+          var index = Math.max(0, index_);
+          var itemsLen = list.length;
+          var focused = false;
+          if ((isNext !== null && isNext !== void 0 ? isNext : isTabForward)(e)) {
+            var incresedI = index + 1;
+            var nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
+            nextI %= itemsLen;
+            onNext === null || onNext === void 0 ? void 0 : onNext({
+              e: e,
+              prev: list[index],
+              cur: list[nextI],
+              prevI: index,
+              curI: nextI
+            });
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: list[index],
+              cur: list[nextI],
+              prevI: index,
+              curI: nextI
+            });
+            setIndex(nextI);
+            focus(list[nextI]);
+            focused = true;
+          } else if ((isPrev !== null && isPrev !== void 0 ? isPrev : isTabBackward)(e)) {
+            var decresedI = index - 1;
+            var _nextI = isClamp ? Math.max(0, decresedI) : decresedI;
+            _nextI = (_nextI + itemsLen) % itemsLen;
+            onPrev === null || onPrev === void 0 ? void 0 : onPrev({
+              e: e,
+              prev: list[index],
+              cur: list[_nextI],
+              prevI: index,
+              curI: _nextI
+            });
+            onMove === null || onMove === void 0 ? void 0 : onMove({
+              e: e,
+              prev: list[index],
+              cur: list[_nextI],
+              prevI: index,
+              curI: _nextI
+            });
+            setIndex(_nextI);
+            focus(list[_nextI]);
+            focused = true;
+          }
+          if (focused) {
+            listPreventDefault && e.preventDefault();
+            listStopPropagation && e.stopPropagation();
+          }
+        }
+
+        /** 按下 tab，以浏览器的行为聚焦下个元素 */
+        function focusNextListItemByRange(e) {
+          var head = list[0];
+          var tail = list.at(-1);
+          var current = e.target;
+          if (current === cover) return;
+          if (!isTrappedList()) return;
+          var needToPreventDefault = false;
+          var focused = false;
+          if (isTabForward(e)) {
+            listInfo.recordRange(current);
+            listInfo.rangeBeforeNextCallback = true;
+            if (current === tail) {
+              needToPreventDefault = true;
+              if (!isClamp) focus(head);
+            }
+            if (current === root) {
+              needToPreventDefault = true;
+              focus(head);
+            }
+            focused = true;
+          } else if (isTabBackward(e)) {
+            listInfo.recordRange(current);
+            listInfo.rangeBeforePrevCallback = true;
+            if (current === head) {
+              needToPreventDefault = true;
+              if (!isClamp) focus(tail);
+            }
+            if (current === root) {
+              needToPreventDefault = true;
+              focus(tail);
+            }
+            focused = true;
+          }
+          if (needToPreventDefault || focused && listPreventDefault) e.preventDefault();
+          if (focused && listStopPropagation) e.stopPropagation();
         }
 
         /*~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~+
@@ -1251,7 +1408,17 @@
                 prevI: -1,
                 curI: listInfo.curI
               });
-            } else focus(listInfo.data[0]);
+            } else {
+              listInfo.recordRange(listInfo.prev == null ? listInfo.head : listInfo.prev);
+              focus(listInfo.cur);
+              onMove === null || onMove === void 0 ? void 0 : onMove({
+                e: e,
+                prev: null,
+                cur: listInfo.cur,
+                prevI: -1,
+                curI: -1
+              });
+            }
             return;
           }
 
@@ -1271,6 +1438,7 @@
           // 默认出口，默认行为，默认的行为的场景是包含子元素的长列表
           if (isDefaultExitCover && isTabForward(e)) {
             // 虽然也是离开列表，但是这里不移除监听事件，因为移除后就不能再次进入封面
+            focusFromDefaultExitCover = true;
             focus(tail);
             return;
           }
@@ -1293,23 +1461,35 @@
             var _outListExits$i = outListExits[i],
               on = _outListExits$i.on,
               origin_target = _outListExits$i.target,
-              delay = _outListExits$i.delay;
+              delay = _outListExits$i.delay,
+              _preventDefault = _outListExits$i.preventDefault,
+              stopPropagation = _outListExits$i.stopPropagation;
             var target = element(origin_target);
-            return exitHandler(e, on, target, delay, cover, list, root, outListExits[i]["if"]);
+            return exitHandler(e, on, target, delay, cover, list, root, outListExits[i]["if"], _preventDefault, stopPropagation);
           }
         }
         function exitHandlerWithCondition(e, exit, condition) {
           var origin_node = exit.node,
             on = exit.on,
             origin_target = exit.target,
-            delay = exit.delay;
-          var node = element(origin_node);
+            delay = exit.delay,
+            preventDefault = exit.preventDefault,
+            stopPropagation = exit.stopPropagation;
+          var list = listInfo.data,
+            head = listInfo.head,
+            tail = listInfo.tail;
+          var stringOrNode = isFun(origin_node) ? origin_node({
+            list: list,
+            head: head,
+            tail: tail
+          }) : origin_node;
+          var node = element(stringOrNode);
           var target = element(origin_target);
           if (condition(e, node, exit.key))
             // 未设置点击目标
             return false;
-          exitHandler(e, on, target, delay, cover, list, root, exit["if"]);
-          return true;
+          var res = exitHandler(e, on, target, delay, cover, list, root, exit["if"], preventDefault, stopPropagation);
+          return res !== false;
         }
         function clickExitHandler(e, exit) {
           var cantClick = function cantClick(e, node) {
@@ -1354,7 +1534,7 @@
           if (disabledEsc && isEscapeEvent(e)) return;
           for (var i = 0; i < keyExits.length; ++i) {
             var isOK = keyExitHandler(e, keyExits[i]);
-            if (isOK) break;
+            if (isOK) return true;
           }
         }
         function clickListExitHandler_wild(exit) {
@@ -1386,7 +1566,9 @@
           type = entry.type,
           target = entry.target,
           delay = entry.delay,
-          onExit = entry.onExit;
+          onExit = entry.onExit,
+          preventDefault = entry.preventDefault,
+          stopPropagation = entry.stopPropagation;
         var ef = entry["if"];
         var types = [].concat(type);
         var allTypes = ["keydown", "focus", "click"];
@@ -1401,11 +1583,11 @@
             } : function (_) {
               return true;
             };
-            entryListeners.push(node, type, toggleHandler(ifKey, isKey)); // 保存事件信息
+            entryListeners.push(node, type, toggleHandler(ifKey)); // 保存事件信息
           }
         });
 
-        function toggleHandler(ifKey, isKey) {
+        function toggleHandler(ifKey) {
           return function (e) {
             if ((isFun(ef) ? ef({
               e: e,
@@ -1413,30 +1595,23 @@
               cur: list.cur,
               prevI: list.prevI,
               curI: list.curI
-            }) : true) && ifKey(e)) toggleEntryAndExit(e, isKey);
+            }) : true) && ifKey(e)) toggleEntryAndExit(e);
           };
         }
-        function toggleEntryAndExit(e, isKey) {
-          /** 是否执行 */
-          var processed = 0;
+        function toggleEntryAndExit(e) {
           if (trappedList) {
             if (isFun(onExit)) {
               // 若存在 onExit，则表示该入口同时是出口，是开关
-              var _getKeyNodes6 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
-                _list = _getKeyNodes6.list,
-                _cover3 = _getKeyNodes6.cover,
-                _root2 = _getKeyNodes6.root;
-              exitHandler(e, onExit, target, false, _cover3, _list, _root2);
-              processed = !processed;
+              var _getKeyNodes5 = getKeyNodes(rootNode, subNodes, coverNode, coverIsRoot),
+                _list = _getKeyNodes5.list,
+                _cover2 = _getKeyNodes5.cover,
+                _root2 = _getKeyNodes5.root;
+              exitHandler(e, onExit, target, false, _cover2, _list, _root2, null, preventDefault, stopPropagation);
             }
           } else {
-            entryHandler(e, on, target, delay);
+            entryHandler(e, on, target, delay, preventDefault, stopPropagation);
             if (removeListenersEachEnter && !manual) entryListeners.removeListeners();
-            processed = !processed;
           }
-
-          // 如果是键盘事件，并且已执行，则阻止默认行为
-          if (isKey && processed) e.preventDefault();
         }
       };
       for (var i = 0; i < entries.length; ++i) {
@@ -1457,7 +1632,7 @@
     }
   };
 
-  return focusNoJutsu;
+  return focusFly;
 
 }));
-//# sourceMappingURL=focus-no-jutsu.umd.js.map
+//# sourceMappingURL=focus-fly.umd.js.map

@@ -1,82 +1,77 @@
-# Focus-no-Jutsu
+# focus-fly
 
-<a href="https://naruto.fandom.com/wiki/Genjutsu"><img src="https://img.shields.io/badge/Genjutsu-B-%23fbadcc" alt="B level Genjutsu" align="right"></a>
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-使用 focus-no-jutsu 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。focus-no-jutsu 的压缩体积为 [5.7kB](https://bundlephobia.com/package/focus-no-jutsu)。
+使用 focus-fly 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。
 
-> 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，*依然保有*用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以*自由地*切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-no-jutsu* 的范例网站](https://wswmsword.github.io/examples/focus-no-jutsu)。
+> 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，*依然保有*用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以*自由地*切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-fly* 的范例网站](https://wswmsword.github.io/examples/focus-fly)。
 
 网页程序里有很多需要管理和控制焦点的场景，例如弹窗、菜单、选项卡、抽屉等等。焦点往往在多个元素之间相互关联，并且要有符合预期的移动轨迹。进行业务或组件开发的时候，如果不考虑焦点的影响，处处关联的焦点可能让程序变得混乱，如果遗漏处理某些情况，反应到用户界面上，则是不符预期的意外行为。
 
 下面的文档会使用到几个关键词，分别是**入口**、**封面**、**列表**和**出口**，引入项目之后可以运用这几个关键词，来描述“焦点如何通过入口进入列表，进入列表后如何移动焦点，以及如何让焦点通过出口退出列表”。
-
-> **Note** <img src="./images/NARUTO01_0054-0055.jpg" alt="漫画里的“影分身之术”" width="180" align="right">
->
-> Focus-no-Jutsu 意为“聚焦术”。no-Jutsu 的发音为 /ˈnɔˌjutsu/，是日语里“の術”的发音，意为“……之术”，比如动漫《火影忍者》主角常用的忍术“[多重影分身之术](https://naruto.fandom.com/wiki/Multiple_Shadow_Clone_Technique)”，日语为“多重影分身*の術*”，读音为“Tajū Kage Bunshin *no Jutsu*”。
 
 <details>
 <summary>在开发无障碍组件的时候需要控制焦点。</summary>
 
 例如开发一个模态对话框，对话框的背景应该对所有用户隐藏，对于鼠标用户，鼠标不能访问背景元素，对于键盘用户，键盘不能访问背景元素，对于使用辅助设备的用户，辅助设备也不能访问背景元素。
 
-focus-no-jutsu 可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
+focus-fly 可以控制从“打开”按钮开始、到对话框内导航、到“关闭”按钮结束，这个流程中焦点的路径，通过确定的焦点路径，避免聚焦到背景元素上。
 </details>
 
 ## 安装
 
-npm 安装（yarn 则使用 `yarn add focus-no-jutsu` 进行安装）：
+npm 安装（yarn 则使用 `yarn add focus-fly` 进行安装）：
 ```bash
-npm install focus-no-jutsu
+npm install focus-fly
 ```
 
 ## 使用
 
-focus-no-jutsu 支持 ESM 和 CJS 导入，如果希望直接通过浏览器标签导入，可以下载[本项目 `output/` 文件夹内的 UMD 文件](https://github.com/wswmsword/focus-no-jutsu/tree/main/output) 进行 `<script>` 标签引入。
+focus-fly 支持 ESM 和 CJS 导入，如果希望直接通过浏览器标签导入，可以下载[本项目 `output/` 文件夹内的 UMD 文件](https://github.com/wswmsword/focus-fly/tree/main/output) 进行 `<script>` 标签引入。
 
 添加下面这两行代码后，焦点将会在一个列表之间陷入循环，这个列表的头元素是 `#firstTabbableNode`，尾元素是 `#lastTabbableNode`：
 
 ```javascript
-import focus from "focus-no-jutsu"; // ESM 导入方式
-// const focus = require("focus-no-jutsu"); // CJS 导入方式
-focus(["#firstTabbableNode", "#lastTabbableNode"]);
+import fFocus from "focus-fly"; // ESM 导入方式
+// const focus = require("focus-fly"); // CJS 导入方式
+fFocus(["#firstTabbableNode", "#lastTabbableNode"]);
 ```
 
 这是最简洁的调用，以这种方式调用，焦点可以通过键盘（<kbd>Tab</kbd>）进入列表，但是无法通过键盘退出列表，下面对调用参数稍加修改，加入元素 `#entryBtn` 作为入口，元素 `#lastTabbableNode` 作为出口，这样焦点就能够通过键盘在入口、列表和出口间流动：
 
 ```javascript
-focus(["#firstTabbableNode", "#lastTabbableNode"], {
+fFocus(["#firstTabbableNode", "#lastTabbableNode"], {
   entry: "#entryBtn",
   exit: "#lastTabbableNode",
   onEscape: true
 });
 ```
 
-上面的代码执行后，在浏览器中将会有这样的行为：在 `#entryBtn` 上按下 <kbd>Enter</kbd>，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，在 `#lastTabbableNode` 上按下 <kbd>Enter</kbd>，或者在列表内的任意元素上按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-no-jutsu#h-hot)。
+上面的代码执行后，在浏览器中将会有这样的行为：在 `#entryBtn` 上按下 <kbd>Enter</kbd>，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，在 `#lastTabbableNode` 上按下 <kbd>Enter</kbd>，或者在列表内的任意元素上按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-fly#h-hot)。
 
 这是一个简单和完整的用法，解释了入口、列表和出口对焦点的管理与控制，继续阅读，查看关于延迟注册列表事件、触发焦点移动的钩子、自定义焦点矫正目标等更多特性的详细介绍。
 
-### focusNoJutsu(list[, options])
+### focusFly(list[, options])
 
-调用函数 `focusNoJutsu` 时可以传递 2 个参数，`list` 表示焦点列表，第二个入参 `options` 是可选的，用于设定若干选项，例如设定入口、封面、列表和出口相关的详细配置。
+调用函数 `focusFly` 时可以传递 2 个参数，`list` 表示焦点列表，第二个入参 `options` 是可选的，用于设定若干选项，例如设定入口、封面、列表和出口相关的详细配置。
 
-### focusNoJutsu(root, list[, options])
+### focusFly(root, list[, options])
 
-调用函数 `focusNoJutsu` 时可以传递 3 个参数，`root` 是 `list` 内各元素的公共祖先元素，将会被用来监听键盘（keydown）之类的事件，如果不提供 `root`，focus-no-jutsu 将会通过 `list` 找到最小公共祖先元素，第二个入参 `list` 表示列表，第三个 `options` 是可选的，用于设定若干选项。
+调用函数 `focusFly` 时可以传递 3 个参数，`root` 是 `list` 内各元素的公共祖先元素，将会被用来监听键盘（keydown）之类的事件，如果不提供 `root`，focus-fly 将会通过 `list` 找到最小公共祖先元素，第二个入参 `list` 表示列表，第三个 `options` 是可选的，用于设定若干选项。
 
 <details>
 <summary>
-查看一种使用范例，范例演示了如何通过 focus-no-jutsu 完成对话框组件的焦点管理。
+查看一种使用范例，范例演示了如何通过 focus-fly 完成对话框组件的焦点管理。
 </summary>
 
 ```javascript
-import focus from "focus-no-jutsu"; // esm 方式引入
-// const focus = require("focus-no-jutsu"); // cjs 方式引入
+import fFocus from "focus-fly"; // esm 方式引入
+// const fFocus = require("focus-fly"); // cjs 方式引入
 
 const dialog = document.getElementById("dialog");
 
 // 循环焦点的根元素，对话框
-focus(dialog, ["#head", "#tail"], { // 根元素 root 是 #dialog，根元素用来监听诸如 keydown 之类的事件，列表 list 的范围是从 #head 到 #tail，焦点如果进入列表，就会在这个范围循环
+fFocus(dialog, ["#head", "#tail"], { // 根元素 root 是 #dialog，根元素用来监听诸如 keydown 之类的事件，列表 list 的范围是从 #head 到 #tail，焦点如果进入列表，就会在这个范围循环
   // 入口配置
   entry: {
     // 入口的选择器字符串，例如“打开”按钮
@@ -124,7 +119,7 @@ npm run start
 
 根元素 `root` 是列表内各元素的公共祖先元素，将被用于监听键盘（keydown）事件以及和列表有关的其它事件，默认会监听按键 <kbd>Tab</kbd> 来控制焦点循环聚焦，如果开启了 `options.onEscape`，也会监听 <kbd>Esc</kbd>。
 
-如果不提供这个参数，focus-no-jutsu 会取得列表 `list` 内元素的最小公共祖先作为根元素 `root`。
+如果不提供这个参数，focus-fly 会取得列表 `list` 内元素的最小公共祖先作为根元素 `root`。
 
 ### list
 
@@ -157,6 +152,8 @@ npm run start
 | correctionTarget | boolean \| getTarget | true | 焦点矫正，默认从非入口的空白区域进入列表，也将聚焦上一次退出前焦点在列表中的位置，设置为 false 则不进行矫正 |
 | delayToFocus | boolean \| promiseDelay \| callbackDelay | null | 延迟聚焦，执行完 `options.entry.on` 后，等待执行 delayToFocus 完成后聚焦，延迟聚焦的本意是等待列表渲染完成后再聚焦，延迟聚焦意味延迟添加列表相关的事件，也即在触发入口前，没有列表相关的事件，如果设为 true，则会在触发入口后立刻添加列表相关的事件，可用于性能优化 |
 | delayToBlur | promiseDelay \| callbackDelay | null | 延迟失列表的焦，触发出口后等待执行 `delayToBlur` 完成后失焦，和 `delayToFocus` 类似 |
+| stopPropagation | boolean | false | 阻止（列表移动）冒泡或捕获 |
+| preventDefault | boolean | false | 阻止（列表移动）默认行为 |
 | manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
 
 为了不影响排版阅读，下面 4 个名称过长的选项被单独制成一张表格：
@@ -189,7 +186,7 @@ npm run start
 
 下面的代码演示了使用 `→`、`↓` 和 `ctrl-n` 完成前进焦点，使用 `←`、`↑` 和 `ctrl-p` 完成后退焦点：
 ```javascript
-import focus from "focus-no-jutsu";
+import fFocus from "focus-fly";
 
 const dialog = document.getElementById("dialog");
 
@@ -203,7 +200,7 @@ const isBackward = e => (
   e.key === "ArrowTop" ||
   e.key === "ArrowLeft");
 
-focus(dialog, ["#head", "#second", "#tail"], {
+fFocus(dialog, ["#head", "#second", "#tail"], {
   entry: {
     node: "#open",
     on() {
@@ -240,6 +237,8 @@ focus(dialog, ["#head", "#second", "#tail"], {
 | target | boolean \| element \| getTarget | null | 进入到哪个元素？默认将聚焦列表第一个元素，设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟聚焦，触发 node 后等待执行 delay 完成后聚焦，如果没有设置，将取 `options.delayToFocus` |
 | if | ef | null | 触发入口的条件，如果不符合条件，将不被认为是进入了列表 |
+| stopPropagation | boolean | false | 阻止（入口）冒泡或捕获 |
+| preventDefault | boolean | true | 阻止（入口）默认行为 |
 | onExit | true \| handleExit | null | 指定当前入口同时也是出口，作为出口的行为，设为 true，则行为取 `options.entry.on`，该选项类似表明这个元素是个开关 |
 
 入口定义的方式非常自由，例如 `entry: "#entryBtn"`，`entry: { node: "#entryBtn", type: "click" }`，`entry: ["#entryBtn"]`，`entry: ["#entryBtn", { node: "#btn2", type: "click" }]`，这四种写法都是允许的。
@@ -252,12 +251,14 @@ focus(dialog, ["#head", "#second", "#tail"], {
 
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
-| node | element \| element[] | null | 出口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
+| node | element \| element[] \| getExit | null | 出口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
 | key | iskey | null | 自定义退出列表组合键 |
 | on | handleKeydown | null | 退出时被调用，退出列表前的行为，如果有封面就退出至封面，如果没有就退出至入口，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
 | type | exitType \| exitType[] | ["keydown", "click"] | 出口的事件类型，和 `options.entry.type` 类似，但是多了 `"outlist"` 类型，用于聚焦空白区域、非列表区域时触发出口，这常用于弹窗的半透明蒙版 |
 | target | boolean \| element \| getTarget | null | 退出至哪个元素？默认将聚焦第一个入口，设置为 false 将不改变焦点 |
 | delay | false \| promiseDelay \| callbackDelay | null | 延迟失焦，触发 node 后等待执行 delay 完成后失焦，如果没有设置，将取 `options.delayToBlur` |
+| stopPropagation | boolean | false | 阻止（出口）冒泡或捕获 |
+| preventDefault | boolean | true | 阻止（出口）默认行为 |
 | if | ef | null | 触发出口的条件，如果不符合条件，将不被认为是退出了列表 |
 
 出口定义的方式和入口一样，例如 `exit: "#exitBtn"`，`exit: { node: "#exitBtn", type: "click" }`，`exit: ["#exitBtn"]`，`entry: ["#exitBtn", { node: "#btn2", type: "click" }]`，这四种写法都是允许的。
@@ -285,7 +286,7 @@ focus(dialog, ["#head", "#second", "#tail"], {
 
 ### Return
 
-下面是调用函数 focusNoJutsu 后返回的属性。
+下面是调用函数 focusFly 后返回的属性。
 
 | Name | Type | Desc |
 |:--|:--|:--|
@@ -307,30 +308,30 @@ focus(dialog, ["#head", "#second", "#tail"], {
 </summary>
 
 ```javascript
-import focusNoJutsu from "focus-no-jutsu";
+import fFocus from "focus-fly";
 
 const dialog = document.getElementById("dialog");
 const openBtn = document.getElementById("#open");
 const closeBtn = document.getElementById("#close");
 
-const focus = focusNoJutsu(dialog, ["#head", "#tail"]);
+const bagel = fFocus(dialog, ["#head", "#tail"]);
 
 openBtn.addEventListener("click", e => {
   dialog.classList.add("openedDialog");
   dialog.classList.remove("closedDialog");
-  focus.enter(); // 聚焦 #head
+  bagel.enter(); // 聚焦 #head
 })
 
 closeBtn.addEventListener("click", e => {
   dialog.classList.remove("openedDialog");
   dialog.classList.add("closedDialog");
-  focus.exit(); // 聚焦 #dialog
+  bagel.exit(); // 聚焦 #dialog
 })
 ```
 
 </details>
 
-查看[使用 `addForward` 的一个范例](https://github.com/wswmsword/focus-no-jutsu/blob/main/examples/cjs/src/player.js)，这个范例中，`#grid_wrapper` 是一个中转节点，通过按下 <kbd>Tab</kbd> 和反向 <kbd>Tab</kbd>，焦点中转到 `#more_from`。
+查看[使用 `addForward` 的一个范例](https://github.com/wswmsword/focus-fly/blob/main/examples/cjs/src/player.js)，这个范例中，`#grid_wrapper` 是一个中转节点，通过按下 <kbd>Tab</kbd> 和反向 <kbd>Tab</kbd>，焦点中转到 `#more_from`。
 
 ## 范例与项目开发
 
@@ -349,7 +350,7 @@ npm i
 npm run start
 ```
 
-运行之后，修改根目录的 index.js（focus-no-jutsu 主文件）和 `examples/run-start` 下的文件，即可在浏览器看到实时修改结果。开发后，提交时请编写相应的单元测试。
+运行之后，修改根目录的 index.js（focus-fly 主文件）和 `examples/run-start` 下的文件，即可在浏览器看到实时修改结果。开发后，提交时请编写相应的单元测试。
 
 ## 单元测试
 
@@ -366,7 +367,7 @@ npm run test
 `entry.onExit` 利用了 `relatedTarget`，至少对于 `<button>` 元素，Safari 不能正常获取。为了让入口在 Safari 上支持切换出口，可以添加下面这样的 `outlist` 类型的出口：
 
 ```javascript
-focusNoJutsu("#container", ["#start", "#end"], {
+focusFly("#container", ["#start", "#end"], {
   onEscape: toggle,
   entry: {
     node: "#btn",
@@ -399,7 +400,7 @@ function toggle() {
 <details>
 <summary>有些情况，通过 onMove、onNext、onPrev、entry.on 等钩子回调，不能完成样式修改。</summary>
 
-focus-no-jutsu 的主要任务是管理和控制**焦点**，如果有钩子不能满足需求，可以考虑在业务开发中自行监听事件，处理样式的变化。
+focus-fly 的主要任务是管理和控制**焦点**，如果有钩子不能满足需求，可以考虑在业务开发中自行监听事件，处理样式的变化。
 </details>
 
 ## 原理
@@ -424,7 +425,7 @@ focus-no-jutsu 的主要任务是管理和控制**焦点**，如果有钩子不�
 
 ## 其它
 
-focus-no-jutsu 支持的特性：
+focus-fly 支持的特性：
 - 集中管理焦点；
 - 通过指定范围或序列循环焦点；
 - 按需监听、移除事件；

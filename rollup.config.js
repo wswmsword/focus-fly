@@ -27,7 +27,7 @@ const commonOutput = {
 const demo = () => ({
   ...commonConfig,
   output: {
-    name: "focusNoJutsu",
+    name: "focusFly",
     file: "examples/run-start/demo.js",
     format: "iife",
     sourcemap: true,
@@ -50,7 +50,7 @@ const cjs = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-no-jutsu.cjs",
+      file: "output/focus-fly.cjs",
       format: "cjs",
       ...commonOutput,
     },
@@ -59,7 +59,7 @@ const cjs = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-no-jutsu.min.cjs",
+      file: "output/focus-fly.min.cjs",
       format: "cjs",
       ...commonOutput,
     },
@@ -72,7 +72,7 @@ const esm = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-no-jutsu.esm.js",
+      file: "output/focus-fly.esm.js",
       format: "esm",
       ...commonOutput,
     },
@@ -81,7 +81,7 @@ const esm = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-no-jutsu.esm.min.js",
+      file: "output/focus-fly.esm.min.js",
       format: "esm",
       ...commonOutput,
     },
@@ -94,10 +94,10 @@ const umd = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/focus-no-jutsu.umd.js",
+      file: "output/focus-fly.umd.js",
       format: "umd",
       noConflict: true,
-      name: "focusNoJutsu",
+      name: "focusFly",
       ...commonOutput,
       globals: {},
     },
@@ -106,10 +106,10 @@ const umd = [
   {
     ...commonConfig,
     output: {
-      file: "output/focus-no-jutsu.umd.min.js",
+      file: "output/focus-fly.umd.min.js",
       format: "umd",
       noConflict: true,
-      name: "focusNoJutsu",
+      name: "focusFly",
       ...commonOutput,
     },
     plugins: [...commonPlugins, terser()],

@@ -1,12 +1,12 @@
 {
-  "name": "focus-no-jutsu",
+  "name": "focus-fly",
   "version": "1.1.0",
   "type": "module",
   "description": "焦点管理。Focus management.",
-  "main": "output/focus-no-jutsu.cjs",
+  "main": "output/focus-fly.cjs",
   "exports": {
-    "import": "./output/focus-no-jutsu.esm.js",
-    "require": "./output/focus-no-jutsu.cjs"
+    "import": "./output/focus-fly.esm.js",
+    "require": "./output/focus-fly.cjs"
   },
   "sideEffects": false,
   "files": [
@@ -18,10 +18,10 @@
     "index.d.ts",
     "utils.js",
     "output",
-    "!output/focus-no-jutsu.umd.js",
-    "!output/focus-no-jutsu.umd.js.map",
-    "!output/focus-no-jutsu.umd.min.js",
-    "!output/focus-no-jutsu.umd.min.js.map"
+    "!output/focus-fly.umd.js",
+    "!output/focus-fly.umd.js.map",
+    "!output/focus-fly.umd.min.js",
+    "!output/focus-fly.umd.min.js.map"
   ],
   "types": "index.d.ts",
   "scripts": {
@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wswmsword/focus-no-jutsu.git"
+    "url": "git+https://github.com/wswmsword/focus-fly.git"
   },
   "keywords": [
     "focus",
@@ -51,9 +51,9 @@
   "author": "wsWmsword",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/wswmsword/focus-no-jutsu/issues"
+    "url": "https://github.com/wswmsword/focus-fly/issues"
   },
-  "homepage": "https://github.com/wswmsword/focus-no-jutsu#readme",
+  "homepage": "https://github.com/wswmsword/focus-fly#readme",
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",

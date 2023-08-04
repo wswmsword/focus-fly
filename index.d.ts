@@ -23,7 +23,15 @@ type targetOpts = {
   lastI: number,
 }
 
+type exitFuncOpts = {
+  list: element[],
+  head: element,
+  tail: element,
+}
+
 type getTarget = (opts: targetOpts) => element;
+
+type getExit = (obj: exitFuncOpts) => element;
 
 type listForward = {
   /** 自定义前进 subNodes 的组合键 */
@@ -70,6 +78,12 @@ type entry = {
   /** 入口的条件 */
   if?: ef;
 
+  /** 阻止（入口）冒泡或捕获 */
+  stopPropagation?: boolean;
+
+  /** 阻止（入口）默认行为 */
+  preventDefault?: boolean;
+
   /** 设置入口同时也是出口，设置作为出口时的行为 */
   onExit?: true | handleExit;
 }
@@ -88,7 +102,7 @@ type ReturnEntry = {
 type exit = {
 
   /** 退出循环焦点的触发器，用于监听点击事件 */
-  node?: element | element[];
+  node?: element | element[] | getExit;
 
   /** 自定义退出 subNodes 组合键 */
   key?: isKey;
@@ -104,6 +118,12 @@ type exit = {
 
   /** 延迟失焦，触发 node 后等待执行 delay 完成后失焦 */
   delay?: false | promiseDelay | callbackDelay;
+
+  /** 阻止（出口）冒泡或捕获 */
+  stopPropagation?: boolean;
+
+  /** 阻止（出口）默认行为 */
+  preventDefault?: boolean;
 
   /** 出口的条件 */
   if?: ef;
@@ -222,6 +242,12 @@ interface Options {
 
   /** 每次退出列表是否添加入口监听事件 */
   addEntryListenersEachExit?: boolean;
+
+  /** 阻止（列表移动）冒泡或捕获 */
+  stopPropagation?: boolean;
+
+  /** 阻止（列表移动）默认行为 */
+  stopPropagation?: boolean;
 
   /** 手动添加监听事件，入口、列表、出口的监听事件 */
   manual?: boolean;
