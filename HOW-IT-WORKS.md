@@ -5,14 +5,14 @@
 例如，进行一个包含入口、列表和出口的最简单的调用：
 
 ```javascript
-focusNoJutsu(["#b1", "#b3"], {
+focusFly(["#b1", "#b3"], {
   onEscape: true,
   entry: "#b0",
   exit: "#b3",
 });
 ```
 
-上面的调用里，入口是元素“#b0”，出口是元素“#b3”，列表是一个范围，这个范围的头元素是“#b1”，尾元素是“#b3”。在调用 `focusNoJutsu` 的时候，实际上注册了一些事件：
+上面的调用里，入口是元素“#b0”，出口是元素“#b3”，列表是一个范围，这个范围的头元素是“#b1”，尾元素是“#b3”。在调用 `focusFly` 的时候，实际上注册了一些事件：
 - 入口，元素 #b0 注册点击（`click`）事件；
 - 列表，元素 #b1 和 #b3 共同的父元素，注册 `click`、`focusin`、`focusout`、`keydown` 和 `mousedown` 事件；
 - 出口，重复利用列表的 `click` 和 `focusout` 事件。
