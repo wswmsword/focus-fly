@@ -1,4 +1,4 @@
-const focusBagel = require("focus-no-jutsu");
+const focusBagel = require("focus-fly");
 
 const dialog = document.getElementById("dialog");
 const mask = document.getElementById("dialog_mask");

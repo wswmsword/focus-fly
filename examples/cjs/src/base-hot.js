@@ -1,6 +1,6 @@
-const focusNoJutsu = require("focus-no-jutsu");
+const fFocus = require("focus-fly");
 
-focusNoJutsu(["#firstTabbableNode", "#lastTabbableNode"], {
+fFocus(["#firstTabbableNode", "#lastTabbableNode"], {
   entry: "#entryBtn",
   exit: "#lastTabbableNode",
   onEscape: true,

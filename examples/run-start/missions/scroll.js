@@ -1,5 +1,5 @@
 const scrollContent = document.getElementById("scroll_content");
-const bagel = focusNoJutsu(
+const bagel = focusFly(
   scrollContent, // 根元素
   [...document.getElementsByClassName("scroll_item")], // 列表
   {
@@ -66,7 +66,7 @@ function createOrRemoveItemFocus({ cur }) {
 
     const itemFirst = cur.getElementsByClassName("item_top")[0];
     const itemLast = cur.getElementsByClassName("item_bottom")[0];
-    lastItemFocus = focusNoJutsu([itemFirst, itemLast], {
+    lastItemFocus = focusFly([itemFirst, itemLast], {
       entry: {
         node: cur,
         type: "keydown",

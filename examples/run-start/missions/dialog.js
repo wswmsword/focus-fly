@@ -3,7 +3,7 @@ const dialog = document.getElementById("dialog");
 const mask = document.getElementById("dialog_mask");
 const entry = document.getElementById("open");
 // 6～18 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内移动的范围
-focusNoJutsu(dialog, ["#firstFocusBtn", "#close"], { // L:6
+focusFly(dialog, ["#firstFocusBtn", "#close"], { // L:6
   loop: false,
   entry: {
     node: entry,

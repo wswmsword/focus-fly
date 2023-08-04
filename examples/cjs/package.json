@@ -12,7 +12,7 @@
   "description": "",
   "type": "commonjs",
   "dependencies": {
-    "focus-no-jutsu": "file:../.."
+    "focus-fly": "file:../.."
   },
   "devDependencies": {
     "css-loader": "^6.8.1",

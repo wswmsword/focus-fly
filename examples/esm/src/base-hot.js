@@ -1,6 +1,6 @@
-import focusNoJutsu from "focus-no-jutsu";
+import fFocus from "focus-fly";
 
-focusNoJutsu(["#firstTabbableNode", "#lastTabbableNode"], {
+fFocus(["#firstTabbableNode", "#lastTabbableNode"], {
   entry: "#entryBtn",
   exit: "#lastTabbableNode",
   onEscape: true,

@@ -1,6 +1,6 @@
-import focusNoJutsu from "focus-no-jutsu";
+import fFocus from "focus-fly";
 const scrollContent = document.getElementById("scroll_content");
-const bagel = focusNoJutsu(
+const bagel = fFocus(
   scrollContent, // 根元素
   [...document.getElementsByClassName("scroll_item")], // 列表
   {
@@ -67,7 +67,7 @@ function createOrRemoveItemFocus({ cur }) {
 
     const itemFirst = cur.getElementsByClassName("item_top")[0];
     const itemLast = cur.getElementsByClassName("item_bottom")[0];
-    lastItemFocus = focusNoJutsu([itemFirst, itemLast], {
+    lastItemFocus = fFocus([itemFirst, itemLast], {
       entry: {
         node: cur,
         type: "keydown",

@@ -2,7 +2,7 @@ const menuBtn = document.getElementById("menu_btn");
 const menuBody = document.getElementById("menu");
 
 // 5～29 行为焦点管理和控制的部分，包含了触发入口和出口时的行为——切换菜单状态，toggleMenu
-focusNoJutsu(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
+focusFly(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   onEscape: toggleMenu,
   entry: {
     node: menuBtn,

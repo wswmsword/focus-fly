@@ -1,4 +1,4 @@
-import focusBagel from "focus-no-jutsu";
+import focusBagel from "focus-fly";
 
 const dialog = document.getElementById("dialog");
 const mask = document.getElementById("dialog_mask");
