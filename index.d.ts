@@ -292,9 +292,9 @@ interface Return {
   i(newI?: number): number;
 }
 
-declare function focusNoJutsu(root: element, list: element[], options?: Options): Return;
-declare function focusNoJutsu(list: element[], options?: Options): Return;
+declare function focusFly(root: element, list: element[], options?: Options): Return;
+declare function focusFly(list: element[], options?: Options): Return;
 
-export = focusNoJutsu;
+export = focusFly;
 
-export default focusNoJutsu;
+export default focusFly;
