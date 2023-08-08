@@ -1,4 +1,4 @@
-import { objToStr, isObj, isFun, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode } from "./utils";
+import { objToStr, isObj, isFun, getActiveElement, element, tick, isSelectableInput, isEnterEvent, isEscapeEvent, isTabForward, isTabBackward, findLowestCommonAncestorNode, getKeysFromStr } from "./utils";
 
 /** 聚焦，如果是 input，则聚焦后选中 */
 const focus = function(e) {
@@ -12,6 +12,30 @@ const tickFocus = function(e) {
   if (e == null) tick(() => e && focus(e));
   else focus(e);
 };
+
+/** 是否匹配按键 */
+const matchKeys = function(keys, e, prevI, curI) {
+  let matched = false;
+  for (const key of keys) {
+    if (isFun(key)) {
+      matched = key(e, prevI, curI);
+    } else {
+      const { shift, meta, alt, ctrl, commonKey } = key;
+      matched = ((shift && e.shiftKey) || !(shift || e.shiftKey)) &&
+        ((meta && e.metaKey) || !(meta || e.metaKey)) &&
+        ((alt && e.altKey) || !(alt || e.altKey)) &&
+        ((ctrl && e.ctrlKey) || !(ctrl || e.ctrlKey)) &&
+        (commonKey == null || (commonKey === e.key));
+    }
+    if (matched) return matched; // true
+  }
+  return matched; // false
+};
+
+/** 转换用户输入的按键为程序可理解的按键 */
+const convertKeys = function(keys, defaultKey) {
+  return [].concat(keys).map(k => typeof k === "string" ? getKeysFromStr(k) : k ?? defaultKey);
+}
 
 /** 获取根节点 */
 const getRootNode = function(rootStr, listHead, listTail) {
@@ -97,13 +121,14 @@ const getExits = function(exit, onEscape, enabledCover, cover, trigger, delayToB
       delay: e.delay ?? delayToBlur,
       // undefined 表示用户没有主动设置
       type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(t => t !== '') : [].concat(e.type),
+      key: convertKeys(e.key),
     }))
     .reduce(pickNodesAry, []);
   let _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? tempExits[0]?.on ?? (() => {}) : onEscape;
   /** 按下 esc 的出口 */
   const escapeExit = isFun(_onEscape) ? {
     node: null,
-    key: isEscapeEvent,
+    key: [isEscapeEvent],
     on: _onEscape,
     target: enabledCover ? cover : trigger,
     type: ["keydown"],
@@ -334,6 +359,7 @@ const focusFly = (...props) => {
       delay: entry.delay ?? delayToFocus,
       type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(t => t != '') : [].concat(entry.type),
       onExit: entry.onExit === true ? entry.on : entry.onExit, // 这个入口是开关吗
+      key: convertKeys(entry.key),
     }))
     .reduce(pickNodesAry, []); // 处理元素的 node 属性是数组的情况，将它分解成多个元素
   /** 是否是空入口 */
@@ -362,6 +388,7 @@ const focusFly = (...props) => {
     .map(e => ({ // 对元素的属性进行默认处理
       ...e,
       target: e.target ?? _trigger,
+      key: convertKeys(e.key),
     }));
   /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
   const isDefaultExitCover = enabledCover && exitsCover.length === 0;
@@ -376,15 +403,23 @@ const focusFly = (...props) => {
 
   list.recordPrev(null, initialActive ?? -1);
 
+  const objNext = isObj(next) ? next : { key: next };
   const {
     key: isNext,
     on: onNext,
-  } = isObj(next) ? next : { key: next };
+  } = {
+    ...objNext,
+    key: convertKeys(objNext.key, isTabForward)
+  };
 
+  const objPrev = isObj(prev) ? prev : { key: prev };
   const {
     key: isPrev,
     on: onPrev,
-  } = isObj(prev) ? prev : { key: prev };
+  } = {
+    ...objPrev,
+    key: convertKeys(objPrev.key, isTabBackward)
+  };
 
   /** 禁用左上角 esc 出口 */
   const disabledEsc = onEscape === false;
@@ -393,7 +428,7 @@ const focusFly = (...props) => {
   const isClamp = !(loop ?? true);
 
   /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
-  const enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
+  const enabledTabSequence = !!(next || prev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
 
   /** 移动列表，是否阻止默认行为 */
   const listPreventDefault = preventDefault ?? enabledTabSequence;
@@ -525,11 +560,12 @@ const focusFly = (...props) => {
       }
       else opts = forward;
 
-      const { node: origin_node, on, key, target: origin_target } = opts;
+      const { node: origin_node, on, key: origin_key, target: origin_target } = opts;
       const node = element(origin_node);
       const target = element(origin_target);
+      const keys = convertKeys(origin_key);
       keyForwards.push(id, node, e => {
-        if (key?.(e, list.prevI, list.curI)) {
+        if (matchKeys(keys, e, list.prevI, list.curI)) {
           e.preventDefault();
           on?.();
           tickFocus(target);
@@ -972,7 +1008,8 @@ const focusFly = (...props) => {
         const index = Math.max(0, index_);
         const itemsLen = list.length;
         let focused = false;
-        if ((isNext ?? isTabForward)(e)) {
+        
+        if (matchKeys(isNext, e, listInfo.prevI, listInfo.curI)) {
           const incresedI = index + 1;
           let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
           nextI %= itemsLen;
@@ -982,7 +1019,7 @@ const focusFly = (...props) => {
           focus(list[nextI]);
           focused = true;
         }
-        else if ((isPrev ?? isTabBackward)(e)) {
+        else if (matchKeys(isPrev, e, listInfo.prevI, listInfo.curI)) {
           const decresedI = index - 1;
           let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
           nextI = (nextI + itemsLen) % itemsLen;
@@ -1080,7 +1117,7 @@ const focusFly = (...props) => {
         for (let i = 0; i < exitsCover.length; ++ i) {
           const { key, on, target: origin } = exitsCover[i];
           const target = element(origin);
-          if (key?.(e, listInfo.prevI, listInfo.curI)) {
+          if (matchKeys(key, e, listInfo.prevI, listInfo.curI)) {
             exitCoverHandler(e, on, target);
             return;
           }
@@ -1159,7 +1196,7 @@ const focusFly = (...props) => {
 
       function keyExitHandler(e, exit) {
 
-        const cantKey = (e, node, key) => (node != null && e.target !== node) || (!key?.(e, listInfo.prevI, listInfo.curI)); // 聚焦目标不匹配 或者 未设置点击目标
+        const cantKey = (e, node, key) => (node != null && e.target !== node) || !(matchKeys(key, e, listInfo.prevI, listInfo.curI)); // 聚焦目标不匹配 或者 未设置点击目标
         return exitHandlerWithCondition(e, exit, cantKey);
       }
 
@@ -1209,7 +1246,7 @@ const focusFly = (...props) => {
           /** 是否是键盘事件 */
           const isKey = type === "keydown";
           /** 如果是键盘事件，则判断键位是否匹配，如果是非键盘事件，则直接返回 true */
-          const ifKey = isKey ? e => key?.(e, list.prevI, list.curI) : _ => true;
+          const ifKey = isKey ? e => matchKeys(key, e, list.prevI, list.curI) : _ => true;
           entryListeners.push(node, type, toggleHandler(ifKey)); // 保存事件信息
         }
       });

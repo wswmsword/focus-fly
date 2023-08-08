@@ -70,3 +70,39 @@ export const findLowestCommonAncestorNode = function(x, y) {
   }
   return range.commonAncestorContainer;
 };
+
+/** 从字符串中分解按键 */
+export const getKeysFromStr = function(str) {
+  const firstMinus = str.indexOf('-');
+  const firstKey = firstMinus === -1 ? str : firstMinus === 0 ? '-' : str.slice(0, firstMinus);
+  const extraStr = str.replace(firstKey, '');
+  const keys = [firstKey];
+  const reg = /-(?:-|[^-]+)/g;
+  let res;
+  while(res = reg.exec(extraStr))
+    keys.push(res[0].slice(1));
+  let shift = false;
+  let meta = false;
+  let alt = false;
+  let ctrl = false;
+  let commonKey = null;
+  let enableKeyMap = new Map([
+    ["Shift", () => shift = true],
+    ["Meta", () => meta = true],
+    ["Alt", () => alt = true],
+    ["Control", () => ctrl = true],
+  ]);
+  for(let i = 0; i < keys.length; ++ i) {
+    const enableKey = enableKeyMap.get(keys[i]);
+    if (enableKey == null)
+      commonKey = keys[i];
+    else enableKey();
+  }
+  return {
+    shift,
+    meta,
+    alt,
+    ctrl,
+    commonKey,
+  };
+}
