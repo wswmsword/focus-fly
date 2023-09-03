@@ -1022,8 +1022,8 @@ const focusFly = (...props) => {
         let focused = false;
         
         if (matchKeys(isNext, e, listInfo.prevI, listInfo.curI)) {
-          const incresedI = index + 1;
-          let nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
+          const increasedI = index + 1;
+          let nextI = isClamp ? Math.min(itemsLen - 1, increasedI) : increasedI;
           nextI %= itemsLen;
           onNext?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
           onMove?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
@@ -1032,8 +1032,8 @@ const focusFly = (...props) => {
           focused = true;
         }
         else if (matchKeys(isPrev, e, listInfo.prevI, listInfo.curI)) {
-          const decresedI = index - 1;
-          let nextI = isClamp ? Math.max(0, decresedI) : decresedI;
+          const decreasedI = index - 1;
+          let nextI = isClamp ? Math.max(0, decreasedI) : decreasedI;
           nextI = (nextI + itemsLen) % itemsLen;
           onPrev?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
           onMove?.({ e, prev: list[index], cur: list[nextI], prevI: index, curI: nextI });
