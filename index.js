@@ -165,22 +165,24 @@ const delayToProcess = function(delay, processor) {
 
 /** 获取出口或者入口的目标 */
 const getTarget = function(target, cover, list, root, enabledCover, activeIndex, defaultTarget, e) {
+  const isDefaultTarget = t => t == null || t === true;
   // 空 target 走默认
-  if (target == null || target === true) {
-    if (enabledCover) return cover;
-    else return defaultTarget;
-  }
+  if (isDefaultTarget(target))
+    return returnDefaultTarget();
   // 函数 target 则传入节点执行
   else if (isFun(target)) {
     const gotTarget = target({ e, list, cover, root, last: list[activeIndex], lastI: activeIndex });
-    if (gotTarget == null || gotTarget === true) {
-      if (enabledCover) return cover;
-      else return defaultTarget;
-    }
+    if (isDefaultTarget(gotTarget))
+      return returnDefaultTarget();
     return gotTarget;
   }
   // 选择器字符串或者节点，则直接获取
   else return element(target);
+
+  function returnDefaultTarget() {
+    if (enabledCover) return cover;
+    else return defaultTarget;
+  }
 };
 
 /** 保存的监听事件信息，方便监听和移除监听 */
@@ -267,12 +269,6 @@ class TabList {
     this.recordPrev(this.cur, this.curI);
     this.recordCur(cur, curI);
   };
-  recordSequnce(cur, curI) {
-    if (this.curI === curI // this.curI 和 curI 必须不同
-      || (this.curI < 0 && curI < 0)) // curI 为 -1 后，不会再次更新新的 -1
-      return;
-    this.record(cur, curI);
-  };
   recordRange(cur) {
     if (this.cur === cur || (this.cur == null && cur == null))
       return;
@@ -287,7 +283,11 @@ class TabList {
     this.cur = cur || null;
   };
   recordSequenceByIdx(curI) {
-    this.recordSequnce(this.data[curI], curI);
+    const cur = this.data[curI];
+    if (this.curI === curI // this.curI 和 curI 必须不同
+      || (this.curI < 0 && curI < 0)) // curI 为 -1 后，不会再次更新新的 -1
+      return;
+    this.record(cur, curI);
   };
 }
 
