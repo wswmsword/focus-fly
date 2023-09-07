@@ -1042,10 +1042,9 @@ const focusFly = (...props) => {
           focused = true;
         }
 
-        if (focused || e.key === "Tab") {
-          listPreventDefault && e.preventDefault();
-          listStopPropagation && e.stopPropagation();
-        }
+        // 如果按下了 Tab，则阻止默认行为（聚焦下一个元素），无需阻止事件传播
+        (e.key === "Tab" || focused) && listPreventDefault && e.preventDefault();
+        focused && listStopPropagation && e.stopPropagation();
       };
 
       /** 按下 tab，以浏览器的行为聚焦下个元素 */
