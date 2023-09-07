@@ -1020,7 +1020,7 @@ const focusFly = (...props) => {
         const index = Math.max(0, index_);
         const itemsLen = list.length;
         let focused = false;
-        
+
         if (matchKeys(isNext, e, listInfo.prevI, listInfo.curI)) {
           const increasedI = index + 1;
           let nextI = isClamp ? Math.min(itemsLen - 1, increasedI) : increasedI;
@@ -1042,7 +1042,7 @@ const focusFly = (...props) => {
           focused = true;
         }
 
-        if (focused) {
+        if (focused || e.key === "Tab") {
           listPreventDefault && e.preventDefault();
           listStopPropagation && e.stopPropagation();
         }
