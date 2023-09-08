@@ -816,13 +816,13 @@ const focusFly = (...props) => {
       }
 
 
-      /** 入口开关上一次触发 mousedown 的时间戳，用于和列表的 blur 事件做比较，如果相差时间很短，则代表当前触发的是开关，需要忽略跳过列表的 blur 事件 */
-      let lastMousedownTimestamp = -Infinity;
+      /** 是否触发了开关的 mousedown，如果是，则代表当前触发的是开关，需要忽略跳过列表的 blur 事件 */
+      let triggeredToggleMousedown = false;
 
       // 若存在 outlist 类型，则为入口添加 mousedown，用于入口是开关的情况
       if (outListExits) {
         toggles.forEach(toggle => {
-          listListeners.push(toggle, "mousedown", e => lastMousedownTimestamp = e.timeStamp);
+          listListeners.push(toggle, "mousedown", _ => triggeredToggleMousedown = true);
         });
       }
 
@@ -916,9 +916,9 @@ const focusFly = (...props) => {
       }
 
       function blurTrapListHandler(e) {
-        // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发
-        const blurTimestamp = e.timeStamp;
-        if (blurTimestamp - lastMousedownTimestamp < 20) return; // mousedown 一定优先 blur 触发，如果相距触发的毫秒数很小，代表当前触发的是开关；20 毫秒是一个阀值，是通过在同一个机器的多个浏览器中测试得到的结果
+        // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发；也可用 relatedTarget 判断，但 relatedTarget 不兼容 Safari（23.09.08）
+        if (triggeredToggleMousedown)
+          return triggeredToggleMousedown = false; // mousedown 一定优先 blur 触发，如果触发了 mousedown，则代表当前触发的是开关
 
         tick(() => { // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
 
