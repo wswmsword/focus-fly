@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 const user = userEvent.setup();
 import { getSequenceModalDom, getInputModalDom, getRangeModalDom, getCoverModalDom } from "./template-html/index.js"
-import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38, initBagel_39, initBagel_40, initBagel_1_2, initBagel_20_2, initBagel_20_3, initBagel_15_1 } from "./bagels.js";
+import { initBagel, initBagel_1_1, initBagel_2, initBagel_3, initBagel_4, initBagel_4_1, initBagel_5, initBagel_6, initBagel_7, initBagel_8, initBagel_9, initBagel_10, initBagel_11, initBagel_12, initBagel_13, initBagel_14, initBagel_15, initBagel_16, initBagel_17, initBagel_18, initBagel_19, initBagel_20, initBagel_21, initBagel_22, initBagel_23, initBagel_24, initBagel_25, initBagel_26, initBagel_27, initBagel_28, initBagel_29, initBagel_30, initBagel_31, initBagel_32, initBagel_33, initBagel_34, initBagel_20_1, initBagel_35, initBagel_16_1, initBagel_36, initBagel_37, initBagel_38, initBagel_39, initBagel_40, initBagel_1_2, initBagel_20_2, initBagel_20_3, initBagel_15_1, initBagel_28_1, initBagel_28_2, initBagel_41, initBagel_42, initBagel_43, initBagel_44, initBagel_45, initBagel_46, initBagel_47, initBagel_13_1 } from "./bagels.js";
 import { wait } from './helper/utils.js';
 
 // 基本功能
@@ -537,6 +537,136 @@ describe("focus-bagel", function() {
     expect(open).toHaveFocus();
   });
 
+  // 用按键字符串替代按键函数
+  it("should pass key-string instead of key-function", async function() {
+    const { container, dialog, first, last, open, close } = getRangeModalDom();
+    initBagel_28_1(container, dialog, first, last, open, close);
+
+    await user.click(open);
+    expect(first).toHaveFocus();
+    await user.keyboard("{Control>}c{/Control}");
+    expect(open).toHaveFocus();
+  });
+
+  // 用字符串定义的按键遍历访问列表序列
+  it("should pass key-string to navigate sequence", async function() {
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_28_2(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{Control>}n{/Control}");
+    expect(focusB).toHaveFocus();
+    await user.tab();
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{Control>}n{/Control}");
+    await user.keyboard("{Control>}n{/Control}");
+    await user.keyboard("{Control>}n{/Control}");
+    await user.keyboard("{Control>}n{/Control}");
+    await user.keyboard("{Control>}n{/Control}");
+    expect(focusG).toHaveFocus();
+    await user.keyboard("{Control>}n{/Control}");
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{Control>}p{/Control}");
+    expect(focusG).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(focusG).toHaveFocus();
+  });
+
+});
+
+// key 属性的字符串形式
+describe("string key for shortcut", function () {
+
+  // “j” 代表按下 j 向前导航，“k” 代表按下 k 向后导航
+  it("common keys such as j, k", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_41(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{j}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{j}");await user.keyboard("{j}");
+    expect(focusD).toHaveFocus();
+    await user.keyboard("{k}");await user.keyboard("{k}");await user.keyboard("{k}");
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{k}");
+    expect(focusG).toHaveFocus();
+  });
+
+  // 如果有多个普通按键，取最后一个
+  it("take the last key of common keys", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_42(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{f}");
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{j}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{k}");await user.keyboard("{k}");
+    expect(focusG).toHaveFocus();
+  });
+
+  it("shift", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_43(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{j}");
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{k}");
+    expect(focusA).toHaveFocus();
+    await user.keyboard("{Shift>}j{/Shift}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{Shift>}k{/Shift}");await user.keyboard("{Shift>}k{/Shift}");
+    expect(focusG).toHaveFocus();
+  });
+
+  it("Meta, Command, Windows", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_44(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+    await user.click(open);
+    await user.keyboard("{Meta>}j{/Meta}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{Meta>}k{/Meta}");
+    expect(focusA).toHaveFocus();
+  });
+
+  it("alt", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_45(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+    await user.click(open);
+    await user.keyboard("{Alt>}j{/Alt}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{Alt>}k{/Alt}");
+    expect(focusA).toHaveFocus();
+  });
+
+  // 多组合键
+  it("compose Control-Shift-n", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_46(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+    await user.click(open);
+    await user.keyboard("{Control>}n{/Control}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{Control>}{Shift>}n{/Control}{/Shift}");
+    expect(focusA).toHaveFocus();
+  });
+
+  // 方向键
+  it("arrow left and arrow right", async function() {
+    const { dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_47(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+    await user.click(open);
+    await user.keyboard("{ArrowRight}");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("{ArrowLeft}");
+    expect(focusA).toHaveFocus();
+  });
 });
 
 // 开启封面
@@ -1073,6 +1203,23 @@ describe("list", function() {
     await user.click(dialog);
     await user.tab();
     expect(first).toHaveFocus();
+  });
+
+  // 自定义前进或后退的按键后，默认的 tab 导航将失效
+  it("should not tab the key is customized", async function() {
+    const { container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG } = getSequenceModalDom();
+    initBagel_13_1(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG);
+
+    await user.click(open);
+    expect(focusA).toHaveFocus();
+    await user.tab();
+    expect(focusA).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(focusA).toHaveFocus();
+    await user.keyboard("j");
+    expect(focusB).toHaveFocus();
+    await user.keyboard("k");
+    expect(focusA).toHaveFocus(); 
   });
 });
 

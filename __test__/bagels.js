@@ -138,6 +138,16 @@ export function initBagel_13(container, dialog, open, focusA, focusB, focusC, fo
   });
 }
 
+export function initBagel_13_1(container, dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  const bagel = focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "j",
+    prev: "k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
 export function initBagel_14(container, dialog, first, last, open, close) {
 
   focusBagel("#dialog", ["#firstFocusA", "#lastFocusBtn"], {
@@ -337,6 +347,24 @@ export function initBagel_28(container, dialog, first, last, open, close, walk1)
   });
 }
 
+export function initBagel_28_1(container, dialog, first, last, open, close, walk1) {
+
+  return focusBagel(dialog, [first, last], {
+    entry: { node: open, key: "c" },
+    exit: { key: "Control-c" },
+  });
+}
+
+export function initBagel_28_2(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "Control-n",
+    prev: "Control-p",
+    entry: open,
+    exit: focusF,
+  });
+}
+
 export function initBagel_29(container, dialog, first, last, open, close) {
 
   focusBagel(dialog, [first, last], {
@@ -493,5 +521,75 @@ export function initBagel_40(dialog, open, focusA, focusB, focusC) {
     sequence: true,
     entry: open,
     exit: ({ tail }) => tail,
+  });
+}
+
+export function initBagel_41(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "j",
+    prev: "k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_42(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "f-j",
+    prev: "f-k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_43(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "Shift-j",
+    prev: "Shift-k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_44(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "Meta-j",
+    prev: "Meta-k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_45(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "Alt-j",
+    prev: "Alt-k",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_46(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "Control-n",
+    prev: "Control-Shift-n",
+    entry: open,
+    exit: focusF,
+  });
+}
+
+export function initBagel_47(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: "ArrowRight",
+    prev: "ArrowLeft",
+    entry: open,
+    exit: focusF,
   });
 }
