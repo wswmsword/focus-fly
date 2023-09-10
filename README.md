@@ -2,7 +2,7 @@
 
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-使用 focus-fly 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。focus-fly 的压缩体积为 [6.2kB](https://bundlephobia.com/package/focus-fly)。
+使用 focus-fly 管理和控制焦点，实现一个[键盘可访问的用户界面](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/)，为用户带来流畅的键盘体验。focus-fly（v2.0.1）的压缩体积为 [6.2kB](https://bundlephobia.com/package/focus-fly)。
 
 > 键盘可访问的用户界面，会在用户丧失或暂时丧失使用鼠标能力的时候，*依然保有*用户使用键盘的能力。对于有能力同时使用鼠标和键盘的用户，他们可以*自由地*切换访问界面的设备。您可以任意选择鼠标和键盘来访问这个[使用 *focus-fly* 的范例网站](https://wswmsword.github.io/examples/focus-fly)。
 
@@ -49,7 +49,7 @@ fFocus(["#firstTabbableNode", "#lastTabbableNode"], {
 
 上面的代码执行后，在浏览器中将会有这样的行为：在 `#entryBtn` 上按下 <kbd>Enter</kbd>，`#firstTabbableNode` 成为焦点，按住 <kbd>Tab</kbd>，焦点在 `#firstTabbableNode` 和 `#lastTabbableNode` 之间循环，在 `#lastTabbableNode` 上按下 <kbd>Enter</kbd>，或者在列表内的任意元素上按下 <kbd>Esc</kbd>，`#entryBtn` 成为焦点。查看[一个在线范例](https://wswmsword.github.io/examples/focus-fly#h-hot)。
 
-这是一个简单和完整的用法，解释了入口、列表和出口对焦点的管理与控制，继续阅读，查看关于延迟注册列表事件、触发焦点移动的钩子、自定义焦点矫正目标等更多特性的详细介绍。
+这是一个简单，但是是比较完整的用法，解释了入口、列表和出口对焦点的管理与控制，继续阅读，查看关于延迟注册列表事件、触发焦点移动的钩子、自定义焦点矫正目标等更多特性的详细介绍。
 
 ### focusFly(list[, options])
 
@@ -139,8 +139,8 @@ npm run start
 |:--|:--|:--|:--|
 | sequence | boolean | false | 是否指定焦点导航的序列，设置 true 则按顺序聚焦列表内每项元素 |
 | loop | boolean | true | 是否循环聚焦，设置为 false，锁住焦点，焦点将停止在第一个和最后一个元素 |
-| next | isKey \| listForward | null | 自定义*前进*焦点函数，设置后，`sequence` 将默认为 true |
-| prev | isKey \| listBackward | null | 自定义*后退*焦点函数，设置后，`sequence` 将默认为 true |
+| next | isKey \| listForward | null | 自定义*前进*按键，可传入函数和字符串，设置后，`sequence` 将默认为 true |
+| prev | isKey \| listBackward | null | 自定义*后退*按键，可传入函数和字符串，设置后，`sequence` 将默认为 true |
 | trigger | element | null | 入口元素，用于退出列表时聚焦使用，如果在其它地方设置，可以忽略，例如设置 `entry.node` 后，不用设置 `trigger` |
 | entry | element \| element[] \| entry \| entry[] | null | 入口相关配置，进入列表，可以直接设置为一个元素，也可以设置数组，表示多个入口 |
 | exit | element \| element[] \| exit \| exit[] | null | 出口相关配置，退出列表，回到入口，如果存在封面，则是回到封面，可以直接设置为一个元素，也可以设置数组，表示多个出口 |
@@ -156,6 +156,17 @@ npm run start
 | preventDefault | boolean | false | 阻止（列表移动）默认行为 |
 | manual | boolean | false | 手动添加监听事件，入口、列表、出口的监听事件，通过调用的返回值手动添加各事件 |
 
+<details>
+  <summary>关于组合键，可以通过字符串便捷地设置，展开查看具体说明。</summary>
+
+关于组合键的设置，上面和下面的表格中，类型 `Type` 为 `isKey` 的，有便捷的字符串的设置方式：
+- 直接传入字符串，例如 `"Control-n"`，表示同时按下 <kbd>Control</kbd> 和 <kbd>n</kbd>；
+- 也可配合数组，用于多种按键组合完成同一个任务，例如 `["Control-n", 'j', "ArrowRight", "ArrowDown"]`，表示按下 <kbd>Control</kbd> 和 <kbd>n</kbd>、按下 <kbd>j</kbd>、按下右方向键、按下向下方向键，这四种组合的功能都是一样的。
+
+如果需要传入函数，也可将函数传入数组中，函数和字符串能够混合使用。
+  
+</details>
+
 为了不影响排版阅读，下面 4 个名称过长的选项被单独制成一张表格：
 
 | Name | Type | Default | Desc |
@@ -169,14 +180,14 @@ npm run start
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| key | isKey | N | null | 自定义在列表前进的组合键，设置组合键并返回 true 代表应用这个组合键 |
+| key | isKey | N | null | 自定义在列表前进的组合键，可传入函数和字符串，如果是函数，则返回 true 代表应用这个组合键 |
 | on | handleNextOrPrev | N | null | 前进时被执行，前进时的行为 |
 
 ### options.prev
 
 | Name | Type | isRequired | Default | Desc |
 |:--|:--|:--|:--|:--|
-| key | isKey | N | null | 自定义在列表后退的组合键，设置组合键并返回 true |
+| key | isKey | N | null | 自定义在列表后退的组合键，可传入函数和字符串，如果是函数，则返回 true 代表应用这个组合键 |
 | on | handleNextOrPrev | N | null | 后退时被执行，后退时的行为 |
 
 <details>
@@ -184,16 +195,11 @@ npm run start
 查看自定义按键聚焦的范例。
 </summary>
 
-下面的代码演示了使用 `→`、`↓` 和 `ctrl-n` 完成前进焦点，使用 `←`、`↑` 和 `ctrl-p` 完成后退焦点：
+下面的代码演示了使用 `→`、`↓` 和 `ctrl-n` 完成前进焦点（字符串形式），使用 `←`、`↑` 和 `ctrl-p` 完成后退焦点（函数形式）：
 ```javascript
 import fFocus from "focus-fly";
 
 const dialog = document.getElementById("dialog");
-
-const isForward = e => (
-  (e.ctrlKey && e.key === "n") ||
-  e.key === "ArrowRight" ||
-  e.key === "ArrowDown");
 
 const isBackward = e => (
   (e.ctrlKey && e.key === "p") ||
@@ -215,7 +221,7 @@ fFocus(dialog, ["#head", "#second", "#tail"], {
       dialog.classList.add("closedDialog");
     },
   },
-  next: isForward, // <----- 自定义*前进*焦点的配置项
+  next: ["Control-n", "ArrowRight", "ArrowDown"], // <----- 自定义*前进*焦点的配置项
   prev: isBackward, // <---- 自定义*后退*焦点的配置项
 });
 ```
@@ -231,7 +237,7 @@ fFocus(dialog, ["#head", "#second", "#tail"], {
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
 | node | element \| element[] | null | 入口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
-| key | iskey | null | 自定义进入列表组合键 |
+| key | isKey | null | 自定义进入列表组合键，可传入字符串和函数 |
 | on | handleKeydown | null | 进入时被调用，进入列表前的行为，如果列表或封面在这里才开始渲染，需要设置 `options.delayToFocus` 来延迟聚焦，否则不能聚焦不存在的元素 |
 | type | enterType \| enterType[] | null | 入口的监听方式，如果 `options.entry` 设置了 `node` 选项，则默认为 `"click"`，如果还设置了 `key` 选项，则默认为 `["click", "keydown"]`，另外还支持 `"focus"` 类型用于聚焦触发入口，`"invoke"` 类型用于返回值 `Return.enter` 触发入口 |
 | target | boolean \| element \| getTarget | null | 进入到哪个元素？默认将聚焦列表第一个元素，设置为 false 将不改变焦点 |
@@ -252,7 +258,7 @@ fFocus(dialog, ["#head", "#second", "#tail"], {
 | Name | Type | Default | Desc |
 |:--|:--|:--|:--|
 | node | element \| element[] \| getExit | null | 出口元素，将用于监听点击事件，用于退出列表时聚焦使用 |
-| key | iskey | null | 自定义退出列表组合键 |
+| key | isKey | null | 自定义退出列表组合键，可传入字符串和函数 |
 | on | handleKeydown | null | 退出时被调用，退出列表前的行为，如果有封面就退出至封面，如果没有就退出至入口，设置该选项后，按键按下 <kbd>esc</kbd> 同样生效 |
 | type | exitType \| exitType[] | ["keydown", "click"] | 出口的事件类型，和 `options.entry.type` 类似，但是多了 `"outlist"` 类型，用于聚焦空白区域、非列表区域时触发出口，这常用于弹窗的半透明蒙版 |
 | target | boolean \| element \| getTarget | null | 退出至哪个元素？默认将聚焦第一个入口，设置为 false 将不改变焦点 |
@@ -273,14 +279,14 @@ fFocus(dialog, ["#head", "#second", "#tail"], {
 |:--|:--|:--|
 | node | element | 封面元素，如果不指定，默认将取根元素 `root` |
 | exit | isKey \| exitCover \| exitCover[] | 退出封面，可以直接设置退出封面的组合键，如果不设置，<kbd>Tab</kbd> 将作为默认退出封面的按键，并且退出至列表的后一个元素 |
-| enterKey | isKey | 自定义进入列表的组合键，如果不设置，默认为 <kbd>Enter</kbd> |
+| enterKey | isKey | 自定义进入列表的组合键，如果不设置，默认为 <kbd>Enter</kbd>，可传入函数和字符串 |
 | onEnter | handleKeydown | 进入列表时的行为 |
 
 `options.cover.exit` 是一个有若干选项的对象，也可以是一个包含这类对象的数组。下面是 `options.cover.exit` 的所有选项，每一个选项都是可选的，且默认值为空：
 
 | Name | Type | Desc |
 |:--|:--|:--|
-| key | isKey | 自定义退出封面的组合键 |
+| key | isKey | 自定义退出封面的组合键，可传入函数和字符串 |
 | on | handleKeydown | 退出封面时的行为 |
 | target | element | 退出到哪个元素？ |
 
@@ -360,42 +366,6 @@ npm run test
 ```
 
 ## 常见问题
-
-<details>
-<summary>macOS 的 Safari 浏览器中，“entry.onExit” 无效，不能实现切换（开关）的功能。</summary>
-
-`entry.onExit` 利用了 `relatedTarget`，至少对于 `<button>` 元素，Safari 不能正常获取。为了让入口在 Safari 上支持切换出口，可以添加下面这样的 `outlist` 类型的出口：
-
-```javascript
-focusFly("#container", ["#start", "#end"], {
-  onEscape: toggle,
-  entry: {
-    node: "#btn",
-    on: toggle,
-    onExit: true, // 令 #btn 支持作为出口
-  },
-  exit: [
-    {
-      type: "outlist",
-      if: () => false, // 强制不执行（跳过） outlist 类型的出口
-    },
-    // 其它出口
-    // {
-    //   node: ...
-    //   key: ...
-    //   on: ...
-    // }
-  ],
-});
-
-function toggle() {
-  // ...
-}
-```
-
-不过像这样添加后，`outlist` 就不能正常使用了，点击空白区域将不会触发 `outlist` 退出列表焦点。
-</details>
-
 
 <details>
 <summary>有些情况，通过 onMove、onNext、onPrev、entry.on 等钩子回调，不能完成样式修改。</summary>
