@@ -2,13 +2,13 @@ const fFocus = require("focus-fly");
 const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 // 3～38 行为播放列表的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
 const playerBagel = fFocus("#songs_wrapper", songs, { // L:3
-  next: e => e.key === "ArrowDown",
-  prev: e => e.key === "ArrowUp",
+  next: "ArrowDown",
+  prev: "ArrowUp",
   exit: [{
-    key: e => e.key === "Tab" && !e.shiftKey,
+    key: "Tab",
     target: "#more_from",
   }, {
-    key: e => e.key === "Tab" && e.shiftKey,
+    key: "Shift-Tab",
     target: "#grid_wrapper",
   }, {
     type: "outlist",
@@ -41,7 +41,7 @@ playerBagel.addForward("grid", {
 /** 一首歌曲最后的聚焦焦点的序号 */
 let songLastActiveIdx = 0;
 /** 管理第 curI + 1 首歌曲的焦点 */
-function initSongBagel(curI, lastActive) {
+function initSongBagel(curI) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
   // 47～65 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
@@ -51,11 +51,11 @@ function initSongBagel(curI, lastActive) {
       type: "focus",
     }, {
       node: `#song_${idx}`,
-      key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
+      key: ["ArrowRight", "ArrowLeft"],
       type: "keydown",
     }],
-    next: e => e.key === "ArrowRight",
-    prev: e => e.key === "ArrowLeft",
+    next: "ArrowRight",
+    prev: "ArrowLeft",
     exit: {
       type: "outlist",
       target: false,
@@ -78,6 +78,6 @@ function onMovePlayer({ cur, prev, curI }) {
   }
   lastSong?.removeListeners(); // 移除这首歌曲和焦点有关的事件
   if (curI > -1) {
-    lastSong = initSongBagel(curI, songLastActiveIdx); // 对这首歌的焦点进行管理
+    lastSong = initSongBagel(curI); // 对这首歌的焦点进行管理
   }
 }

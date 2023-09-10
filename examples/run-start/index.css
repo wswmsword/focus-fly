@@ -5,6 +5,17 @@
   padding: 0 12px;
 }
 
+.navbar {
+  border: transparent solid 0;
+  background: transparent;
+  text-align: center;
+  font-size: 24px;
+}
+
+.navbar::before {
+  content: "\2727\2003\2003\2727\2003\2003\2727";
+}
+
 /* header {
   position: relative;
 }

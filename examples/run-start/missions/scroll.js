@@ -7,17 +7,17 @@ const bagel = focusFly(
     entry: [{
       node: "#scroll_wrapper", // 从最外层回车进入列表
       type: "keydown",
-      key: e => e.key === "Enter",
-      if: ({ e: { target: { id } } }) => id === "scroll_wrapper",
+      key: "Enter",
+      if: ({ e }) => e.target.id === "scroll_wrapper",
     }, {
       node: "#scroll_type", // 从切换加载方式按钮按下“右方向键”和“Tab”进入列表
       type: "keydown",
-      key: ({ key }) => ["ArrowRight", "Tab"].includes(key),
+      key: ["ArrowRight", "Tab", "Shift-Tab"],
       stopPropagation: true,
     }, {
       node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表
       type: "keydown",
-      key: ({ key }) => ["ArrowLeft", "Tab", "Enter", ' '].includes(key),
+      key: ["ArrowLeft", "Tab", "Shift-Tab", "Enter", ' '],
       stopPropagation: true, // 阻止冒泡
       target({ e: { key }, list }) {
         if (key === "Enter" || key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
@@ -27,17 +27,17 @@ const bagel = focusFly(
       },
     }],
     exit: [{
-      key: ({ key }) => key === "ArrowLeft", // 按下“左方向键”退出列表
+      key: "ArrowLeft", // 按下“左方向键”退出列表
       target: "#scroll_type", // 从列表退出到“切换加载方式的按钮”
     }, {
-      key: ({ key }) => key === "ArrowRight", // 按下“右方向键”退出列表
+      key: "ArrowRight", // 按下“右方向键”退出列表
       target: "#scroll_top", // 从列表退出到“回到顶部”按钮
     }, {
       node: ["#scroll_type", "#scroll_top"], // 点击“切换加载”和“回到顶部”，退出列表
       type: "click",
       target: false, // 退出后焦点保持原位
-      on({ target }) {
-        if (target.id === "scroll_top") scrollToTop();
+      on(e) {
+        if (e.target.id === "scroll_top") scrollToTop();
       }
     }],
     stopPropagation: true, // 阻止列表的事件冒泡
@@ -53,7 +53,7 @@ const bagel = focusFly(
 
 bagel.addForward("next_wrapper", { // 转发
   node: "#scroll_wrapper",
-  key: ({ key, shiftKey }) => (key === "Tab" && !shiftKey),
+  key: "Tab",
   target: "#scroll_code",
 });
 
@@ -70,10 +70,10 @@ function createOrRemoveItemFocus({ cur }) {
       entry: {
         node: cur,
         type: "keydown",
-        key: e => e.key === "Enter",
+        key: "Enter",
       },
       exit: {
-        key: e => e.key === "Escape",
+        key: "Escape",
         stopPropagation: true,
       },
       delayToFocus: true,
@@ -136,7 +136,7 @@ function scrollToTop() {
 
 /** 生成列表的子元素 */
 function generateItems() {
-  const fragment = document.createDocumentFragment()
+  const fragment = document.createDocumentFragment();
   for (let i = 0; i < 9; ++ i) {
     const item = createTabElement("scroll_item", "商品");
     const top = createTabElement("item_top", "图片");

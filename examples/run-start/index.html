@@ -21,6 +21,8 @@
         <h1><code>focus-fly</code> 范例</h1>
       </header>
 
+      <hr class="navbar">
+
       <p>该范例页面使用 <code>focus-fly</code> 管理和控制焦点，是一个<a href="https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/">键盘可访问的界面</a>，具有流畅的键盘体验，您可以任意选择鼠标和键盘访问该页面。</p>
 
       <!-- <hr />
@@ -203,12 +205,12 @@ focusFly(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   exit: [{
     node: ({ head }) => head,
     type: "keydown",
-    key: e => e.key === "Tab" && e.shiftKey,
+    key: "Shift-Tab",
     on: toggleMenu,
   }, {
     node: ({ tail }) => tail,
     type: "keydown",
-    key: e => e.key === "Tab" && !e.shiftKey,
+    key: "Tab",
     on: toggleMenu,
     target: "#nav_link",
   }, {
@@ -295,13 +297,13 @@ function toggleMenu() {
 
 // 4～17 行为焦点管理的部分，管理了焦点的入口、出口，以及焦点在列表内的移动
 focusFly("#tab_list", tabList, { // L:4
-  next: e => e.key === "ArrowRight",
-  prev: e => e.key === "ArrowLeft",
+  next: "ArrowRight",
+  prev: "ArrowLeft",
   exit: [{
-    key: e => e.key === "Tab" && !e.shiftKey,
+    key: "Tab",
     target: "#tags_code",
   }, {
-    key: e => e.key === "Tab" && e.shiftKey,
+    key: "Shift-Tab",
     target: "#navigation_code",
   }],
   initialActive: 1,
@@ -508,13 +510,13 @@ function onMove({ prev, cur, prevI, curI }) {
 <code>const songs = ["#song_1", "#song_2", "#song_3", "#song_4", "#song_5", "#song_6", "#song_7"];
 // 3～38 行为播放列表的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
 const playerBagel = focusFly("#songs_wrapper", songs, { // L:3
-  next: e => e.key === "ArrowDown",
-  prev: e => e.key === "ArrowUp",
+  next: "ArrowDown",
+  prev: "ArrowUp",
   exit: [{
-    key: e => e.key === "Tab" && !e.shiftKey,
+    key: "Tab",
     target: "#more_from",
   }, {
-    key: e => e.key === "Tab" && e.shiftKey,
+    key: "Shift-Tab",
     target: "#grid_wrapper",
   }, {
     type: "outlist",
@@ -547,7 +549,7 @@ playerBagel.addForward("grid", {
 /** 一首歌曲最后的聚焦焦点的序号 */
 let songLastActiveIdx = 0;
 /** 管理第 curI + 1 首歌曲的焦点 */
-function initSongBagel(curI, lastActive) {
+function initSongBagel(curI) {
   const idx = curI + 1;
   const list = [`#s${idx}_play`, `#s${idx}_a`, `#s${idx}_like`, `#s${idx}_more`];
   // 47～65 行为播放列表内每一首歌曲的焦点管理部分，管理了焦点的入口、出口，以及焦点在列表内的移动
@@ -557,11 +559,11 @@ function initSongBagel(curI, lastActive) {
       type: "focus",
     }, {
       node: `#song_${idx}`,
-      key: e => e.key === "ArrowRight" || e.key === "ArrowLeft",
+      key: ["ArrowRight", "ArrowLeft"],
       type: "keydown",
     }],
-    next: e => e.key === "ArrowRight",
-    prev: e => e.key === "ArrowLeft",
+    next: "ArrowRight",
+    prev: "ArrowLeft",
     exit: {
       type: "outlist",
       target: false,
@@ -584,7 +586,7 @@ function onMovePlayer({ cur, prev, curI }) {
   }
   lastSong?.removeListeners(); // 移除这首歌曲和焦点有关的事件
   if (curI > -1) {
-    lastSong = initSongBagel(curI, songLastActiveIdx); // 对这首歌的焦点进行管理
+    lastSong = initSongBagel(curI); // 对这首歌的焦点进行管理
   }
 }</code>
         </pre>
@@ -646,17 +648,17 @@ const bagel = focusFly(
     entry: [{
       node: "#scroll_wrapper", // 从最外层回车进入列表
       type: "keydown",
-      key: e => e.key === "Enter",
+      key: "Enter",
       if: ({ e: { target: { id } } }) => id === "scroll_wrapper",
     }, {
       node: "#scroll_type", // 从切换加载方式按钮按下“右方向键”和“Tab”进入列表
       type: "keydown",
-      key: ({ key }) => ["ArrowRight", "Tab"].includes(key),
+      key: ["ArrowRight", "Tab", "Shift-Tab"],
       stopPropagation: true,
     }, {
       node: "#scroll_top", // 从“回到顶部”按钮按下“左方向键”、“Tab”、回车和空格进入列表
       type: "keydown",
-      key: ({ key }) => ["ArrowLeft", "Tab", "Enter", ' '].includes(key),
+      key: ["ArrowLeft", "Tab", "Shift-Tab", "Enter", ' '],
       stopPropagation: true, // 阻止冒泡
       target({ e: { key }, list }) {
         if (key === "Enter" || key === ' ') return list[0]; // 按下回车或空格，聚焦列表第一个元素
@@ -666,17 +668,17 @@ const bagel = focusFly(
       },
     }],
     exit: [{
-      key: ({ key }) => key === "ArrowLeft", // 按下“左方向键”退出列表
+      key: "ArrowLeft", // 按下“左方向键”退出列表
       target: "#scroll_type", // 从列表退出到“切换加载方式的按钮”
     }, {
-      key: ({ key }) => key === "ArrowRight", // 按下“右方向键”退出列表
+      key: "ArrowRight", // 按下“右方向键”退出列表
       target: "#scroll_top", // 从列表退出到“回到顶部”按钮
     }, {
       node: ["#scroll_type", "#scroll_top"], // 点击“切换加载”和“回到顶部”，退出列表
       type: "click",
       target: false, // 退出后焦点保持原位
-      on({ target }) {
-        if (target.id === "scroll_top") scrollToTop();
+      on(e) {
+        if (e.target.id === "scroll_top") scrollToTop();
       }
     }],
     stopPropagation: true, // 阻止列表的事件冒泡
@@ -692,7 +694,7 @@ const bagel = focusFly(
 
 bagel.addForward("next_wrapper", { // 转发
   node: "#scroll_wrapper",
-  key: ({ key, shiftKey }) => (key === "Tab" && !shiftKey),
+  key: "Tab",
   target: "#scroll_code",
 });
 
@@ -709,10 +711,10 @@ function createOrRemoveItemFocus({ cur }) {
       entry: {
         node: cur,
         type: "keydown",
-        key: e => e.key === "Enter",
+        key: "Enter",
       },
       exit: {
-        key: e => e.key === "Escape",
+        key: "Escape",
         stopPropagation: true,
       },
       delayToFocus: true,
@@ -765,7 +767,8 @@ function onScrollBottom() {
         </pre>
         <p>查看<a href="https://github.com/wswmsword/focus-fly/blob/main/examples/esm/src/scroll.js">完整的滚动加载源码</a>。</p>
       </details>
-    </main>
+      <hr class="navbar">
+    </div>
   </body>
   <script src="demo.js"></script>
   <script src="missions/dialog.js"></script>

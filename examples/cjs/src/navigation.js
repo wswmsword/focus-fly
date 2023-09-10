@@ -15,12 +15,12 @@ fFocus(menuBody, ["#hot_anchor", "#scroll_anchor"], { // L:5
   exit: [{
     node: ({ head }) => head,
     type: "keydown",
-    key: e => e.key === "Tab" && e.shiftKey,
+    key: "Shift-Tab",
     on: toggleMenu,
   }, {
     node: ({ tail }) => tail,
     type: "keydown",
-    key: e => e.key === "Tab" && !e.shiftKey,
+    key: "Tab",
     on: toggleMenu,
     target: "#nav_link",
   }, {
