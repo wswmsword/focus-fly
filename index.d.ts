@@ -12,7 +12,7 @@ type handleMoveListItem = (obj: { e: Event | { fromInvoke: boolean }, prev: HTML
 
 type element = string | Element | HTMLElement;
 
-type isKey = (e: KeyboardEvent) => boolean;
+type isKey = string | ((e: KeyboardEvent) => boolean) | (string | ((e: KeyboardEvent) => boolean))[];
 
 type targetOpts = {
   e: Event,
@@ -247,7 +247,7 @@ interface Options {
   stopPropagation?: boolean;
 
   /** 阻止（列表移动）默认行为 */
-  stopPropagation?: boolean;
+  preventDefault?: boolean;
 
   /** 手动添加监听事件，入口、列表、出口的监听事件 */
   manual?: boolean;
