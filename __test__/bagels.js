@@ -593,3 +593,13 @@ export function initBagel_47(dialog, open, focusA, focusB, focusC, focusD, focus
     exit: focusF,
   });
 }
+
+export function initBagel_48(dialog, open, focusA, focusB, focusC, focusD, focusE, focusF, focusG) {
+  focusBagel(dialog, [focusA, focusB, focusC, focusD, focusE, focusF, focusG], {
+    sequence: true,
+    next: ["ArrowRight", "ArrowDown"],
+    prev: ["ArrowLeft", "ArrowUp"],
+    entry: open,
+    exit: focusF,
+  });
+}
