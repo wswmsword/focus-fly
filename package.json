@@ -1,6 +1,6 @@
 {
   "name": "focus-fly",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "type": "module",
   "description": "焦点管理。Focus management.",
   "main": "output/focus-fly.cjs",
