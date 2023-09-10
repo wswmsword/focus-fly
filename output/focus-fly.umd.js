@@ -40,6 +40,37 @@
     };
     return _extends.apply(this, arguments);
   }
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+    return arr2;
+  }
+  function _createForOfIteratorHelperLoose(o, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+    if (it) return (it = it.call(o)).next.bind(it);
+    if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+      if (it) o = it;
+      var i = 0;
+      return function () {
+        if (i >= o.length) return {
+          done: true
+        };
+        return {
+          done: false,
+          value: o[i++]
+        };
+      };
+    }
+    throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _toPrimitive(input, hint) {
     if (typeof input !== "object" || input === null) return input;
     var prim = input[Symbol.toPrimitive];
@@ -135,6 +166,42 @@
     return range.commonAncestorContainer;
   };
 
+  /** 从字符串中分解按键 */
+  var getKeysFromStr = function getKeysFromStr(str) {
+    var firstMinus = str.indexOf('-');
+    var firstKey = firstMinus === -1 ? str : firstMinus === 0 ? '-' : str.slice(0, firstMinus);
+    var extraStr = str.replace(firstKey, '');
+    var keys = [firstKey];
+    var reg = /-(?:-|[^-]+)/g;
+    var res;
+    while (res = reg.exec(extraStr)) keys.push(res[0].slice(1));
+    var shift = false;
+    var meta = false;
+    var alt = false;
+    var ctrl = false;
+    var commonKey = null;
+    var enableKeyMap = new Map([["Shift", function () {
+      return shift = true;
+    }], ["Meta", function () {
+      return meta = true;
+    }], ["Alt", function () {
+      return alt = true;
+    }], ["Control", function () {
+      return ctrl = true;
+    }]]);
+    for (var i = 0; i < keys.length; ++i) {
+      var enableKey = enableKeyMap.get(keys[i]);
+      if (enableKey == null) commonKey = keys[i];else enableKey();
+    }
+    return {
+      shift: shift,
+      meta: meta,
+      alt: alt,
+      ctrl: ctrl,
+      commonKey: commonKey
+    };
+  };
+
   /** 聚焦，如果是 input，则聚焦后选中 */
   var focus = function focus(e) {
     e.focus();
@@ -146,6 +213,34 @@
     if (e == null) tick(function () {
       return e && focus(e);
     });else focus(e);
+  };
+
+  /** 是否匹配按键 */
+  var matchKeys = function matchKeys(keys, e, prevI, curI) {
+    var matched = false;
+    for (var _iterator = _createForOfIteratorHelperLoose(keys), _step; !(_step = _iterator()).done;) {
+      var key = _step.value;
+      if (isFun(key)) {
+        matched = key(e, prevI, curI);
+      } else {
+        var shift = key.shift,
+          meta = key.meta,
+          alt = key.alt,
+          ctrl = key.ctrl,
+          commonKey = key.commonKey;
+        matched = (shift && e.shiftKey || !(shift || e.shiftKey)) && (meta && e.metaKey || !(meta || e.metaKey)) && (alt && e.altKey || !(alt || e.altKey)) && (ctrl && e.ctrlKey || !(ctrl || e.ctrlKey)) && (commonKey == null || commonKey === e.key);
+      }
+      if (matched) return matched; // true
+    }
+
+    return matched; // false
+  };
+
+  /** 转换用户输入的按键为程序可理解的按键 */
+  var convertKeys = function convertKeys(keys, defaultKey) {
+    return [].concat(keys).map(function (k) {
+      return typeof k === "string" ? getKeysFromStr(k) : k !== null && k !== void 0 ? k : defaultKey;
+    });
   };
 
   /** 获取根节点 */
@@ -271,14 +366,15 @@
         // undefined 表示用户没有主动设置
         type: e.type === undefined ? [e.key == null ? '' : "keydown", e.node == null ? '' : "click"].filter(function (t) {
           return t !== '';
-        }) : [].concat(e.type)
+        }) : [].concat(e.type),
+        key: convertKeys(e.key)
       });
     }).reduce(pickNodesAry, []);
     var _onEscape = isFun(onEscape) ? onEscape : onEscape === true ? (_tempExits$0$on = (_tempExits$ = tempExits[0]) === null || _tempExits$ === void 0 ? void 0 : _tempExits$.on) !== null && _tempExits$0$on !== void 0 ? _tempExits$0$on : function () {} : onEscape;
     /** 按下 esc 的出口 */
     var escapeExit = isFun(_onEscape) ? {
       node: null,
-      key: isEscapeEvent,
+      key: [isEscapeEvent],
       on: _onEscape,
       target: enabledCover ? cover : trigger,
       type: ["keydown"]
@@ -317,10 +413,11 @@
 
   /** 获取出口或者入口的目标 */
   var getTarget = function getTarget(target, cover, list, root, enabledCover, activeIndex, defaultTarget, e) {
+    var isDefaultTarget = function isDefaultTarget(t) {
+      return t == null || t === true;
+    };
     // 空 target 走默认
-    if (target == null || target === true) {
-      if (enabledCover) return cover;else return defaultTarget;
-    }
+    if (isDefaultTarget(target)) return returnDefaultTarget();
     // 函数 target 则传入节点执行
     else if (isFun(target)) {
       var gotTarget = target({
@@ -331,13 +428,14 @@
         last: list[activeIndex],
         lastI: activeIndex
       });
-      if (gotTarget == null || gotTarget === true) {
-        if (enabledCover) return cover;else return defaultTarget;
-      }
+      if (isDefaultTarget(gotTarget)) return returnDefaultTarget();
       return gotTarget;
     }
     // 选择器字符串或者节点，则直接获取
     else return element(target);
+    function returnDefaultTarget() {
+      if (enabledCover) return cover;else return defaultTarget;
+    }
   };
 
   /** 保存的监听事件信息，方便监听和移除监听 */
@@ -431,13 +529,6 @@
       this.recordPrev(this.cur, this.curI);
       this.recordCur(cur, curI);
     };
-    _proto3.recordSequnce = function recordSequnce(cur, curI) {
-      if (this.curI === curI // this.curI 和 curI 必须不同
-      || this.curI < 0 && curI < 0)
-        // curI 为 -1 后，不会再次更新新的 -1
-        return;
-      this.record(cur, curI);
-    };
     _proto3.recordRange = function recordRange(cur) {
       if (this.cur === cur || this.cur == null && cur == null) return;
       this.record(cur, -1);
@@ -451,7 +542,12 @@
       this.cur = cur || null;
     };
     _proto3.recordSequenceByIdx = function recordSequenceByIdx(curI) {
-      this.recordSequnce(this.data[curI], curI);
+      var cur = this.data[curI];
+      if (this.curI === curI // this.curI 和 curI 必须不同
+      || this.curI < 0 && curI < 0)
+        // curI 为 -1 后，不会再次更新新的 -1
+        return;
+      this.record(cur, curI);
     };
     _createClass(TabList, [{
       key: "prev",
@@ -526,7 +622,9 @@
         type: entry.type === undefined ? [entry.key == null ? '' : "keydown", entry.node == null ? '' : "click"].filter(function (t) {
           return t != '';
         }) : [].concat(entry.type),
-        onExit: entry.onExit === true ? entry.on : entry.onExit // 这个入口是开关吗
+        onExit: entry.onExit === true ? entry.on : entry.onExit,
+        // 这个入口是开关吗
+        key: convertKeys(entry.key)
       });
     }).reduce(pickNodesAry, []); // 处理元素的 node 属性是数组的情况，将它分解成多个元素
     /** 是否是空入口 */
@@ -563,7 +661,8 @@
     .map(function (e) {
       var _e$target;
       return _extends({}, e, {
-        target: (_e$target = e.target) !== null && _e$target !== void 0 ? _e$target : _trigger
+        target: (_e$target = e.target) !== null && _e$target !== void 0 ? _e$target : _trigger,
+        key: convertKeys(e.key)
       });
     });
     /** 是否使用默认的离开封面方法，也即 tab 和 shift-tab */
@@ -576,16 +675,22 @@
     /** 封面 */
     var cover = null;
     list.recordPrev(null, initialActive !== null && initialActive !== void 0 ? initialActive : -1);
-    var _ref3 = isObj(next) ? next : {
-        key: next
-      },
-      isNext = _ref3.key,
-      onNext = _ref3.on;
-    var _ref4 = isObj(prev) ? prev : {
-        key: prev
-      },
-      isPrev = _ref4.key,
-      onPrev = _ref4.on;
+    var objNext = isObj(next) ? next : {
+      key: next
+    };
+    var _objNext$key = _extends({}, objNext, {
+        key: convertKeys(objNext.key, isTabForward)
+      }),
+      isNext = _objNext$key.key,
+      onNext = _objNext$key.on;
+    var objPrev = isObj(prev) ? prev : {
+      key: prev
+    };
+    var _objPrev$key = _extends({}, objPrev, {
+        key: convertKeys(objPrev.key, isTabBackward)
+      }),
+      isPrev = _objPrev$key.key,
+      onPrev = _objPrev$key.on;
 
     /** 禁用左上角 esc 出口 */
     var disabledEsc = onEscape === false;
@@ -594,7 +699,7 @@
     var isClamp = !(loop !== null && loop !== void 0 ? loop : true);
 
     /** 是否打开列表序列，按照序列的顺序进行焦点导航 */
-    var enabledTabSequence = !!(isNext || isPrev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
+    var enabledTabSequence = !!(next || prev || sequence); // 自定义前进或后退焦点函数，则设置 sequence 为 true
 
     /** 移动列表，是否阻止默认行为 */
     var listPreventDefault = preventDefault !== null && preventDefault !== void 0 ? preventDefault : enabledTabSequence;
@@ -616,8 +721,8 @@
       _addEntryListeners();
 
       // 如果有入口不需要延迟，则立即加载列表的监听事件
-      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref5) {
-        var delay = _ref5.delay;
+      var hasImmediateEntry = (hasNoEntry ? [{}] : entries).some(function (_ref3) {
+        var delay = _ref3.delay;
         return !delay;
       });
       if (hasImmediateEntry) {
@@ -750,12 +855,13 @@
         var _opts = opts,
           origin_node = _opts.node,
           on = _opts.on,
-          key = _opts.key,
+          origin_key = _opts.key,
           origin_target = _opts.target;
         var node = element(origin_node);
         var target = element(origin_target);
+        var keys = convertKeys(origin_key);
         keyForwards.push(id, node, function (e) {
-          if (key !== null && key !== void 0 && key(e, list.prevI, list.curI)) {
+          if (matchKeys(keys, e, list.prevI, list.curI)) {
             e.preventDefault();
             on === null || on === void 0 ? void 0 : on();
             tickFocus(target);
@@ -1010,19 +1116,31 @@
         }
 
         // 非列表内的出口
-        focusListExitHandlers_wild.forEach(function (_ref6) {
-          var node = _ref6[0],
-            handler = _ref6[1];
+        focusListExitHandlers_wild.forEach(function (_ref4) {
+          var node = _ref4[0],
+            handler = _ref4[1];
           listListeners.push(node, "focus", handler);
         });
-        clickListExitHandlers_wild.forEach(function (_ref7) {
-          var node = _ref7[0],
-            handler = _ref7[1];
+        clickListExitHandlers_wild.forEach(function (_ref5) {
+          var node = _ref5[0],
+            handler = _ref5[1];
           listListeners.push(node, "click", handler);
         });
         if (cover != null) {
           // 封面的事件
           listListeners.push(cover, "keydown", keyCoverHandler);
+        }
+
+        /** 是否触发了开关的 mousedown，如果是，则代表当前触发的是开关，需要忽略跳过列表的 blur 事件 */
+        var triggeredToggleMousedown = false;
+
+        // 若存在 outlist 类型，则为入口添加 mousedown，用于入口是开关的情况
+        if (outListExits) {
+          toggles.forEach(function (toggle) {
+            listListeners.push(toggle, "mousedown", function (_) {
+              return triggeredToggleMousedown = true;
+            });
+          });
         }
 
         // flush
@@ -1062,13 +1180,13 @@
 
           // 调用范围模式下的 onPrev、onNext、onMove，此时焦点正在列表内移动
           if (listInfo.rangeBeforePrevCallback || listInfo.rangeBeforeNextCallback) {
-            var _ref8;
+            var _ref6;
             listInfo.recordRange(target);
             listInfo.rangeBeforePrevCallback = false;
             listInfo.rangeBeforeNextCallback = false;
             var cur = listInfo.cur,
               _prev2 = listInfo.prev;
-            (_ref8 = listInfo.rangeBeforePrevCallback ? onNext : onPrev) === null || _ref8 === void 0 ? void 0 : _ref8({
+            (_ref6 = listInfo.rangeBeforePrevCallback ? onNext : onPrev) === null || _ref6 === void 0 ? void 0 : _ref6({
               e: e,
               prev: _prev2,
               cur: cur,
@@ -1143,8 +1261,9 @@
         }
 
         function blurTrapListHandler(e) {
-          // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发
-          if (toggles.has(e.relatedTarget)) return;
+          // 用于保护可切换的入口（开关，同时作为出口的入口）能够被触发；也可用 relatedTarget 判断，但 relatedTarget 不兼容 Safari（23.09.08）
+          if (triggeredToggleMousedown) return triggeredToggleMousedown = false; // mousedown 一定优先 blur 触发，如果触发了 mousedown，则代表当前触发的是开关
+
           tick(function () {
             // 延迟后获取下一次聚焦的元素，否则当前聚焦元素是 body
 
@@ -1285,9 +1404,9 @@
           var index = Math.max(0, index_);
           var itemsLen = list.length;
           var focused = false;
-          if ((isNext !== null && isNext !== void 0 ? isNext : isTabForward)(e)) {
-            var incresedI = index + 1;
-            var nextI = isClamp ? Math.min(itemsLen - 1, incresedI) : incresedI;
+          if (matchKeys(isNext, e, listInfo.prevI, listInfo.curI)) {
+            var increasedI = index + 1;
+            var nextI = isClamp ? Math.min(itemsLen - 1, increasedI) : increasedI;
             nextI %= itemsLen;
             onNext === null || onNext === void 0 ? void 0 : onNext({
               e: e,
@@ -1306,9 +1425,9 @@
             setIndex(nextI);
             focus(list[nextI]);
             focused = true;
-          } else if ((isPrev !== null && isPrev !== void 0 ? isPrev : isTabBackward)(e)) {
-            var decresedI = index - 1;
-            var _nextI = isClamp ? Math.max(0, decresedI) : decresedI;
+          } else if (matchKeys(isPrev, e, listInfo.prevI, listInfo.curI)) {
+            var decreasedI = index - 1;
+            var _nextI = isClamp ? Math.max(0, decreasedI) : decreasedI;
             _nextI = (_nextI + itemsLen) % itemsLen;
             onPrev === null || onPrev === void 0 ? void 0 : onPrev({
               e: e,
@@ -1328,10 +1447,10 @@
             focus(list[_nextI]);
             focused = true;
           }
-          if (focused) {
-            listPreventDefault && e.preventDefault();
-            listStopPropagation && e.stopPropagation();
-          }
+
+          // 如果按下了 Tab，则阻止默认行为（聚焦下一个元素），无需阻止事件传播
+          (e.key === "Tab" || focused) && listPreventDefault && e.preventDefault();
+          focused && listStopPropagation && e.stopPropagation();
         }
 
         /** 按下 tab，以浏览器的行为聚焦下个元素 */
@@ -1429,7 +1548,7 @@
               on = _exitsCover$i.on,
               origin = _exitsCover$i.target;
             var target = element(origin);
-            if (key !== null && key !== void 0 && key(e, listInfo.prevI, listInfo.curI)) {
+            if (matchKeys(key, e, listInfo.prevI, listInfo.curI)) {
               exitCoverHandler(e, on, target);
               return;
             }
@@ -1522,7 +1641,7 @@
         }
         function keyExitHandler(e, exit) {
           var cantKey = function cantKey(e, node, key) {
-            return node != null && e.target !== node || !(key !== null && key !== void 0 && key(e, listInfo.prevI, listInfo.curI));
+            return node != null && e.target !== node || !matchKeys(key, e, listInfo.prevI, listInfo.curI);
           }; // 聚焦目标不匹配 或者 未设置点击目标
           return exitHandlerWithCondition(e, exit, cantKey);
         }
@@ -1579,7 +1698,7 @@
             var isKey = type === "keydown";
             /** 如果是键盘事件，则判断键位是否匹配，如果是非键盘事件，则直接返回 true */
             var ifKey = isKey ? function (e) {
-              return key === null || key === void 0 ? void 0 : key(e, list.prevI, list.curI);
+              return matchKeys(key, e, list.prevI, list.curI);
             } : function (_) {
               return true;
             };
