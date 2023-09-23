@@ -391,7 +391,7 @@ focus-fly 的主要任务是管理和控制**焦点**，如果有钩子不能满
 
 ## 支持和赞助
 
-请随意 Issue、PR 和 Star，通过[爱发电](https://afdian.net/a/george-chen)进行赞助。
+请随意 Issue、PR 和 Star，通过[爱发电](https://afdian.net/a/george-chen)进行赞助，爱发电中有一项“[咨询提问专用红烧牛肉面](https://afdian.net/order/create?plan_id=d4e7801e59ab11ee90a652540025c377&product_type=0)”用于付费咨询。
 
 ## 其它
 
